@@ -1,0 +1,50 @@
+﻿using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using WordGame.API.Data.Mongo;
+using WordGame.API.Domain.Enums;
+using WordGame.API.Domain.Models;
+using WordGame.API.Domain.Repositories;
+
+namespace WordGame.API.Data.Repositories
+{
+	public class GameRepository : IGameRepository
+	{
+		protected readonly IMongoClient _mongoClient;
+		protected readonly IOptions<MongoDbSettings> _settings;
+
+		protected IMongoCollection<Game> Games
+			=> _mongoClient
+				.GetDatabase(_settings.Value.DatabaseName)
+				.GetCollection<Game>("game");
+
+		public GameRepository(IMongoClient mongoClient, IOptions<MongoDbSettings> settings)
+		{
+			_mongoClient = mongoClient ?? throw new ArgumentNullException(nameof(mongoClient));
+			_settings = settings ?? throw new ArgumentNullException(nameof(settings));
+		}
+
+		public async Task AddGame(Game game)
+		{
+			await Games.InsertOneAsync(game);
+		}
+
+		public async Task<List<Game>> GetGames(int skip, int take)
+		{
+			return await Games.Find(x => true)
+				.Skip(skip)
+				.Limit(take)
+				.ToListAsync();
+		}
+
+		public async Task<Game> GetGameByCode(string gameCode)
+		{
+			return await Games.Find(x => x.GameCode == gameCode
+					&& x.Status != GameStatus.Archived)
+				.SingleOrDefaultAsync();
+		}
+	}
+}

@@ -6,6 +6,11 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using WordGame.API.Data.Repositories;
+using WordGame.API.Domain.Repositories;
+using WordGame.API.Extensions;
 
 namespace WordGame.API
 {
@@ -21,13 +26,23 @@ namespace WordGame.API
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddControllersWithViews();
+			services.AddControllersWithViews()
+				.AddJsonOptions(options =>
+				{
+					options.JsonSerializerOptions.AllowTrailingCommas = true;
+					options.JsonSerializerOptions.Converters.Add(
+						new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+					options.JsonSerializerOptions.WriteIndented = true;
+				});
 
 			// In production, the React files will be served from this directory
 			services.AddSpaStaticFiles(configuration =>
 			{
 				configuration.RootPath = "ClientApp/build";
 			});
+
+			services.AddMongo(Configuration);
+			services.AddScoped<IGameRepository, GameRepository>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
