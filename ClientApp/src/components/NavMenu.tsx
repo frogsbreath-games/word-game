@@ -43,7 +43,7 @@ export default class NavMenu extends React.PureComponent<
                   </NavLink>
                 </NavItem>
                 <NavItem>
-                  <NavLink tag={Link} className="text-dark" to="/game">
+                  <NavLink tag={Link} className="text-dark" to="/game-home">
                     Game
                   </NavLink>
                 </NavItem>
