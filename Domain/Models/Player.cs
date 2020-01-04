@@ -10,18 +10,18 @@ namespace WordGame.API.Domain.Models
 	public class Player
 	{
 		public Player(
-			string nickName,
-			bool isAdminFlag,
-			bool isSpyMasterFlag,
+			string name,
+			bool isAdmin,
+			bool isSpyMaster,
 			Team team,
 			Guid? id = null,
 			DateTime? createdDate = null)
 		{
 			Id = id ?? Guid.NewGuid();
 			CreatedDate = createdDate ?? DateTime.Now;
-			NickName = nickName ?? throw new ArgumentNullException(nameof(nickName));
-			IsAdminFlag = isAdminFlag;
-			IsSpyMasterFlag = isSpyMasterFlag;
+			Name = name ?? throw new ArgumentNullException(nameof(name));
+			IsAdmin = isAdmin;
+			IsSpyMaster = isSpyMaster;
 			Team = team;
 		}
 
@@ -31,11 +31,11 @@ namespace WordGame.API.Domain.Models
 		[JsonIgnore]
 		public DateTime CreatedDate { get; protected set; }
 
-		public string NickName { get; protected set; }
+		public string Name { get; protected set; }
 
-		public bool IsAdminFlag { get; protected set; }
+		public bool IsAdmin { get; protected set; }
 
-		public bool IsSpyMasterFlag { get; protected set; }
+		public bool IsSpyMaster { get; protected set; }
 
 		public Team Team { get; protected set; }
 	}

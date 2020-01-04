@@ -35,16 +35,22 @@ namespace WordGame.API.Data.Repositories
 		public async Task<List<Game>> GetGames(int skip, int take)
 		{
 			return await Games.Find(x => true)
+				.SortByDescending(x => x.CreatedDate)
 				.Skip(skip)
 				.Limit(take)
 				.ToListAsync();
 		}
 
-		public async Task<Game> GetGameByCode(string gameCode)
+		public async Task<Game> GetGameByCode(string code)
 		{
-			return await Games.Find(x => x.GameCode == gameCode
+			return await Games.Find(x => x.Code == code
 					&& x.Status != GameStatus.Archived)
 				.SingleOrDefaultAsync();
+		}
+
+		public async Task<DeleteResult> DeleteGame(string code)
+		{
+			return await Games.DeleteOneAsync(x => x.Code == code);
 		}
 	}
 }

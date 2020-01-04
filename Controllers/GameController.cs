@@ -10,7 +10,7 @@ using WordGame.API.Domain.Repositories;
 namespace WordGame.API.Controllers
 {
     [ApiController]
-    [Route("Game")]
+    [Route("api/games")]
     public class GameController : ControllerBase
     {
         protected IGameRepository _repository;
@@ -31,7 +31,7 @@ namespace WordGame.API.Controllers
 
             await _repository.AddGame(game);
 
-            return await _repository.GetGameByCode(game.GameCode);
+            return await _repository.GetGameByCode(game.Code);
         }
 
         [HttpGet]
@@ -40,6 +40,20 @@ namespace WordGame.API.Controllers
             [FromQuery] int take = 100)
         {
             return await _repository.GetGames(skip, take);
+        }
+
+        [HttpGet("{code}")]
+        public async Task<ApiResponse<Game>> GetByCode([FromRoute] string code)
+        {
+            return await _repository.GetGameByCode(code);
+        }
+
+        [HttpDelete("{code}")]
+        public async Task<ApiResponse> DeleteGame([FromRoute] string code)
+        {
+            await _repository.DeleteGame(code);
+
+            return new ApiResponse("Game deleted");
         }
     }
 }

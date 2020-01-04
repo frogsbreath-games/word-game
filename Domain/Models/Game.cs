@@ -16,15 +16,15 @@ namespace WordGame.API.Domain.Models
 		[JsonIgnore]
 		public DateTime CreatedDate { get; protected set; }
 
-		public string GameCode { get; protected set; }
+		public string Code { get; protected set; }
 
 		public GameStatus Status { get; protected set; }
 
 		public List<Player> Players { get; protected set; } = new List<Player>();
 
 		public Game(
-			string gameCode,
-			string adminNickName,
+			string code,
+			string adminName,
 			Team adminTeam,
 			bool adminIsSpyMaster,
 			DateTime? createdDate = null,
@@ -32,10 +32,10 @@ namespace WordGame.API.Domain.Models
 		{
 			Id = id ?? ObjectId.GenerateNewId();
 			CreatedDate = createdDate ?? DateTime.Now;
-			GameCode = gameCode ?? throw new ArgumentNullException(nameof(gameCode));
+			Code = code ?? throw new ArgumentNullException(nameof(code));
 			Status = GameStatus.Lobby;
 			Players.Add(new Player(
-				adminNickName,
+				adminName,
 				true,
 				adminIsSpyMaster,
 				adminTeam,

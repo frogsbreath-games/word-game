@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ namespace WordGame.API.Domain.Repositories
 
 		Task AddGame(Game game);
 
-		Task<Game> GetGameByCode(string gameCode);
+		Task<Game> GetGameByCode(string code);
+
+		Task<DeleteResult> DeleteGame(string code);
 	}
 }

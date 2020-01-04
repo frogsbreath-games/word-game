@@ -51,7 +51,7 @@ export const actionCreators = {
     const appState = getState();
     debugger;
     if (appState && appState.game) {
-      fetch(`game`, { method: "POST" })
+      fetch(`api/games`, { method: "POST" })
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
           dispatch({
