@@ -35,6 +35,8 @@ namespace WordGame.API
 					options.JsonSerializerOptions.WriteIndented = true;
 				});
 
+			services.AddOpenApiDocument();
+
 			// In production, the React files will be served from this directory
 			services.AddSpaStaticFiles(configuration =>
 			{
@@ -64,6 +66,9 @@ namespace WordGame.API
 			app.UseSpaStaticFiles();
 
 			app.UseRouting();
+
+			app.UseSwaggerUi3();
+			app.UseReDoc();
 
 			app.UseEndpoints(endpoints =>
 			{
