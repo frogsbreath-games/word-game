@@ -6,7 +6,7 @@ import { AppThunkAction } from "./";
 
 export interface GameState {
   isLoading: boolean;
-  game: object;
+  game: Game;
 }
 
 export interface Game {
@@ -76,7 +76,7 @@ export const actionCreators = {
 
 const unloadedState: GameState = {
   isLoading: false,
-  game: {}
+  game: {} as Game
 };
 
 export const reducer: Reducer<GameState> = (

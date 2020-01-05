@@ -2,6 +2,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
+import { Redirect } from "react-router";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -9,12 +10,18 @@ type GameProps = GameStore.GameState & // ... state we've requested from the Red
 
 class GameHome extends React.PureComponent<GameProps> {
   public render() {
+    //When game is retrieved redirect to lobby component
+    if (this.props.game.status === "lobby") {
+      return <Redirect to="/lobby" />;
+    }
+
     let buttonText = "New Game";
     if (this.props.isLoading) {
       buttonText = "Loading";
     } else {
       buttonText = "New Game";
     }
+
     return (
       <React.Fragment>
         <div>
