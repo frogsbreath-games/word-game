@@ -53,7 +53,6 @@ export const actionCreators = {
   requestNewGame: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
     // Only load data if it's something we don't already have (and are not already loading)
     const appState = getState();
-    debugger;
     if (appState && appState.game) {
       fetch(`api/games`, { method: "POST" })
         .then(response => response.json() as Promise<APIResponse>)
