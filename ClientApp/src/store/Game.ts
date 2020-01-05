@@ -11,11 +11,15 @@ export interface GameState {
 
 export interface Game {
   code: string;
+  status: string;
   players: Player[];
 }
 
 export interface Player {
   name: string;
+  isAdmin: boolean;
+  isSpyMaster: boolean;
+  team: string;
 }
 
 export interface APIResponse {
@@ -54,6 +58,7 @@ export const actionCreators = {
       fetch(`api/games`, { method: "POST" })
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
+          console.log(data);
           dispatch({
             type: "RECEIVE_NEW_GAME",
             game: data.data as Game
