@@ -2,6 +2,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
+import { Redirect } from "react-router";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -10,17 +11,24 @@ type GameProps = GameStore.GameState & // ... state we've requested from the Red
 type PlayerTileProps = {
   player: GameStore.Player;
   key: number;
+  swapTeams: (player: GameStore.Player) => void;
 };
 
-const PlayerTile = ({ player, key }: PlayerTileProps) => (
+const PlayerTile = ({ player, key, swapTeams }: PlayerTileProps) => (
   <div>
     <div className="card">
       <div className="card-body">
         <h5 className="card-title">{player.name}</h5>
-        <p className="card-text">{key}</p>
-        <a href="#" className="btn btn-primary">
-          Switch Team
-        </a>
+        <p className="card-text">
+          {player.isSpyMaster ? "Spy Master" : "Agent"}
+        </p>
+        <button
+          className="btn btn-primary"
+          type="button"
+          onClick={() => swapTeams(player)}
+        >
+          Swap Teams
+        </button>
       </div>
     </div>
   </div>
@@ -28,6 +36,11 @@ const PlayerTile = ({ player, key }: PlayerTileProps) => (
 
 class GameHome extends React.PureComponent<GameProps> {
   public render() {
+    //When game is retrieved redirect to lobby component
+    if (this.props.game.status !== "lobby") {
+      return <Redirect to="/game-home" />;
+    }
+
     return (
       <React.Fragment>
         <h1>Lobby: {this.props.game.code}</h1>
@@ -38,7 +51,11 @@ class GameHome extends React.PureComponent<GameProps> {
             {this.props.game.players
               .filter(player => player.team === "red")
               .map((player, index) => (
-                <PlayerTile player={player} key={index} />
+                <PlayerTile
+                  player={player}
+                  key={index}
+                  swapTeams={() => this.props.swapTeams(player)}
+                />
               ))}
           </div>
           <div className="col-sm-6">
@@ -47,7 +64,11 @@ class GameHome extends React.PureComponent<GameProps> {
             {this.props.game.players
               .filter(player => player.team === "blue")
               .map((player, index) => (
-                <PlayerTile player={player} key={index} />
+                <PlayerTile
+                  player={player}
+                  key={index}
+                  swapTeams={() => this.props.swapTeams(player)}
+                />
               ))}
           </div>
         </div>

@@ -41,9 +41,17 @@ interface ReceiveNewGameAction {
   game: Game;
 }
 
+interface SwapPlayerTeamAction {
+  type: "SWAP_PLAYER_TEAM";
+  player: Player;
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-type KnownAction = RequestNewGameAction | ReceiveNewGameAction;
+type KnownAction =
+  | RequestNewGameAction
+  | ReceiveNewGameAction
+  | SwapPlayerTeamAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -68,7 +76,9 @@ export const actionCreators = {
         type: "REQUEST_NEW_GAME"
       });
     }
-  }
+  },
+  swapTeams: (player: Player) =>
+    ({ type: "SWAP_PLAYER_TEAM", player: player } as SwapPlayerTeamAction)
 };
 
 // ----------------
@@ -98,6 +108,20 @@ export const reducer: Reducer<GameState> = (
       return {
         isLoading: false,
         game: action.game
+      };
+    case "SWAP_PLAYER_TEAM":
+      var updatedPlayers = state.game.players.filter(
+        player => player.name !== action.player.name
+      );
+      if (action.player.team === "blue") {
+        action.player.team = "red";
+      } else {
+        action.player.team = "blue";
+      }
+      updatedPlayers.push(action.player);
+      return {
+        isLoading: false,
+        game: { ...state.game, players: updatedPlayers }
       };
     default:
       return state;
