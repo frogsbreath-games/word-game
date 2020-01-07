@@ -16,6 +16,7 @@ export interface Game {
 }
 
 export interface Player {
+  number: number;
   name: string;
   isAdmin: boolean;
   isSpyMaster: boolean;
@@ -41,8 +42,12 @@ interface ReceiveNewGameAction {
   game: Game;
 }
 
-interface SwapPlayerTeamAction {
-  type: "SWAP_PLAYER_TEAM";
+interface RequestUpdatePlayerAction {
+  type: "REQUEST_UPDATE_PLAYER";
+}
+
+interface RecieveUpdatePlayerAction {
+  type: "RECEIVE_UPDATE_PLAYER";
   player: Player;
 }
 
@@ -51,7 +56,8 @@ interface SwapPlayerTeamAction {
 type KnownAction =
   | RequestNewGameAction
   | ReceiveNewGameAction
-  | SwapPlayerTeamAction;
+  | RequestUpdatePlayerAction
+  | RecieveUpdatePlayerAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -77,8 +83,34 @@ export const actionCreators = {
       });
     }
   },
-  swapTeams: (player: Player) =>
-    ({ type: "SWAP_PLAYER_TEAM", player: player } as SwapPlayerTeamAction)
+  updatePlayer: (player: Player): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${appState.game.game.code}/players/${player.number}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(player)
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+          dispatch({
+            type: "RECEIVE_UPDATE_PLAYER",
+            player: data.data as Player
+          });
+        });
+
+      dispatch({
+        type: "REQUEST_UPDATE_PLAYER"
+      });
+    }
+  }
 };
 
 // ----------------
@@ -96,7 +128,6 @@ export const reducer: Reducer<GameState> = (
   if (state === undefined) {
     return unloadedState;
   }
-
   const action = incomingAction as KnownAction;
   switch (action.type) {
     case "REQUEST_NEW_GAME":
@@ -109,15 +140,15 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         game: action.game
       };
-    case "SWAP_PLAYER_TEAM":
+    case "REQUEST_UPDATE_PLAYER":
+      return {
+        isLoading: true,
+        game: state.game
+      };
+    case "RECEIVE_UPDATE_PLAYER":
       var updatedPlayers = state.game.players.filter(
-        player => player.name !== action.player.name
+        player => player.number !== action.player.number
       );
-      if (action.player.team === "blue") {
-        action.player.team = "red";
-      } else {
-        action.player.team = "blue";
-      }
       updatedPlayers.push(action.player);
       return {
         isLoading: false,

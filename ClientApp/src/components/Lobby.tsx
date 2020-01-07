@@ -14,7 +14,7 @@ type PlayerTileProps = {
   swapTeams: (player: GameStore.Player) => void;
 };
 
-const PlayerTile = ({ player, key, swapTeams }: PlayerTileProps) => (
+const PlayerTile = ({ player, swapTeams }: PlayerTileProps) => (
   <div>
     <div className="card">
       <div className="card-body">
@@ -35,6 +35,14 @@ const PlayerTile = ({ player, key, swapTeams }: PlayerTileProps) => (
 );
 
 class GameHome extends React.PureComponent<GameProps> {
+  public swapTeams(player: GameStore.Player) {
+    if (player.team === "blue") {
+      player.team = "red";
+    } else {
+      player.team = "blue";
+    }
+    this.props.updatePlayer(player);
+  }
   public render() {
     //When game is retrieved redirect to lobby component
     if (this.props.game.status !== "lobby") {
@@ -53,8 +61,8 @@ class GameHome extends React.PureComponent<GameProps> {
               .map((player, index) => (
                 <PlayerTile
                   player={player}
-                  key={index}
-                  swapTeams={() => this.props.swapTeams(player)}
+                  key={player.number}
+                  swapTeams={() => this.swapTeams(player)}
                 />
               ))}
           </div>
@@ -66,8 +74,8 @@ class GameHome extends React.PureComponent<GameProps> {
               .map((player, index) => (
                 <PlayerTile
                   player={player}
-                  key={index}
-                  swapTeams={() => this.props.swapTeams(player)}
+                  key={player.number}
+                  swapTeams={() => this.swapTeams(player)}
                 />
               ))}
           </div>
