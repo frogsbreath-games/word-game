@@ -1,8 +1,8 @@
 ﻿using MongoDB.Bson;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WordGame.API.Domain.Enums;
 
@@ -34,12 +34,18 @@ namespace WordGame.API.Domain.Models
 			CreatedDate = createdDate ?? DateTime.Now;
 			Code = code ?? throw new ArgumentNullException(nameof(code));
 			Status = GameStatus.Lobby;
-			Players.Add(new Player(
+			AddPlayer(new Player(
 				adminName,
 				true,
 				adminIsSpyMaster,
+				0,
 				adminTeam,
 				createdDate: CreatedDate));
+		}
+
+		public void AddPlayer(Player player)
+		{
+			Players.Add(player);
 		}
 	}
 }

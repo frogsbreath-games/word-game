@@ -52,5 +52,12 @@ namespace WordGame.API.Data.Repositories
 		{
 			return await Games.DeleteOneAsync(x => x.Code == code);
 		}
+
+		public async Task<ReplaceOneResult> UpdateGame(string code, Game game)
+		{
+			return await Games.ReplaceOneAsync(
+				x => x.Code == code,
+				game);
+		}
 	}
 }

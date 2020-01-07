@@ -6,8 +6,13 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+using NJsonSchema.Generation;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using WordGame.API.Application.Services;
 using WordGame.API.Data.Repositories;
 using WordGame.API.Domain.Repositories;
 using WordGame.API.Extensions;
@@ -27,12 +32,10 @@ namespace WordGame.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddControllersWithViews()
-				.AddJsonOptions(options =>
+				.AddNewtonsoftJson(options =>
 				{
-					options.JsonSerializerOptions.AllowTrailingCommas = true;
-					options.JsonSerializerOptions.Converters.Add(
-						new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-					options.JsonSerializerOptions.WriteIndented = true;
+					options.SerializerSettings.Converters.Add(
+						new StringEnumConverter(new CamelCaseNamingStrategy(false, true)));
 				});
 
 			services.AddOpenApiDocument();
@@ -45,6 +48,7 @@ namespace WordGame.API
 
 			services.AddMongo(Configuration);
 			services.AddScoped<IGameRepository, GameRepository>();
+			services.AddSingleton<INameGenerator, NameGenerator>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

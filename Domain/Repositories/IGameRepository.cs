@@ -15,6 +15,8 @@ namespace WordGame.API.Domain.Repositories
 
 		Task<Game> GetGameByCode(string code);
 
+		Task<ReplaceOneResult> UpdateGame(string code, Game game);
+
 		Task<DeleteResult> DeleteGame(string code);
 	}
 }
