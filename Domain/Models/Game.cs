@@ -47,5 +47,38 @@ namespace WordGame.API.Domain.Models
 		{
 			Players.Add(player);
 		}
+
+		//This is sort of inefficient but whatever
+		public bool CanStart
+		{
+			get
+			{
+				if (Status != GameStatus.Lobby)
+					return false;
+
+				var redPlayers = Players.Where(x => x.Team == Team.Red);
+				var bluePlayers = Players.Where(x => x.Team == Team.Blue);
+
+				if (redPlayers.Count(x => x.IsSpyMaster) != 1)
+					return false;
+
+				if (bluePlayers.Count(x => x.IsSpyMaster) != 1)
+					return false;
+
+				if (redPlayers.Count() < 2)
+					return false;
+
+				if (bluePlayers.Count() < 2)
+					return false;
+
+				if (Math.Abs(redPlayers.Count() - bluePlayers.Count()) > 1)
+					return false;
+
+				if (Players.Count != (redPlayers.Count() + bluePlayers.Count()))
+					return false;
+
+				return true;
+			}
+		}
 	}
 }

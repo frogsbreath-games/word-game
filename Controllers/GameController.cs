@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WordGame.API.Application.Services;
@@ -13,6 +14,7 @@ namespace WordGame.API.Controllers
 {
     [ApiController]
     [Route("api/games")]
+    [Produces("application/json"), Consumes("application/json")]
     public class GameController : ControllerBase
     {
         protected IGameRepository _repository;
@@ -24,7 +26,30 @@ namespace WordGame.API.Controllers
             _nameGenerator = nameGenerator ?? throw new ArgumentNullException(nameof(nameGenerator));
         }
 
+        protected ApiResponse NotFound(string message)
+        {
+            Response.StatusCode = (int)HttpStatusCode.NotFound;
+
+            return new ApiResponse(message);
+        }
+
+        protected ApiResponse<T> Created<T>(string pathPart, T obj)
+        {
+            Response.StatusCode = (int)HttpStatusCode.Created;
+            Response.Headers["Location"] = $"{Request.Path}/{pathPart}";
+
+            return obj;
+        }
+
+        protected ApiResponse<T> Ok<T>(T obj)
+        {
+            Response.StatusCode = (int)HttpStatusCode.OK;
+
+            return obj;
+        }
+
         [HttpPost]
+        [ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.Created)]
         public async Task<ApiResponse<Game>> CreateGame()
         {
             var game = new Game(
@@ -35,38 +60,58 @@ namespace WordGame.API.Controllers
 
             await _repository.AddGame(game);
 
-            return await _repository.GetGameByCode(game.Code);
+            return Created(game.Code, game);
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(ApiResponse<List<Game>>), (int)HttpStatusCode.OK)]
         public async Task<ApiResponse<List<Game>>> GetAll(
             [FromQuery] int skip = 0,
             [FromQuery] int take = 100)
         {
-            return await _repository.GetGames(skip, take);
+            return Ok(await _repository.GetGames(skip, take));
         }
 
         [HttpGet("{code}")]
-        public async Task<ActionResult<Game>> GetByCode([FromRoute] string code)
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
+        public async Task<ApiResponse<Game>> GetByCode([FromRoute] string code)
         {
-            return await _repository.GetGameByCode(code);
+            Game game = await _repository.GetGameByCode(code);
+
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
+
+            return Ok(game);
         }
 
         [HttpDelete("{code}")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         public async Task<ApiResponse> DeleteGame([FromRoute] string code)
         {
+            Game game = await _repository.GetGameByCode(code);
+
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
+
             await _repository.DeleteGame(code);
 
             return new ApiResponse("Game deleted");
         }
 
         [HttpGet("{code}/players")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<List<Player>>), (int)HttpStatusCode.OK)]
         public async Task<ApiResponse<List<Player>>> GetGamePlayers(
             [FromRoute] string code,
             [FromQuery] Team? team = null,
             [FromQuery] bool? isSpyMaster = null)
         {
             Game game = await _repository.GetGameByCode(code);
+
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
 
             IEnumerable<Player> players = game.Players;
 
@@ -80,10 +125,15 @@ namespace WordGame.API.Controllers
         }
 
         [HttpPost("{code}/players")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.Created)]
         public async Task<ApiResponse<Player>> JoinGame(
             [FromRoute] string code)
         {
             Game game = await _repository.GetGameByCode(code);
+
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
 
             IEnumerable<Player> players = game.Players;
 
@@ -111,20 +161,32 @@ namespace WordGame.API.Controllers
 
             await _repository.UpdateGame(code, game);
 
-            return player;
+            return Ok(player);
         }
 
         [HttpGet("{code}/players/{number}")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
         public async Task<ApiResponse<Player>> GetGamePlayer(
             [FromRoute] string code,
             [FromRoute] int number)
         {
             Game game = await _repository.GetGameByCode(code);
 
-            return game.Players.SingleOrDefault(x => x.Number == number);
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
+
+            Player player = game.Players.SingleOrDefault(x => x.Number == number);
+
+            if (player is null)
+                return NotFound($"Cannot find player with number: [{number}] in game with code: [{code}]");
+
+            return Ok(player);
         }
 
         [HttpPost("{code}/players/{number}")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
         public async Task<ApiResponse<Player>> UpdatePlayer(
             [FromRoute] string code,
             [FromRoute] int number,
@@ -132,7 +194,13 @@ namespace WordGame.API.Controllers
         {
             Game game = await _repository.GetGameByCode(code);
 
-            var player = game.Players.SingleOrDefault(x => x.Number == number);
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
+
+            Player player = game.Players.SingleOrDefault(x => x.Number == number);
+
+            if (player is null)
+                return NotFound($"Cannot find player with number: [{number}] in game with code: [{code}]");
 
             player.UpdatePlayer(
                 playerModel.Team,
@@ -141,7 +209,7 @@ namespace WordGame.API.Controllers
 
             await _repository.UpdateGame(code, game);
 
-            return player;
+            return Ok(player);
         }
     }
 }
