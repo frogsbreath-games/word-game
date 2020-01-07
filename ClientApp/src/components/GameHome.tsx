@@ -8,7 +8,26 @@ import { Redirect } from "react-router";
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
   typeof GameStore.actionCreators;
 
-class GameHome extends React.PureComponent<GameProps> {
+type State = { value: string };
+
+class GameHome extends React.PureComponent<GameProps, State> {
+  constructor(props: GameProps) {
+    super(props);
+    this.state = { value: "" };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({ value: event.target.value });
+  }
+
+  handleSubmit(event: React.MouseEvent) {
+    alert("A name was submitted: " + this.state.value);
+    event.preventDefault();
+  }
+
   public render() {
     //When game is retrieved redirect to lobby component
     if (this.props.game.status === "lobby") {
@@ -33,11 +52,17 @@ class GameHome extends React.PureComponent<GameProps> {
             >
               <input
                 type="text"
+                value={this.state.value}
+                onChange={this.handleChange}
                 className="form-control"
                 placeholder="XXX69..."
               />
               <div className="input-group-append">
-                <button className="btn btn-primary" type="button">
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={() => this.props.joinGame(this.state.value)}
+                >
                   Join Game
                 </button>
               </div>

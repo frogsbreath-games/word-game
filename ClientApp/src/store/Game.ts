@@ -51,13 +51,24 @@ interface RecieveUpdatePlayerAction {
   player: Player;
 }
 
+interface RequestJoinGameAction {
+  type: "REQUEST_JOIN_GAME";
+}
+
+interface RecieveJoinedGameAction {
+  type: "RECEIVE_JOIN_GAME";
+  game: Game;
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction =
   | RequestNewGameAction
   | ReceiveNewGameAction
   | RequestUpdatePlayerAction
-  | RecieveUpdatePlayerAction;
+  | RecieveUpdatePlayerAction
+  | RequestJoinGameAction
+  | RecieveJoinedGameAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -110,6 +121,30 @@ export const actionCreators = {
         type: "REQUEST_UPDATE_PLAYER"
       });
     }
+  },
+  joinGame: (code: string): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${code}/players`, {
+        method: "POST"
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+          dispatch({
+            type: "RECEIVE_JOIN_GAME",
+            game: data.data as Game
+          });
+        });
+
+      dispatch({
+        type: "REQUEST_JOIN_GAME"
+      });
+    }
   }
 };
 
@@ -136,6 +171,16 @@ export const reducer: Reducer<GameState> = (
         game: state.game
       };
     case "RECEIVE_NEW_GAME":
+      return {
+        isLoading: false,
+        game: action.game
+      };
+    case "REQUEST_JOIN_GAME":
+      return {
+        isLoading: true,
+        game: state.game
+      };
+    case "RECEIVE_JOIN_GAME":
       return {
         isLoading: false,
         game: action.game

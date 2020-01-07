@@ -127,7 +127,7 @@ namespace WordGame.API.Controllers
         [HttpPost("{code}/players")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.Created)]
-        public async Task<ApiResponse<Player>> JoinGame(
+        public async Task<ApiResponse<Game>> JoinGame(
             [FromRoute] string code)
         {
             Game game = await _repository.GetGameByCode(code);
@@ -161,7 +161,7 @@ namespace WordGame.API.Controllers
 
             await _repository.UpdateGame(code, game);
 
-            return Ok(player);
+            return Ok(game);
         }
 
         [HttpGet("{code}/players/{number}")]
