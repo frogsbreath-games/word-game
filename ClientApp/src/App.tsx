@@ -6,12 +6,14 @@ import GameHome from "./components/GameHome";
 import Counter from "./components/Counter";
 import FetchData from "./components/FetchData";
 import Lobby from "./components/Lobby";
+import Game from "./components/Game";
 
 import "./custom.css";
 
 export default () => (
   <Layout>
     <Route exact path="/" component={Home} />
+    <Route path="/game" component={Game} />
     <Route path="/game-home" component={GameHome} />
     <Route path="/counter" component={Counter} />
     <Route path="/lobby" component={Lobby} />
