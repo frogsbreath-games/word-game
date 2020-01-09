@@ -18,7 +18,7 @@ export interface Game {
 export interface Player {
   number: number;
   name: string;
-  isAdmin: boolean;
+  isOrganizer: boolean;
   isSpyMaster: boolean;
   team: string;
 }

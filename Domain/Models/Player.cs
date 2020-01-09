@@ -11,7 +11,7 @@ namespace WordGame.API.Domain.Models
 	{
 		public Player(
 			string name,
-			bool isAdmin,
+			bool isOrganizer,
 			bool isSpyMaster,
 			int number,
 			Team team,
@@ -21,7 +21,7 @@ namespace WordGame.API.Domain.Models
 			Id = id ?? Guid.NewGuid();
 			CreatedDate = createdDate ?? DateTime.Now;
 			Name = name ?? throw new ArgumentNullException(nameof(name));
-			IsAdmin = isAdmin;
+			IsOrganizer = isOrganizer;
 			IsSpyMaster = isSpyMaster;
 			Team = team;
 			Number = number;
@@ -37,7 +37,7 @@ namespace WordGame.API.Domain.Models
 
 		public string Name { get; protected set; }
 
-		public bool IsAdmin { get; protected set; }
+		public bool IsOrganizer { get; protected set; }
 
 		public bool IsSpyMaster { get; protected set; }
 
