@@ -42,6 +42,15 @@ interface ReceiveNewGameAction {
   game: Game;
 }
 
+interface RequestCurrentGameAction {
+  type: "REQUEST_CURRENT_GAME";
+}
+
+interface ReceiveCurrentGameAction {
+  type: "RECEIVE_CURRENT_GAME";
+  game: Game;
+}
+
 interface RequestUpdatePlayerAction {
   type: "REQUEST_UPDATE_PLAYER";
 }
@@ -60,6 +69,14 @@ interface RecieveJoinedGameAction {
   game: Game;
 }
 
+interface RequestLeaveDeleteAction {
+  type: "REQUEST_DELETE_GAME";
+}
+
+interface RecieveLeaveDeleteAction {
+  type: "RECEIVE_DELETE_GAME";
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction =
@@ -68,7 +85,11 @@ type KnownAction =
   | RequestUpdatePlayerAction
   | RecieveUpdatePlayerAction
   | RequestJoinGameAction
-  | RecieveJoinedGameAction;
+  | RecieveJoinedGameAction
+  | RequestLeaveDeleteAction
+  | RecieveLeaveDeleteAction
+  | RequestCurrentGameAction
+  | ReceiveCurrentGameAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -91,6 +112,41 @@ export const actionCreators = {
 
       dispatch({
         type: "REQUEST_NEW_GAME"
+      });
+    }
+  },
+  requestCurrentGame: (): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/current`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        }
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+          dispatch({
+            type: "RECEIVE_CURRENT_GAME",
+            game: data.data as Game
+          });
+        })
+        .catch(error => {
+          //added this because if user isn't authenticated get 404 response
+          dispatch({
+            type: "RECEIVE_CURRENT_GAME",
+            game: {} as Game
+          });
+        });
+
+      dispatch({
+        type: "REQUEST_CURRENT_GAME"
       });
     }
   },
@@ -145,6 +201,33 @@ export const actionCreators = {
         type: "REQUEST_JOIN_GAME"
       });
     }
+  },
+  deleteGame: (code: string): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${code}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        }
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+          dispatch({
+            type: "RECEIVE_DELETE_GAME"
+          });
+        });
+
+      dispatch({
+        type: "REQUEST_DELETE_GAME"
+      });
+    }
   }
 };
 
@@ -165,6 +248,16 @@ export const reducer: Reducer<GameState> = (
   }
   const action = incomingAction as KnownAction;
   switch (action.type) {
+    case "REQUEST_CURRENT_GAME":
+      return {
+        isLoading: true,
+        game: state.game
+      };
+    case "RECEIVE_CURRENT_GAME":
+      return {
+        isLoading: false,
+        game: action.game
+      };
     case "REQUEST_NEW_GAME":
       return {
         isLoading: true,
@@ -184,6 +277,16 @@ export const reducer: Reducer<GameState> = (
       return {
         isLoading: false,
         game: action.game
+      };
+    case "REQUEST_DELETE_GAME":
+      return {
+        isLoading: true,
+        game: state.game
+      };
+    case "RECEIVE_DELETE_GAME":
+      return {
+        isLoading: false,
+        game: {} as Game
       };
     case "REQUEST_UPDATE_PLAYER":
       return {

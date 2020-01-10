@@ -11,10 +11,17 @@ type GameProps = GameStore.GameState & // ... state we've requested from the Red
 type PlayerTileProps = {
   player: GameStore.Player;
   key: number;
+  code: string;
   swapTeams: (player: GameStore.Player) => void;
+  leaveGame: (code: string) => void;
 };
 
-const PlayerTile = ({ player, swapTeams }: PlayerTileProps) => (
+const PlayerTile = ({
+  player,
+  swapTeams,
+  leaveGame,
+  code
+}: PlayerTileProps) => (
   <div>
     <div className="card">
       <div className="card-body">
@@ -29,12 +36,27 @@ const PlayerTile = ({ player, swapTeams }: PlayerTileProps) => (
         >
           Swap Teams
         </button>
+        <button
+          className="btn btn-danger"
+          type="button"
+          onClick={() => leaveGame(code)}
+        >
+          Leave Game
+        </button>
       </div>
     </div>
   </div>
 );
 
 class GameHome extends React.PureComponent<GameProps> {
+  public componentDidMount() {
+    this.ensureDataFetched();
+  }
+
+  private ensureDataFetched() {
+    this.props.requestCurrentGame();
+  }
+
   public swapTeams(player: GameStore.Player) {
     if (player.team === "blue") {
       player.team = "red";
@@ -43,9 +65,13 @@ class GameHome extends React.PureComponent<GameProps> {
     }
     this.props.updatePlayer(player);
   }
+
+  public deleteGame(code: string) {
+    this.props.deleteGame(code);
+  }
   public render() {
     //When game is retrieved redirect to lobby component
-    if (this.props.game.status !== "lobby") {
+    if (this.props.isLoading === false && this.props.game.status !== "lobby") {
       return <Redirect to="/game-home" />;
     }
 
@@ -58,11 +84,13 @@ class GameHome extends React.PureComponent<GameProps> {
             <hr />
             {this.props.game.players
               .filter(player => player.team === "red")
-              .map((player, index) => (
+              .map(player => (
                 <PlayerTile
                   player={player}
+                  code={this.props.game.code}
                   key={player.number}
                   swapTeams={() => this.swapTeams(player)}
+                  leaveGame={() => this.deleteGame(this.props.game.code)}
                 />
               ))}
           </div>
@@ -71,11 +99,13 @@ class GameHome extends React.PureComponent<GameProps> {
             <hr />
             {this.props.game.players
               .filter(player => player.team === "blue")
-              .map((player, index) => (
+              .map(player => (
                 <PlayerTile
                   player={player}
+                  code={this.props.game.code}
                   key={player.number}
                   swapTeams={() => this.swapTeams(player)}
+                  leaveGame={() => this.deleteGame(this.props.game.code)}
                 />
               ))}
           </div>

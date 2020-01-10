@@ -2,7 +2,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
-import { Redirect } from "react-router";
+//import { Redirect } from "react-router";
 import "./Game.css";
 
 // At runtime, Redux will merge together...
@@ -92,14 +92,6 @@ class Game extends React.PureComponent<GameProps, State> {
     // if (this.props.game.status === "InProgress") {
     //   return <Redirect to="/game-home" />;
     // }
-
-    let buttonText = "New Game";
-    if (this.props.isLoading) {
-      buttonText = "Loading";
-    } else {
-      buttonText = "New Game";
-    }
-
     return (
       <React.Fragment>
         <div>

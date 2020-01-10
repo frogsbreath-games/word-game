@@ -19,6 +19,14 @@ class GameHome extends React.PureComponent<GameProps, State> {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  public componentDidMount() {
+    this.ensureDataFetched();
+  }
+
+  private ensureDataFetched() {
+    this.props.requestCurrentGame();
+  }
+
   handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ value: event.target.value });
   }
@@ -30,7 +38,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
 
   public render() {
     //When game is retrieved redirect to lobby component
-    if (this.props.game.status === "lobby") {
+    if (this.props.isLoading === false && this.props.game.status === "lobby") {
       return <Redirect to="/lobby" />;
     }
 

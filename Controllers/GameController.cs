@@ -167,6 +167,8 @@ namespace WordGame.API.Controllers
 
             await _repository.DeleteGame(code);
 
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
             return new ApiResponse("Game deleted");
         }
 
