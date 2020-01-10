@@ -53,6 +53,7 @@ namespace WordGame.API
 			services.AddMongo(Configuration);
 			services.AddScoped<IGameRepository, GameRepository>();
 			services.AddSingleton<INameGenerator, NameGenerator>();
+			services.AddSingleton<IGameBoardGenerator, GameBoardGenerator>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

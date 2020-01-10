@@ -22,6 +22,10 @@ namespace WordGame.API.Domain.Models
 
 		public List<Player> Players { get; protected set; } = new List<Player>();
 
+		public List<WordTile> WordTiles { get; protected set; } = new List<WordTile>();
+
+		public List<Turn> Turns { get; protected set; } = new List<Turn>();
+
 		public Game(
 			string code,
 			string adminName,
@@ -46,6 +50,22 @@ namespace WordGame.API.Domain.Models
 		public void AddPlayer(Player player)
 		{
 			Players.Add(player);
+		}
+
+		public void StartGame(List<WordTile> tiles, Team startingTeam)
+		{
+			if (!CanStart)
+				throw new InvalidOperationException("Cannot start game!");
+
+			if (tiles.Count != 25)
+				throw new InvalidOperationException("Must start game with 25 words!");
+
+			Status = GameStatus.InProgress;
+			WordTiles = tiles;
+			Turns = new List<Turn>
+			{
+				new Turn(startingTeam, 1)
+			};
 		}
 
 		//This is sort of inefficient but whatever

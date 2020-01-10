@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 
 namespace WordGame.API.Domain.Enums
 {
-	public enum Team
+	public enum TurnStatus
 	{
-		Red,
-		Blue,
-		Black,
-		Neutral,
-		Unknown
+		//Spy master is picking a word
+		Planning,
+
+		//Agents are guessing words
+		Guessing,
+
+		//Turn is over
+		Over
 	}
 }

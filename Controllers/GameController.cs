@@ -24,11 +24,13 @@ namespace WordGame.API.Controllers
     {
         protected IGameRepository _repository;
         protected INameGenerator _nameGenerator;
+        protected IGameBoardGenerator _gameBoardGenerator;
 
-        public GameController(IGameRepository repository, INameGenerator nameGenerator)
+        public GameController(IGameRepository repository, INameGenerator nameGenerator, IGameBoardGenerator gameBoardGenerator)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _nameGenerator = nameGenerator ?? throw new ArgumentNullException(nameof(nameGenerator));
+            _gameBoardGenerator = gameBoardGenerator ?? throw new ArgumentNullException(nameof(gameBoardGenerator));
         }
 
         protected ApiResponse NotFound(string message)
@@ -275,6 +277,38 @@ namespace WordGame.API.Controllers
         [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Player")]
         public Task<ApiResponse> QuitCurrentGame()
             => QuitGame(User.GetGameCode());
+
+        [HttpPost("{code}/start")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+        public async Task<ApiResponse<Game>> StartGame(
+            [FromRoute] string code)
+        {
+            Game game = await _repository.GetGameByCode(code);
+
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
+
+            if (!game.CanStart)
+                return BadRequest($"Cannot start game!");
+
+            //Red always goes first (for now)
+            var board = _gameBoardGenerator.GenerateGameBoard(Team.Red);
+
+            game.StartGame(board, Team.Red);
+
+            await _repository.UpdateGame(code, game);
+
+            return Ok(game);
+        }
+
+        [HttpPost("current/start")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+        public Task<ApiResponse<Game>> StartCurrentGame()
+            => StartGame(User.GetGameCode());
 
         [HttpPost("{code}/join")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
