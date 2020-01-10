@@ -129,7 +129,7 @@ export const actionCreators = {
     // Only load data if it's something we don't already have (and are not already loading)
     const appState = getState();
     if (appState && appState.game) {
-      fetch(`api/games/${code}/players`, {
+      fetch(`api/games/${code}/join`, {
         method: "POST"
       })
         .then(response => response.json() as Promise<APIResponse>)

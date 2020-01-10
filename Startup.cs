@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -46,6 +47,9 @@ namespace WordGame.API
 				configuration.RootPath = "ClientApp/build";
 			});
 
+			services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+				.AddCookie();// options => options.LoginPath);
+
 			services.AddMongo(Configuration);
 			services.AddScoped<IGameRepository, GameRepository>();
 			services.AddSingleton<INameGenerator, NameGenerator>();
@@ -74,6 +78,9 @@ namespace WordGame.API
 			app.UseOpenApi();
 			app.UseSwaggerUi3();
 			app.UseReDoc();
+
+			app.UseAuthentication();
+			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>
 			{

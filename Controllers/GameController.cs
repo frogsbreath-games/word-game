@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WordGame.API.Application.Services;
 using WordGame.API.Domain.Enums;
 using WordGame.API.Domain.Models;
 using WordGame.API.Domain.Repositories;
+using WordGame.API.Extensions;
 using WordGame.API.Models;
 
 namespace WordGame.API.Controllers
@@ -33,6 +38,20 @@ namespace WordGame.API.Controllers
             return new ApiResponse(message);
         }
 
+        protected ApiResponse Forbidden(string message)
+        {
+            Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+            return new ApiResponse(message);
+        }
+
+        protected ApiResponse BadRequest(string message)
+        {
+            Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+            return new ApiResponse(message);
+        }
+
         protected ApiResponse<T> Created<T>(string pathPart, T obj)
         {
             Response.StatusCode = (int)HttpStatusCode.Created;
@@ -48,10 +67,40 @@ namespace WordGame.API.Controllers
             return obj;
         }
 
+        //This should only be used if your game got deleted without you somehow.
+        [HttpPost("forceSignOut")]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public async Task<ApiResponse> ForceSignOut()
+        {
+            var currentGame = await GetCurrentGame();
+            if (currentGame.Data is Game game)
+            {
+                if (User.IsInRole("Organizer"))
+                {
+                    await DeleteGame(game.Code);
+                }
+                else
+                {
+                    await QuitGame(game.Code);
+                }
+            }
+            else
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+
+            Response.StatusCode = (int)HttpStatusCode.OK;
+            return new ApiResponse("logged out.");
+        }
+
+
         [HttpPost]
         [ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.Created)]
         public async Task<ApiResponse<Game>> CreateGame()
         {
+            if (User.Identity.IsAuthenticated)
+                return BadRequest("User is already in a game.");
+
             var game = new Game(
                 Guid.NewGuid().ToString().Substring(0, 6).ToUpper(),
                 _nameGenerator.GetRandomName(),
@@ -60,11 +109,14 @@ namespace WordGame.API.Controllers
 
             await _repository.AddGame(game);
 
+            await SignInAsPlayer(game.Players.First(), game.Code);
+
             return Created(game.Code, game);
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<List<Game>>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         public async Task<ApiResponse<List<Game>>> GetAll(
             [FromQuery] int skip = 0,
             [FromQuery] int take = 100)
@@ -75,7 +127,8 @@ namespace WordGame.API.Controllers
         [HttpGet("{code}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
-        public async Task<ApiResponse<Game>> GetByCode([FromRoute] string code)
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public async Task<ApiResponse<Game>> GetGame([FromRoute] string code)
         {
             Game game = await _repository.GetGameByCode(code);
 
@@ -85,9 +138,17 @@ namespace WordGame.API.Controllers
             return Ok(game);
         }
 
+        [HttpGet("current")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public Task<ApiResponse<Game>> GetCurrentGame()
+            => GetGame(User.GetGameCode());
+
         [HttpDelete("{code}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
         public async Task<ApiResponse> DeleteGame([FromRoute] string code)
         {
             Game game = await _repository.GetGameByCode(code);
@@ -95,14 +156,29 @@ namespace WordGame.API.Controllers
             if (game is null)
                 return NotFound($"Cannot find game with code: [{code}]");
 
+            var playerId = User.GetPlayerId();
+
+            var player = game.Players.SingleOrDefault(x => x.Id == playerId);
+
+            if (player is null)
+                return BadRequest("Cannot delete game player is not in.");
+
             await _repository.DeleteGame(code);
 
             return new ApiResponse("Game deleted");
         }
 
+        [HttpDelete("current")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+        public Task<ApiResponse> DeleteCurrentGame()
+            => DeleteGame(User.GetGameCode());
+
         [HttpGet("{code}/players")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse<List<Player>>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         public async Task<ApiResponse<List<Player>>> GetGamePlayers(
             [FromRoute] string code,
             [FromQuery] Team? team = null,
@@ -121,15 +197,94 @@ namespace WordGame.API.Controllers
             if (isSpyMaster.HasValue)
                 players = players.Where(p => p.IsSpyMaster == isSpyMaster.Value);
 
-            return players.ToList();
+            return Ok(players.ToList());
         }
 
-        [HttpPost("{code}/players")]
+        [HttpGet("current/players")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(ApiResponse<List<Player>>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public Task<ApiResponse<List<Player>>> GetCurrentGamePlayers(
+            [FromQuery] Team? team = null,
+            [FromQuery] bool? isSpyMaster = null)
+            => GetGamePlayers(
+                User.GetGameCode(),
+                team,
+                isSpyMaster);
+
+        [HttpGet("{code}/players/self")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public async Task<ApiResponse<Player>> GetSelfGamePlayer(
+            [FromRoute] string code)
+        {
+            Game game = await _repository.GetGameByCode(code);
+
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
+
+            var id = User.GetPlayerId();
+
+            var player = game.Players.SingleOrDefault(x => x.Id == id);
+
+            if (player is null)
+                return NotFound($"Current user is not a player in game with code: [{code}]");
+
+            return Ok(player);
+        }
+
+        [HttpGet("current/players/self")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public Task<ApiResponse<Player>> GetCurrentGameSelf()
+            => GetSelfGamePlayer(User.GetGameCode());
+
+        [HttpPost("{code}/quit")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Player")]
+        public async Task<ApiResponse> QuitGame(
+            [FromRoute] string code)
+        {
+            Game game = await _repository.GetGameByCode(code);
+
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
+
+            var id = User.GetPlayerId();
+
+            var player = game.Players.SingleOrDefault(x => x.Id == id);
+
+            if (player is null)
+                return BadRequest("Cannot quit game player is not in.");
+
+            game.Players.Remove(player);
+
+            await _repository.UpdateGame(code, game);
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return new ApiResponse("Disconnected");
+        }
+
+        [HttpPost("current/quit")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Player")]
+        public Task<ApiResponse> QuitCurrentGame()
+            => QuitGame(User.GetGameCode());
+
+        [HttpPost("{code}/join")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
         public async Task<ApiResponse<Game>> JoinGame(
             [FromRoute] string code)
         {
+            if (User.Identity.IsAuthenticated)
+                return BadRequest("User is already in a game.");
+
             Game game = await _repository.GetGameByCode(code);
 
             if (game is null)
@@ -161,12 +316,15 @@ namespace WordGame.API.Controllers
 
             await _repository.UpdateGame(code, game);
 
+            await SignInAsPlayer(player, code);
+
             return Ok(game);
         }
 
         [HttpGet("{code}/players/{number}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         public async Task<ApiResponse<Player>> GetGamePlayer(
             [FromRoute] string code,
             [FromRoute] int number)
@@ -184,9 +342,18 @@ namespace WordGame.API.Controllers
             return Ok(player);
         }
 
+        [HttpGet("current/players/{number}")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public Task<ApiResponse<Player>> GetCurrentGamePlayer(
+            [FromRoute] int number)
+            => GetGamePlayer(User.GetGameCode(), number);
+
         [HttpPost("{code}/players/{number}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         public async Task<ApiResponse<Player>> UpdatePlayer(
             [FromRoute] string code,
             [FromRoute] int number,
@@ -210,6 +377,36 @@ namespace WordGame.API.Controllers
             await _repository.UpdateGame(code, game);
 
             return Ok(player);
+        }
+
+        [HttpPost("current/players/{number}")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public Task<ApiResponse<Player>> UpdatePlayerInCurrentGame(
+            [FromRoute] int number,
+            [FromBody] PlayerModel playerModel)
+            => UpdatePlayer(User.GetGameCode(), number, playerModel);
+
+        protected Task SignInAsPlayer(Player player, string code)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, player.Id.ToString()),
+                new Claim(ClaimTypes.Role, player.IsOrganizer ? "Organizer" : "Player"),
+                new Claim(ClaimTypes.Name, player.Name),
+                new Claim("Game", code)
+            };
+
+            return HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(new ClaimsIdentity(
+                    claims,
+                    CookieAuthenticationDefaults.AuthenticationScheme)),
+                new AuthenticationProperties
+                {
+                    IsPersistent = true
+                });
         }
     }
 }
