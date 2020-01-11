@@ -6,6 +6,7 @@ import { AppThunkAction } from "./";
 
 export interface GameState {
   isLoading: boolean;
+  localPlayer: Player;
   game: Game;
 }
 
@@ -59,11 +60,20 @@ interface ReceiveCurrentGameAction {
   game: Game;
 }
 
+interface RequestCurrentPlayerAction {
+  type: "REQUEST_CURRENT_PLAYER";
+}
+
+interface ReceiveCurrentPlayerAction {
+  type: "RECEIVE_CURRENT_PLAYER";
+  localPlayer: Player;
+}
+
 interface RequestUpdatePlayerAction {
   type: "REQUEST_UPDATE_PLAYER";
 }
 
-interface RecieveUpdatePlayerAction {
+interface ReceiveUpdatePlayerAction {
   type: "RECEIVE_UPDATE_PLAYER";
   player: Player;
 }
@@ -72,7 +82,7 @@ interface RequestJoinGameAction {
   type: "REQUEST_JOIN_GAME";
 }
 
-interface RecieveJoinedGameAction {
+interface ReceiveJoinedGameAction {
   type: "RECEIVE_JOIN_GAME";
   game: Game;
 }
@@ -81,7 +91,7 @@ interface RequestStartGameAction {
   type: "REQUEST_START_GAME";
 }
 
-interface RecieveStartGameAction {
+interface ReceiveStartGameAction {
   type: "RECEIVE_START_GAME";
   game: Game;
 }
@@ -90,7 +100,7 @@ interface RequestLeaveDeleteAction {
   type: "REQUEST_DELETE_GAME";
 }
 
-interface RecieveLeaveDeleteAction {
+interface ReceiveLeaveDeleteAction {
   type: "RECEIVE_DELETE_GAME";
 }
 
@@ -98,7 +108,7 @@ interface RequestAddBotAction {
   type: "REQUEST_BOT_PLAYER";
 }
 
-interface RecieveAddBotAction {
+interface ReceiveAddBotAction {
   type: "RECEIVE_BOT_PLAYER";
   player: Player;
 }
@@ -109,17 +119,19 @@ type KnownAction =
   | RequestNewGameAction
   | ReceiveNewGameAction
   | RequestUpdatePlayerAction
-  | RecieveUpdatePlayerAction
+  | ReceiveUpdatePlayerAction
   | RequestJoinGameAction
-  | RecieveJoinedGameAction
+  | ReceiveJoinedGameAction
   | RequestLeaveDeleteAction
-  | RecieveLeaveDeleteAction
+  | ReceiveLeaveDeleteAction
   | RequestCurrentGameAction
   | ReceiveCurrentGameAction
+  | RequestCurrentPlayerAction
+  | ReceiveCurrentPlayerAction
   | RequestStartGameAction
-  | RecieveStartGameAction
+  | ReceiveStartGameAction
   | RequestAddBotAction
-  | RecieveAddBotAction;
+  | ReceiveAddBotAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -177,6 +189,51 @@ export const actionCreators = {
 
       dispatch({
         type: "REQUEST_CURRENT_GAME"
+      });
+    }
+  },
+  requestCurrentPlayer: (): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/current/players/self`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        }
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+          dispatch({
+            type: "RECEIVE_CURRENT_PLAYER",
+            localPlayer: data.data as Player
+          });
+          fetch(`api/games/current`, { method: "GET" })
+            .then(response => response.json() as Promise<APIResponse>)
+            .then(data => {
+              console.log(data);
+              dispatch({
+                type: "RECEIVE_CURRENT_GAME",
+                game: data.data as Game
+              });
+              dispatch({ type: "REQUEST_CURRENT_GAME" });
+            });
+        })
+        .catch(error => {
+          //added this because if user isn't authenticated get 404 response
+          dispatch({
+            type: "RECEIVE_CURRENT_PLAYER",
+            localPlayer: {} as Player
+          });
+        });
+
+      dispatch({
+        type: "REQUEST_CURRENT_PLAYER"
       });
     }
   },
@@ -279,6 +336,27 @@ export const actionCreators = {
       });
     }
   },
+  quitGame: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/current/quit`, {
+        method: "POST"
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          //Should have same action behavior as delete game
+          console.log(data);
+          dispatch({
+            type: "RECEIVE_DELETE_GAME"
+          });
+        });
+
+      dispatch({
+        type: "REQUEST_DELETE_GAME"
+      });
+    }
+  },
   addBot: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
     // Only load data if it's something we don't already have (and are not already loading)
     const appState = getState();
@@ -310,6 +388,7 @@ export const actionCreators = {
 
 const unloadedState: GameState = {
   isLoading: false,
+  localPlayer: {} as Player,
   game: {} as Game
 };
 
@@ -325,56 +404,79 @@ export const reducer: Reducer<GameState> = (
     case "REQUEST_CURRENT_GAME":
       return {
         isLoading: true,
+        localPlayer: state.localPlayer,
         game: state.game
       };
     case "RECEIVE_CURRENT_GAME":
       return {
         isLoading: false,
+        localPlayer: state.localPlayer,
         game: action.game
+      };
+    case "REQUEST_CURRENT_PLAYER":
+      return {
+        isLoading: true,
+        localPlayer: state.localPlayer,
+        game: state.game
+      };
+    case "RECEIVE_CURRENT_PLAYER":
+      return {
+        isLoading: false,
+        localPlayer: action.localPlayer,
+        game: state.game
       };
     case "REQUEST_NEW_GAME":
       return {
         isLoading: true,
+        localPlayer: state.localPlayer,
         game: state.game
       };
     case "RECEIVE_NEW_GAME":
       return {
         isLoading: false,
+        localPlayer: action.game.players[0],
         game: action.game
       };
     case "REQUEST_JOIN_GAME":
       return {
         isLoading: true,
+        localPlayer: state.localPlayer,
         game: state.game
       };
     case "RECEIVE_JOIN_GAME":
       return {
         isLoading: false,
+        localPlayer: action.game.players[action.game.players.length - 1],
         game: action.game
       };
     case "REQUEST_START_GAME":
       return {
         isLoading: true,
+        localPlayer: state.localPlayer,
         game: state.game
       };
     case "RECEIVE_START_GAME":
       return {
         isLoading: false,
+        localPlayer: state.localPlayer,
         game: action.game
       };
     case "REQUEST_DELETE_GAME":
       return {
         isLoading: true,
+        localPlayer: state.localPlayer,
         game: state.game
       };
     case "RECEIVE_DELETE_GAME":
       return {
         isLoading: false,
+        localPlayer: {} as Player,
         game: {} as Game
       };
     case "REQUEST_UPDATE_PLAYER":
       return {
         isLoading: true,
+        localPlayer: state.localPlayer,
         game: state.game
       };
     case "RECEIVE_UPDATE_PLAYER":
@@ -382,13 +484,24 @@ export const reducer: Reducer<GameState> = (
         player => player.number !== action.player.number
       );
       updatedPlayers.push(action.player);
+      var updatedLocalPlayer;
+      if (
+        state.localPlayer.number &&
+        state.localPlayer.number === action.player.number
+      ) {
+        updatedLocalPlayer = action.player;
+      } else {
+        updatedLocalPlayer = state.localPlayer;
+      }
       return {
         isLoading: false,
+        localPlayer: updatedLocalPlayer,
         game: { ...state.game, players: updatedPlayers }
       };
     case "REQUEST_BOT_PLAYER":
       return {
         isLoading: true,
+        localPlayer: state.localPlayer,
         game: state.game
       };
     case "RECEIVE_BOT_PLAYER":
@@ -396,6 +509,7 @@ export const reducer: Reducer<GameState> = (
       players.splice(action.player.number, 0, action.player);
       return {
         isLoading: false,
+        localPlayer: state.localPlayer,
         game: { ...state.game, players: players }
       };
     default:
