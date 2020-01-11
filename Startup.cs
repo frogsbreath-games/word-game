@@ -20,6 +20,7 @@ using WordGame.API.Application.Services;
 using WordGame.API.Data.Repositories;
 using WordGame.API.Domain.Repositories;
 using WordGame.API.Extensions;
+using WordGame.API.Hubs;
 
 namespace WordGame.API
 {
@@ -72,6 +73,8 @@ namespace WordGame.API
 			services.AddScoped<IGameRepository, GameRepository>();
 			services.AddSingleton<INameGenerator, NameGenerator>();
 			services.AddSingleton<IGameBoardGenerator, GameBoardGenerator>();
+
+			services.AddSignalR();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -103,6 +106,7 @@ namespace WordGame.API
 
 			app.UseEndpoints(endpoints =>
 			{
+				endpoints.MapHub<LobbyHub>("/hubs/lobby");
 				endpoints.MapControllerRoute(
 					name: "default",
 					pattern: "{controller}/{action=Index}/{id?}");

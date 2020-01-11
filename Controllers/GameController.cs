@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ using WordGame.API.Domain.Enums;
 using WordGame.API.Domain.Models;
 using WordGame.API.Domain.Repositories;
 using WordGame.API.Extensions;
+using WordGame.API.Hubs;
 using WordGame.API.Models;
 
 namespace WordGame.API.Controllers
@@ -25,12 +27,14 @@ namespace WordGame.API.Controllers
 		protected IGameRepository _repository;
 		protected INameGenerator _nameGenerator;
 		protected IGameBoardGenerator _gameBoardGenerator;
+		protected IHubContext<LobbyHub, ILobbyClient> _lobbyContext;
 
-		public GameController(IGameRepository repository, INameGenerator nameGenerator, IGameBoardGenerator gameBoardGenerator)
+		public GameController(IGameRepository repository, INameGenerator nameGenerator, IGameBoardGenerator gameBoardGenerator, IHubContext<LobbyHub, ILobbyClient> lobbyContext)
 		{
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 			_nameGenerator = nameGenerator ?? throw new ArgumentNullException(nameof(nameGenerator));
 			_gameBoardGenerator = gameBoardGenerator ?? throw new ArgumentNullException(nameof(gameBoardGenerator));
+			_lobbyContext = lobbyContext ?? throw new ArgumentNullException(nameof(lobbyContext));
 		}
 
 		protected ApiResponse NotFound(string message)
@@ -166,6 +170,8 @@ namespace WordGame.API.Controllers
 
 			await _repository.DeleteGame(code);
 
+			await _lobbyContext.Clients.Group($"{code}-lobby").GameDeleted();
+
 			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
 			return new ApiResponse("Game deleted");
@@ -267,6 +273,8 @@ namespace WordGame.API.Controllers
 
 			await _repository.UpdateGame(code, game);
 
+			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerLeft(player);
+
 			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
 			return new ApiResponse("Disconnected");
@@ -301,6 +309,8 @@ namespace WordGame.API.Controllers
 
 			await _repository.UpdateGame(code, game);
 
+			await _lobbyContext.Clients.Group($"{code}-lobby").GameStarted();
+
 			return Ok(game);
 		}
 
@@ -325,11 +335,16 @@ namespace WordGame.API.Controllers
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
 
+			if (game.Status != GameStatus.Lobby)
+				return BadRequest($"Cannot join game in status: [{game.Status}]");
+
 			var player = game.AddNewPlayer(_nameGenerator.GetRandomName());
 
 			await _repository.UpdateGame(code, game);
 
 			await SignInAsPlayer(player, code);
+
+			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerAdded(player);
 
 			return Ok(game);
 		}
@@ -346,9 +361,14 @@ namespace WordGame.API.Controllers
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
 
+			if (game.Status != GameStatus.Lobby)
+				return BadRequest($"Cannot add bot to game in status: [{game.Status}]");
+
 			var player = game.AddNewPlayer(_nameGenerator.GetRandomName(), isBot: true);
 
 			await _repository.UpdateGame(code, game);
+
+			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerAdded(player);
 
 			return Ok(player);
 		}
@@ -414,6 +434,8 @@ namespace WordGame.API.Controllers
 				playerModel.IsSpyMaster);
 
 			await _repository.UpdateGame(code, game);
+
+			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerUpdated(player);
 
 			return Ok(player);
 		}
