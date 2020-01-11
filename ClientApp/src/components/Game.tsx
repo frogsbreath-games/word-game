@@ -2,7 +2,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
-//import { Redirect } from "react-router";
+import { Redirect } from "react-router";
 import "./Game.css";
 
 // At runtime, Redux will merge together...
@@ -10,23 +10,6 @@ type GameProps = GameStore.GameState & // ... state we've requested from the Red
   typeof GameStore.actionCreators;
 
 type State = { value: string };
-
-//Make fake tiles for testing
-type GameTile = { word: string; team: string; isRevealed: boolean };
-
-var GameTileArray = [] as GameTile[];
-//Don't judge this
-for (let index = 0; index < 25; index++) {
-  let word = index.toString();
-  let team = index < 8 ? "red" : "blue";
-  if (index > 15) {
-    team = "neutral";
-  }
-  let isRevealed = index % 2 === 0 ? false : true;
-  GameTileArray.push({ word, team, isRevealed });
-  shuffle(GameTileArray);
-}
-
 //blue
 var blue = "#009DDC";
 //red
@@ -37,7 +20,7 @@ var tan = "#C5AFA4";
 var grey = "#C4C4C4";
 
 //shuffle for test data
-function shuffle(array: Array<GameTile>) {
+function shuffle(array: Array<GameStore.WordTile>) {
   array.sort(() => Math.random() - 0.5);
 }
 
@@ -55,7 +38,7 @@ function getColor(color: string, isRevealed: boolean) {
   }
 }
 
-const GameTile = ({ word, team, isRevealed }: GameTile) => (
+const GameTile = ({ word, team, isRevealed }: GameStore.WordTile) => (
   <div
     className="word-tile"
     style={{
@@ -83,15 +66,14 @@ class Game extends React.PureComponent<GameProps, State> {
   }
 
   handleSubmit(event: React.MouseEvent) {
-    alert("A name was submitted: " + this.state.value);
     event.preventDefault();
   }
 
   public render() {
-    //When game is retrieved redirect to lobby component
-    // if (this.props.game.status === "InProgress") {
-    //   return <Redirect to="/game-home" />;
-    // }
+    if (!this.props.game.status || this.props.game.status !== "inProgress") {
+      return <Redirect to="/game-home" />;
+    }
+
     return (
       <React.Fragment>
         <div>
@@ -103,12 +85,22 @@ class Game extends React.PureComponent<GameProps, State> {
             >
               Current Team: Red
             </h1>
-            <h2>Guesses Remaining: 1</h2>
           </div>
           <div className="game-board" style={{ marginTop: "10px" }}>
-            {GameTileArray.map(tile => (
-              <GameTile {...tile} />
-            ))}
+            {this.props.game.wordTiles &&
+              this.props.game.wordTiles.map(tile => (
+                <GameTile {...tile} key={tile.word} />
+              ))}
+          </div>
+          <div className="row">
+            <button
+              className="btn btn-danger"
+              type="button"
+              onClick={() => this.props.deleteGame(this.props.game.code)}
+              style={{ marginTop: "10px", marginLeft: "10px" }}
+            >
+              Delete Game
+            </button>
           </div>
         </div>
       </React.Fragment>

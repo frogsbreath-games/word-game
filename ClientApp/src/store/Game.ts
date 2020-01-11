@@ -12,7 +12,9 @@ export interface GameState {
 export interface Game {
   code: string;
   status: string;
+  canStart: boolean;
   players: Player[];
+  wordTiles: WordTile[];
 }
 
 export interface Player {
@@ -21,6 +23,12 @@ export interface Player {
   isOrganizer: boolean;
   isSpyMaster: boolean;
   team: string;
+}
+
+export interface WordTile {
+  word: string;
+  team: string;
+  isRevealed: boolean;
 }
 
 export interface APIResponse {
@@ -69,6 +77,15 @@ interface RecieveJoinedGameAction {
   game: Game;
 }
 
+interface RequestStartGameAction {
+  type: "REQUEST_START_GAME";
+}
+
+interface RecieveStartGameAction {
+  type: "RECEIVE_START_GAME";
+  game: Game;
+}
+
 interface RequestLeaveDeleteAction {
   type: "REQUEST_DELETE_GAME";
 }
@@ -89,7 +106,9 @@ type KnownAction =
   | RequestLeaveDeleteAction
   | RecieveLeaveDeleteAction
   | RequestCurrentGameAction
-  | ReceiveCurrentGameAction;
+  | ReceiveCurrentGameAction
+  | RequestStartGameAction
+  | RecieveStartGameAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -202,6 +221,30 @@ export const actionCreators = {
       });
     }
   },
+  startGame: (code: string): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${code}/start`, {
+        method: "POST"
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+          dispatch({
+            type: "RECEIVE_START_GAME",
+            game: data.data as Game
+          });
+        });
+
+      dispatch({
+        type: "REQUEST_START_GAME"
+      });
+    }
+  },
   deleteGame: (code: string): AppThunkAction<KnownAction> => (
     dispatch,
     getState
@@ -210,11 +253,7 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/${code}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json"
-        }
+        method: "DELETE"
       })
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
@@ -274,6 +313,16 @@ export const reducer: Reducer<GameState> = (
         game: state.game
       };
     case "RECEIVE_JOIN_GAME":
+      return {
+        isLoading: false,
+        game: action.game
+      };
+    case "REQUEST_START_GAME":
+      return {
+        isLoading: true,
+        game: state.game
+      };
+    case "RECEIVE_START_GAME":
       return {
         isLoading: false,
         game: action.game

@@ -21,6 +21,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
 
   public componentDidMount() {
     this.ensureDataFetched();
+    //When game is retrieved redirect to lobby component
   }
 
   private ensureDataFetched() {
@@ -32,16 +33,20 @@ class GameHome extends React.PureComponent<GameProps, State> {
   }
 
   handleSubmit(event: React.MouseEvent) {
-    alert("A name was submitted: " + this.state.value);
     event.preventDefault();
   }
 
   public render() {
-    //When game is retrieved redirect to lobby component
-    if (this.props.isLoading === false && this.props.game.status === "lobby") {
-      return <Redirect to="/lobby" />;
+    if (this.props.isLoading === false && this.props.game.status) {
+      switch (this.props.game.status) {
+        case "inProgress":
+          return <Redirect to="/game" />;
+        case "lobby":
+          return <Redirect to="/lobby" />;
+        default:
+          break;
+      }
     }
-
     let buttonText = "New Game";
     if (this.props.isLoading) {
       buttonText = "Loading";

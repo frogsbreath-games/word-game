@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
+import { timingSafeEqual } from "crypto";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -40,6 +41,7 @@ const PlayerTile = ({
           className="btn btn-danger"
           type="button"
           onClick={() => leaveGame(code)}
+          style={{ marginLeft: "10px" }}
         >
           Leave Game
         </button>
@@ -49,14 +51,6 @@ const PlayerTile = ({
 );
 
 class GameHome extends React.PureComponent<GameProps> {
-  public componentDidMount() {
-    this.ensureDataFetched();
-  }
-
-  private ensureDataFetched() {
-    this.props.requestCurrentGame();
-  }
-
   public swapTeams(player: GameStore.Player) {
     if (player.team === "blue") {
       player.team = "red";
@@ -70,14 +64,31 @@ class GameHome extends React.PureComponent<GameProps> {
     this.props.deleteGame(code);
   }
   public render() {
-    //When game is retrieved redirect to lobby component
-    if (this.props.isLoading === false && this.props.game.status !== "lobby") {
+    if (!this.props.game.status || this.props.game.status !== "lobby") {
       return <Redirect to="/game-home" />;
     }
 
     return (
       <React.Fragment>
         <h1>Lobby: {this.props.game.code}</h1>
+        <div className="row mx-auto">
+          <button
+            disabled={!this.props.game.canStart}
+            className="btn btn-primary"
+            type="button"
+            onClick={() => this.props.startGame(this.props.game.code)}
+          >
+            Start Game
+          </button>
+          <button
+            className="btn btn-danger"
+            type="button"
+            onClick={() => this.props.deleteGame(this.props.game.code)}
+            style={{ marginLeft: "10px" }}
+          >
+            Delete Game
+          </button>
+        </div>
         <div className="row">
           <div className="col-sm-6">
             <h1 className="text-danger">Red</h1>
