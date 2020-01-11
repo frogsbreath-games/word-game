@@ -33,17 +33,24 @@ function getColor(color: string, isRevealed: boolean) {
   }
 }
 
-const GameTile = ({ word, team, isRevealed }: GameStore.WordTile) => (
+type GameTypeProps = {
+  wordTile: GameStore.WordTile;
+  localPlayer: GameStore.Player;
+};
+const GameTile = ({ wordTile, localPlayer }: GameTypeProps) => (
   <div
     className="word-tile"
     style={{
       textAlign: "center",
-      backgroundColor: getColor(team, isRevealed)
+      backgroundColor: getColor(
+        wordTile.team,
+        localPlayer.isSpyMaster || wordTile.isRevealed
+      )
     }}
   >
-    <div>Word: {word}</div>
-    <div>Team: {team}</div>
-    <div>Is Revealed: {isRevealed.toString()}</div>
+    <div>Word: {wordTile.word}</div>
+    <div>Team: {wordTile.team}</div>
+    <div>Is Revealed: {wordTile.isRevealed.toString()}</div>
   </div>
 );
 
@@ -84,7 +91,11 @@ class Game extends React.PureComponent<GameProps, State> {
           <div className="game-board" style={{ marginTop: "10px" }}>
             {this.props.game.wordTiles &&
               this.props.game.wordTiles.map(tile => (
-                <GameTile {...tile} key={tile.word} />
+                <GameTile
+                  wordTile={tile}
+                  key={tile.word}
+                  localPlayer={this.props.localPlayer}
+                />
               ))}
           </div>
           <div className="row">
