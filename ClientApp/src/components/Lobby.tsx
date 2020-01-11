@@ -81,6 +81,22 @@ class GameHome extends React.PureComponent<GameProps> {
             Start Game
           </button>
           <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={() => this.props.addBot()}
+            style={{ marginLeft: "10px" }}
+          >
+            Add Bot
+          </button>
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={() => this.props.requestCurrentGame()}
+            style={{ marginLeft: "10px" }}
+          >
+            Refresh
+          </button>
+          <button
             className="btn btn-danger"
             type="button"
             onClick={() => this.props.deleteGame(this.props.game.code)}

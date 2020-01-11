@@ -19,11 +19,6 @@ var tan = "#C5AFA4";
 //grey for unrevealed
 var grey = "#C4C4C4";
 
-//shuffle for test data
-function shuffle(array: Array<GameStore.WordTile>) {
-  array.sort(() => Math.random() - 0.5);
-}
-
 function getColor(color: string, isRevealed: boolean) {
   if (!isRevealed) {
     return grey;
@@ -97,7 +92,7 @@ class Game extends React.PureComponent<GameProps, State> {
               className="btn btn-danger"
               type="button"
               onClick={() => this.props.deleteGame(this.props.game.code)}
-              style={{ marginTop: "10px", marginLeft: "10px" }}
+              style={{ marginTop: "10px", marginLeft: "20px" }}
             >
               Delete Game
             </button>

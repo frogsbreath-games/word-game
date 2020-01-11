@@ -94,6 +94,15 @@ interface RecieveLeaveDeleteAction {
   type: "RECEIVE_DELETE_GAME";
 }
 
+interface RequestAddBotAction {
+  type: "REQUEST_BOT_PLAYER";
+}
+
+interface RecieveAddBotAction {
+  type: "RECEIVE_BOT_PLAYER";
+  player: Player;
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction =
@@ -108,7 +117,9 @@ type KnownAction =
   | RequestCurrentGameAction
   | ReceiveCurrentGameAction
   | RequestStartGameAction
-  | RecieveStartGameAction;
+  | RecieveStartGameAction
+  | RequestAddBotAction
+  | RecieveAddBotAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -267,6 +278,30 @@ export const actionCreators = {
         type: "REQUEST_DELETE_GAME"
       });
     }
+  },
+  addBot: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/current/players`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+          dispatch({
+            type: "RECEIVE_BOT_PLAYER",
+            player: data.data as Player
+          });
+        });
+
+      dispatch({
+        type: "REQUEST_BOT_PLAYER"
+      });
+    }
   }
 };
 
@@ -350,6 +385,18 @@ export const reducer: Reducer<GameState> = (
       return {
         isLoading: false,
         game: { ...state.game, players: updatedPlayers }
+      };
+    case "REQUEST_BOT_PLAYER":
+      return {
+        isLoading: true,
+        game: state.game
+      };
+    case "RECEIVE_BOT_PLAYER":
+      var players = state.game.players.slice();
+      players.splice(action.player.number, 0, action.player);
+      return {
+        isLoading: false,
+        game: { ...state.game, players: players }
       };
     default:
       return state;
