@@ -326,29 +326,7 @@ namespace WordGame.API.Controllers
             if (game is null)
                 return NotFound($"Cannot find game with code: [{code}]");
 
-            IEnumerable<Player> players = game.Players;
-
-            int maxNumber = players.Max(x => x.Number);
-
-            var redPlayers = players.Where(x => x.Team == Team.Red);
-            var bluePlayers = players.Where(x => x.Team == Team.Blue);
-
-            var team = redPlayers.Count() > bluePlayers.Count()
-                ? Team.Blue
-                : Team.Red;
-
-            var hasSpyMaster = team == Team.Red
-                ? redPlayers.Any(x => x.IsSpyMaster)
-                : bluePlayers.Any(x => x.IsSpyMaster);
-
-            var player = new Player(
-                _nameGenerator.GetRandomName(),
-                false,
-                !hasSpyMaster,
-                maxNumber + 1,
-                team);
-
-            game.AddPlayer(player);
+            var player = game.AddNewPlayer(_nameGenerator.GetRandomName());
 
             await _repository.UpdateGame(code, game);
 
@@ -356,6 +334,32 @@ namespace WordGame.API.Controllers
 
             return Ok(game);
         }
+
+        [HttpPost("{code}/players")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+        public async Task<ApiResponse<Player>> AddGameBot(
+            [FromRoute] string code)
+        {
+            Game game = await _repository.GetGameByCode(code);
+
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
+
+            var player = game.AddNewPlayer(_nameGenerator.GetRandomName(), isBot: true);
+
+            await _repository.UpdateGame(code, game);
+
+            return Ok(player);
+        }
+
+        [HttpPost("current/players")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+        public Task<ApiResponse<Player>> AddCurrentGameBot()
+            => AddGameBot(User.GetGameCode());
 
         [HttpGet("{code}/players/{number}")]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]

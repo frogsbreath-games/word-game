@@ -47,9 +47,48 @@ namespace WordGame.API.Domain.Models
 				createdDate: CreatedDate));
 		}
 
-		public void AddPlayer(Player player)
+		protected void AddPlayer(Player player)
 		{
 			Players.Add(player);
+		}
+
+		public Player AddNewPlayer(
+			string name,
+			bool isBot = false,
+			Team? team = null,
+			bool? isSpyMaster = null,
+			int? number = null)
+		{
+			if (!number.HasValue)
+			{
+				number = Players.Max(x => x.Number) + 1;
+			}
+
+			if (!team.HasValue)
+			{
+				team = RedPlayers.Count() > BluePlayers.Count()
+					? Team.Blue
+					: Team.Red;
+			}
+
+			if (!isSpyMaster.HasValue)
+			{
+				isSpyMaster = team == Team.Red
+					? !RedPlayers.Any(x => x.IsSpyMaster)
+					: !BluePlayers.Any(x => x.IsSpyMaster);
+			}
+
+			var player = new Player(
+				name,
+				false,
+				isSpyMaster.Value,
+				number.Value,
+				team.Value,
+				isBot);
+
+			AddPlayer(player);
+
+			return player;
 		}
 
 		public void StartGame(List<WordTile> tiles, Team startingTeam)
@@ -68,6 +107,12 @@ namespace WordGame.API.Domain.Models
 			};
 		}
 
+		[JsonIgnore]
+		public IEnumerable<Player> BluePlayers => Players.Where(x => x.Team == Team.Blue);
+
+		[JsonIgnore]
+		public IEnumerable<Player> RedPlayers => Players.Where(x => x.Team == Team.Red);
+
 		//This is sort of inefficient but whatever
 		public bool CanStart
 		{
@@ -76,25 +121,22 @@ namespace WordGame.API.Domain.Models
 				if (Status != GameStatus.Lobby)
 					return false;
 
-				var redPlayers = Players.Where(x => x.Team == Team.Red);
-				var bluePlayers = Players.Where(x => x.Team == Team.Blue);
-
-				if (redPlayers.Count(x => x.IsSpyMaster) != 1)
+				if (RedPlayers.Count(x => x.IsSpyMaster) != 1)
 					return false;
 
-				if (bluePlayers.Count(x => x.IsSpyMaster) != 1)
+				if (BluePlayers.Count(x => x.IsSpyMaster) != 1)
 					return false;
 
-				if (redPlayers.Count() < 2)
+				if (RedPlayers.Count() < 2)
 					return false;
 
-				if (bluePlayers.Count() < 2)
+				if (BluePlayers.Count() < 2)
 					return false;
 
-				if (Math.Abs(redPlayers.Count() - bluePlayers.Count()) > 1)
+				if (Math.Abs(RedPlayers.Count() - BluePlayers.Count()) > 1)
 					return false;
 
-				if (Players.Count != (redPlayers.Count() + bluePlayers.Count()))
+				if (Players.Count != (RedPlayers.Count() + BluePlayers.Count()))
 					return false;
 
 				return true;
