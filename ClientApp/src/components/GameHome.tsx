@@ -25,7 +25,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
   }
 
   private ensureDataFetched() {
-    this.props.requestCurrentGame();
+    this.props.requestCurrentPlayer();
   }
 
   handleChange(event: React.ChangeEvent<HTMLInputElement>) {

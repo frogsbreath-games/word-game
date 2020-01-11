@@ -11,14 +11,16 @@ type GameProps = GameStore.GameState & // ... state we've requested from the Red
 
 type PlayerTileProps = {
   player: GameStore.Player;
+  localPlayer: GameStore.Player;
   key: number;
   code: string;
   swapTeams: (player: GameStore.Player) => void;
-  leaveGame: (code: string) => void;
+  leaveGame: () => void;
 };
 
 const PlayerTile = ({
   player,
+  localPlayer,
   swapTeams,
   leaveGame,
   code
@@ -30,21 +32,25 @@ const PlayerTile = ({
         <p className="card-text">
           {player.isSpyMaster ? "Spy Master" : "Agent"}
         </p>
-        <button
-          className="btn btn-primary"
-          type="button"
-          onClick={() => swapTeams(player)}
-        >
-          Swap Teams
-        </button>
-        <button
-          className="btn btn-danger"
-          type="button"
-          onClick={() => leaveGame(code)}
-          style={{ marginLeft: "10px" }}
-        >
-          Leave Game
-        </button>
+        {(localPlayer.isOrganizer || player.number === localPlayer.number) && (
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={() => swapTeams(player)}
+          >
+            Swap Teams
+          </button>
+        )}
+        {player.number == localPlayer.number && !localPlayer.isOrganizer && (
+          <button
+            className="btn btn-danger"
+            type="button"
+            onClick={() => leaveGame()}
+            style={{ marginLeft: "10px" }}
+          >
+            Leave Game
+          </button>
+        )}
       </div>
     </div>
   </div>
@@ -63,14 +69,20 @@ class GameHome extends React.PureComponent<GameProps> {
   public deleteGame(code: string) {
     this.props.deleteGame(code);
   }
+
+  public quitGame() {
+    this.props.quitGame();
+  }
+
+  public renderOrganizerButtons() {}
   public render() {
     if (!this.props.game.status || this.props.game.status !== "lobby") {
       return <Redirect to="/game-home" />;
     }
 
-    return (
-      <React.Fragment>
-        <h1>Lobby: {this.props.game.code}</h1>
+    let organizerButtons;
+    if (this.props.localPlayer && this.props.localPlayer.isOrganizer) {
+      organizerButtons = (
         <div className="row mx-auto">
           <button
             disabled={!this.props.game.canStart}
@@ -105,6 +117,13 @@ class GameHome extends React.PureComponent<GameProps> {
             Delete Game
           </button>
         </div>
+      );
+    }
+
+    return (
+      <React.Fragment>
+        <h1>Lobby: {this.props.game.code}</h1>
+        {organizerButtons}
         <div className="row">
           <div className="col-sm-6">
             <h1 className="text-danger">Red</h1>
@@ -114,10 +133,11 @@ class GameHome extends React.PureComponent<GameProps> {
               .map(player => (
                 <PlayerTile
                   player={player}
+                  localPlayer={this.props.localPlayer}
                   code={this.props.game.code}
                   key={player.number}
                   swapTeams={() => this.swapTeams(player)}
-                  leaveGame={() => this.deleteGame(this.props.game.code)}
+                  leaveGame={() => this.quitGame()}
                 />
               ))}
           </div>
@@ -129,10 +149,11 @@ class GameHome extends React.PureComponent<GameProps> {
               .map(player => (
                 <PlayerTile
                   player={player}
+                  localPlayer={this.props.localPlayer}
                   code={this.props.game.code}
                   key={player.number}
                   swapTeams={() => this.swapTeams(player)}
-                  leaveGame={() => this.deleteGame(this.props.game.code)}
+                  leaveGame={() => this.quitGame()}
                 />
               ))}
           </div>
