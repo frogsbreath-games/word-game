@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -11,8 +12,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using NJsonSchema.Generation;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using WordGame.API.Application.Services;
 using WordGame.API.Data.Repositories;
 using WordGame.API.Domain.Repositories;
@@ -48,7 +51,22 @@ namespace WordGame.API
 			});
 
 			services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-				.AddCookie();// options => options.LoginPath);
+				.AddCookie(options =>
+				{
+					options.Events = new CookieAuthenticationEvents
+					{
+						OnRedirectToLogin = context =>
+						{
+							context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+							return Task.CompletedTask;
+						},
+						OnRedirectToAccessDenied = context =>
+						{
+							context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+							return Task.CompletedTask;
+						}
+					};
+				});
 
 			services.AddMongo(Configuration);
 			services.AddScoped<IGameRepository, GameRepository>();
