@@ -213,6 +213,7 @@ export const actionCreators = {
             type: "RECEIVE_CURRENT_PLAYER",
             localPlayer: data.data as Player
           });
+          //if we find a current player we need to get the game they are in
           fetch(`api/games/current`, { method: "GET" })
             .then(response => response.json() as Promise<APIResponse>)
             .then(data => {

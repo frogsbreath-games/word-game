@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
-import { timingSafeEqual } from "crypto";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -56,7 +55,7 @@ const PlayerTile = ({
   </div>
 );
 
-class GameHome extends React.PureComponent<GameProps> {
+class Lobby extends React.PureComponent<GameProps> {
   public swapTeams(player: GameStore.Player) {
     if (player.team === "blue") {
       player.team = "red";
@@ -74,7 +73,6 @@ class GameHome extends React.PureComponent<GameProps> {
     this.props.quitGame();
   }
 
-  public renderOrganizerButtons() {}
   public render() {
     if (!this.props.game.status || this.props.game.status !== "lobby") {
       return <Redirect to="/game-home" />;
@@ -165,4 +163,4 @@ class GameHome extends React.PureComponent<GameProps> {
 export default connect(
   (state: ApplicationState) => state.game, // Selects which state properties are merged into the component's props
   GameStore.actionCreators // Selects which action creators are merged into the component's props
-)(GameHome as any);
+)(Lobby as any);
