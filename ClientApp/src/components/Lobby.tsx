@@ -56,6 +56,19 @@ const PlayerTile = ({
 );
 
 class Lobby extends React.PureComponent<GameProps> {
+  public componentDidMount() {
+    const connection = this.props.connection;
+    if (this.props.game.status === "lobby" && connection !== undefined) {
+      console.log("Connection is not undefined");
+    } else {
+      this.ensureConnectionExists();
+    }
+  }
+
+  private ensureConnectionExists() {
+    this.props.createConnection();
+  }
+
   public swapTeams(player: GameStore.Player) {
     if (player.team === "blue") {
       player.team = "red";
