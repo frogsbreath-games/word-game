@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +10,7 @@ using WordGame.API.Extensions;
 
 namespace WordGame.API.Hubs
 {
+	[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
 	public class LobbyHub : Hub<ILobbyClient>
 	{
 		protected string GroupName => $"{Context.User.GetGameCode()}-lobby";
