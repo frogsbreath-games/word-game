@@ -152,6 +152,9 @@ export const actionCreators = {
     const connection = new signalr.HubConnectionBuilder()
       .withUrl(`hubs/lobby`)
       .build();
+
+    //Todo - PlayerAdded
+
     connection.on("PlayerUpdated", data => {
       console.log("Player Updated!");
       debugger;
@@ -161,6 +164,20 @@ export const actionCreators = {
         player: data as Player
       });
     });
+    
+    //Todo - PlayerLeft
+
+    connection.on("GameStarted", data => {
+      console.log("Game Started!");
+      debugger;
+      console.log(data);
+      dispatch({
+        type: "RECEIVE_START_GAME",
+        game: data as Game
+      });
+    });
+
+    //Todo - GameDeleted
 
     connection
       .start()

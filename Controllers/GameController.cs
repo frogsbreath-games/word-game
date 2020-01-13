@@ -309,7 +309,7 @@ namespace WordGame.API.Controllers
 
 			await _repository.UpdateGame(code, game);
 
-			await _lobbyContext.Clients.Group($"{code}-lobby").GameStarted();
+			await _lobbyContext.Clients.Group($"{code}-lobby").GameStarted(game);
 
 			return Ok(game);
 		}

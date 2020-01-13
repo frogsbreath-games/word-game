@@ -44,7 +44,7 @@ namespace WordGame.API.Hubs
 
 		Task PlayerLeft(Player leavingPlayer);
 
-		Task GameStarted();
+		Task GameStarted(Game game);
 
 		Task GameDeleted();
 	}
