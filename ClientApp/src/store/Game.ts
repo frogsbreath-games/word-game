@@ -158,14 +158,7 @@ export const actionCreators = {
       console.log(data);
       dispatch({
         type: "RECEIVE_UPDATE_PLAYER",
-        player: {
-          name: data.name,
-          number: data.number,
-          isOrganizer: data.isOrganizer,
-          isSpyMaster: data.isSpyMaster,
-          //enum is getting converted to a number
-          team: data.team === 0 ? "red" : "blue"
-        } as Player
+        player: data as Player
       });
     });
 

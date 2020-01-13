@@ -74,7 +74,12 @@ namespace WordGame.API
 			services.AddSingleton<INameGenerator, NameGenerator>();
 			services.AddSingleton<IGameBoardGenerator, GameBoardGenerator>();
 
-			services.AddSignalR();
+			services.AddSignalR()
+				.AddNewtonsoftJsonProtocol(options =>
+				{
+					options.PayloadSerializerSettings.Converters.Add(
+						new StringEnumConverter(new CamelCaseNamingStrategy(false, true)));
+				});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
