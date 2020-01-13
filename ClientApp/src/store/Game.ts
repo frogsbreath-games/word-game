@@ -26,6 +26,7 @@ export interface Player {
   name: string;
   isOrganizer: boolean;
   isSpyMaster: boolean;
+  isBot: boolean;
   team: string;
 }
 
@@ -121,6 +122,11 @@ interface ReceiveAddBotAction {
   player: Player;
 }
 
+interface ReceiveAddPlayerAction {
+  type: "RECEIVE_NEW_PLAYER";
+  player: Player;
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction =
@@ -140,7 +146,8 @@ type KnownAction =
   | RequestStartGameAction
   | ReceiveStartGameAction
   | RequestAddBotAction
-  | ReceiveAddBotAction;
+  | ReceiveAddBotAction
+  | ReceiveAddPlayerAction
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -153,7 +160,24 @@ export const actionCreators = {
       .withUrl(`hubs/lobby`)
       .build();
 
-    //Todo - PlayerAdded
+      connection.on("PlayerAdded", data => {
+        console.log("Player Added!");
+        debugger;
+        console.log(data);
+        const player = data as Player;
+
+        if (player.isBot) {
+          dispatch({
+            type: "RECEIVE_BOT_PLAYER",
+            player: player
+          });
+        } else {
+          dispatch({
+            type: "RECEIVE_NEW_PLAYER",
+            player: player
+          });
+        }
+      });
 
     connection.on("PlayerUpdated", data => {
       console.log("Player Updated!");
@@ -581,7 +605,20 @@ export const reducer: Reducer<GameState> = (
       };
     case "RECEIVE_BOT_PLAYER":
       var players = state.game.players.slice();
-      players.splice(action.player.number, 0, action.player);
+      if (!players.some(p => p.number === action.player.number)) {
+        players.splice(action.player.number, 0, action.player);
+      }
+      return {
+        isLoading: false,
+        localPlayer: state.localPlayer,
+        game: { ...state.game, players: players },
+        connection: state.connection
+      };
+    case "RECEIVE_NEW_PLAYER":
+      var players = state.game.players.slice();
+      if (!players.some(p => p.number === action.player.number)) {
+        players.splice(action.player.number, 0, action.player);
+      }
       return {
         isLoading: false,
         localPlayer: state.localPlayer,
