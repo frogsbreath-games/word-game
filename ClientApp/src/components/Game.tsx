@@ -49,8 +49,6 @@ const GameTile = ({ wordTile, localPlayer }: GameTypeProps) => (
     }}
   >
     <div>Word: {wordTile.word}</div>
-    <div>Team: {wordTile.team}</div>
-    <div>Is Revealed: {wordTile.isRevealed.toString()}</div>
   </div>
 );
 
@@ -98,16 +96,18 @@ class Game extends React.PureComponent<GameProps, State> {
                 />
               ))}
           </div>
-          <div className="row">
-            <button
-              className="btn btn-danger"
-              type="button"
-              onClick={() => this.props.deleteGame(this.props.game.code)}
-              style={{ marginTop: "10px", marginLeft: "20px" }}
-            >
-              Delete Game
-            </button>
-          </div>
+          {this.props.localPlayer.isOrganizer && (
+            <div className="row">
+              <button
+                className="btn btn-danger"
+                type="button"
+                onClick={() => this.props.deleteGame(this.props.game.code)}
+                style={{ marginTop: "10px", marginLeft: "20px" }}
+              >
+                Delete Game
+              </button>
+            </div>
+          )}
         </div>
       </React.Fragment>
     );
