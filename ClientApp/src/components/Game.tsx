@@ -48,7 +48,7 @@ const GameTile = ({ wordTile, localPlayer }: GameTypeProps) => (
       )
     }}
   >
-    <div>Word: {wordTile.word}</div>
+    <div>{wordTile.word}</div>
   </div>
 );
 

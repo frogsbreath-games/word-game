@@ -3,10 +3,20 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
+import { SSL_OP_TLS_ROLLBACK_BUG } from "constants";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
   typeof GameStore.actionCreators;
+
+//blue
+var blue = "#009DDC";
+//red
+var red = "#C3423F";
+//tan for bystander
+var tan = "#C5AFA4";
+//grey for unrevealed
+var grey = "#C4C4C4";
 
 type PlayerTileProps = {
   player: GameStore.Player;
@@ -25,17 +35,31 @@ const PlayerTile = ({
   code
 }: PlayerTileProps) => (
   <div>
-    <div className="card">
-      <div className="card-body">
-        <h5 className="card-title">{player.name}</h5>
-        <p className="card-text">
-          {player.isSpyMaster ? "Spy Master" : "Agent"}
-        </p>
+    <div
+      style={{
+        borderRadius: "3px",
+        margin: "15px",
+        padding: "10px",
+        backgroundColor: player.team === "red" ? red : blue
+      }}
+    >
+      <div>
+        <div
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.75)",
+            padding: "10px",
+            borderRadius: "5px"
+          }}
+        >
+          <h5>{player.name}</h5>
+          <p>{player.isSpyMaster ? "Spy Master" : "Agent"}</p>
+        </div>
         {(localPlayer.isOrganizer || player.number === localPlayer.number) && (
           <button
-            className="btn btn-primary"
+            className="btn btn-secondary"
             type="button"
             onClick={() => swapTeams(player)}
+            style={{ marginTop: "5px" }}
           >
             Swap Teams
           </button>
@@ -45,7 +69,7 @@ const PlayerTile = ({
             className="btn btn-danger"
             type="button"
             onClick={() => leaveGame()}
-            style={{ marginLeft: "10px" }}
+            style={{ marginLeft: "10px", marginTop: "5px" }}
           >
             Leave Game
           </button>
@@ -137,7 +161,7 @@ class Lobby extends React.PureComponent<GameProps> {
         {organizerButtons}
         <div className="row">
           <div className="col-sm-6">
-            <h1 className="text-danger">Red</h1>
+            <h1 style={{ color: red }}>Red</h1>
             <hr />
             {this.props.game.players
               .filter(player => player.team === "red")
@@ -153,7 +177,7 @@ class Lobby extends React.PureComponent<GameProps> {
               ))}
           </div>
           <div className="col-sm-6">
-            <h1 className="text-primary">Blue</h1>
+            <h1 style={{ color: blue }}>Blue</h1>
             <hr />
             {this.props.game.players
               .filter(player => player.team === "blue")
