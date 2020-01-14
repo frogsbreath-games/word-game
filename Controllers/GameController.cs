@@ -409,6 +409,44 @@ namespace WordGame.API.Controllers
 			[FromRoute] int number)
 			=> GetGamePlayer(User.GetGameCode(), number);
 
+		[HttpDelete("{code}/players/{number}")]
+		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+		public async Task<ApiResponse> DeleteGameBot(
+			[FromRoute] string code,
+			[FromRoute] int number)
+		{
+			Game game = await _repository.GetGameByCode(code);
+
+			if (game is null)
+				return NotFound($"Cannot find game with code: [{code}]");
+
+			if (game.Status != GameStatus.Lobby)
+				return BadRequest($"Cannot delete bot from game in status: [{game.Status}]");
+
+			Player player = game.Players.SingleOrDefault(x => x.Number == number);
+
+			if (player is null || !player.IsBot)
+				return NotFound($"Cannot find bot with number: [{number}] in game with code: [{code}]");
+
+			game.Players.Remove(player);
+
+			await _repository.UpdateGame(code, game);
+
+			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerLeft(player);
+
+			return new ApiResponse("Bot Deleted");
+		}
+
+		[HttpDelete("current/players/{number}")]
+		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+		public Task<ApiResponse> DeleteCurrentGameBot(
+			[FromRoute] int number)
+			=> DeleteGameBot(User.GetGameCode(), number);
+
 		[HttpPost("{code}/players/{number}")]
 		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
 		[ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]

@@ -127,6 +127,11 @@ interface ReceiveAddPlayerAction {
   player: Player;
 }
 
+interface ReceivePlayerLeftAction {
+  type: "RECEIVE_PLAYER_LEFT";
+  player: Player;
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction =
@@ -148,6 +153,7 @@ type KnownAction =
   | RequestAddBotAction
   | ReceiveAddBotAction
   | ReceiveAddPlayerAction
+  | ReceivePlayerLeftAction
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -189,7 +195,15 @@ export const actionCreators = {
       });
     });
     
-    //Todo - PlayerLeft
+    connection.on("PlayerLeft", data => {
+      console.log("Player Left!");
+      debugger;
+      console.log(data);
+      dispatch({
+        type: "RECEIVE_PLAYER_LEFT",
+        player: data as Player
+      });
+    });
 
     connection.on("GameStarted", data => {
       console.log("Game Started!");
@@ -618,6 +632,18 @@ export const reducer: Reducer<GameState> = (
       var players = state.game.players.slice();
       if (!players.some(p => p.number === action.player.number)) {
         players.splice(action.player.number, 0, action.player);
+      }
+      return {
+        isLoading: false,
+        localPlayer: state.localPlayer,
+        game: { ...state.game, players: players },
+        connection: state.connection
+      };
+    case "RECEIVE_PLAYER_LEFT":
+      var players = state.game.players.slice();
+      const index = players.findIndex(p => p.number === action.player.number);
+      if (index > 0) {
+        players.splice(index, 1);
       }
       return {
         isLoading: false,
