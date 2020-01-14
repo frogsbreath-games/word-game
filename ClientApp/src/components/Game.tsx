@@ -19,6 +19,8 @@ var tan = "#C5AFA4";
 //grey for unrevealed
 var grey = "#C4C4C4";
 
+var black = "#2A2A2A";
+
 function getColor(color: string, isRevealed: boolean) {
   if (!isRevealed) {
     return grey;
@@ -28,8 +30,10 @@ function getColor(color: string, isRevealed: boolean) {
       return red;
     case "blue":
       return blue;
-    default:
+    case "neutral":
       return tan;
+    default:
+      return black;
   }
 }
 
@@ -45,10 +49,21 @@ const GameTile = ({ wordTile, localPlayer }: GameTypeProps) => (
       backgroundColor: getColor(
         wordTile.team,
         localPlayer.isSpyMaster || wordTile.isRevealed
-      )
+      ),
+      padding: "10px"
     }}
   >
-    <div>{wordTile.word}</div>
+    <h6
+      style={{
+        backgroundColor: "rgba(255, 255, 255, 0.75)",
+        padding: "5px",
+        borderRadius: "5px",
+        boxShadow:
+          "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)"
+      }}
+    >
+      {wordTile.word}
+    </h6>
   </div>
 );
 

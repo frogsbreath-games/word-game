@@ -40,7 +40,9 @@ const PlayerTile = ({
         borderRadius: "3px",
         margin: "15px",
         padding: "10px",
-        backgroundColor: player.team === "red" ? red : blue
+        backgroundColor: player.team === "red" ? red : blue,
+        boxShadow:
+          "0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 3px rgba(0, 0, 0, 0.36)"
       }}
     >
       <div>
@@ -48,7 +50,9 @@ const PlayerTile = ({
           style={{
             backgroundColor: "rgba(255, 255, 255, 0.75)",
             padding: "10px",
-            borderRadius: "5px"
+            borderRadius: "5px",
+            boxShadow:
+              "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)"
           }}
         >
           <h5>{player.name}</h5>
@@ -59,7 +63,7 @@ const PlayerTile = ({
             className="btn btn-secondary"
             type="button"
             onClick={() => swapTeams(player)}
-            style={{ marginTop: "5px" }}
+            style={{ marginTop: "10px" }}
           >
             Swap Teams
           </button>
@@ -69,7 +73,7 @@ const PlayerTile = ({
             className="btn btn-danger"
             type="button"
             onClick={() => leaveGame()}
-            style={{ marginLeft: "10px", marginTop: "5px" }}
+            style={{ marginLeft: "10px", marginTop: "10px" }}
           >
             Leave Game
           </button>
