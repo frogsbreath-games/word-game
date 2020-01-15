@@ -19,6 +19,15 @@ export interface Game {
   canStart: boolean;
   players: Player[];
   wordTiles: WordTile[];
+  currentTurn?: Turn;
+}
+
+export interface Turn {
+  turnNumber: number;
+  team: string;
+  status: string;
+  hintWord?: string;
+  wordCount?: number;
 }
 
 export interface Player {

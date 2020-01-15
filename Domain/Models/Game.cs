@@ -24,7 +24,10 @@ namespace WordGame.API.Domain.Models
 
 		public List<WordTile> WordTiles { get; protected set; } = new List<WordTile>();
 
+		[JsonIgnore]
 		public List<Turn> Turns { get; protected set; } = new List<Turn>();
+
+		public Turn CurrentTurn => Turns.OrderBy(x => x.TurnNumber).FirstOrDefault();
 
 		public Game(
 			string code,
