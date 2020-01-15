@@ -162,7 +162,7 @@ type KnownAction =
   | RequestAddBotAction
   | ReceiveAddBotAction
   | ReceiveAddPlayerAction
-  | ReceivePlayerLeftAction
+  | ReceivePlayerLeftAction;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -175,24 +175,24 @@ export const actionCreators = {
       .withUrl(`hubs/lobby`)
       .build();
 
-      connection.on("PlayerAdded", data => {
-        console.log("Player Added!");
-        debugger;
-        console.log(data);
-        const player = data as Player;
+    connection.on("PlayerAdded", data => {
+      console.log("Player Added!");
+      debugger;
+      console.log(data);
+      const player = data as Player;
 
-        if (player.isBot) {
-          dispatch({
-            type: "RECEIVE_BOT_PLAYER",
-            player: player
-          });
-        } else {
-          dispatch({
-            type: "RECEIVE_NEW_PLAYER",
-            player: player
-          });
-        }
-      });
+      if (player.isBot) {
+        dispatch({
+          type: "RECEIVE_BOT_PLAYER",
+          player: player
+        });
+      } else {
+        dispatch({
+          type: "RECEIVE_NEW_PLAYER",
+          player: player
+        });
+      }
+    });
 
     connection.on("PlayerUpdated", data => {
       console.log("Player Updated!");
@@ -203,7 +203,7 @@ export const actionCreators = {
         player: data as Player
       });
     });
-    
+
     connection.on("PlayerLeft", data => {
       console.log("Player Left!");
       debugger;
@@ -478,6 +478,26 @@ export const actionCreators = {
 
       dispatch({
         type: "REQUEST_BOT_PLAYER"
+      });
+    }
+  },
+  deleteBot: (playerNumber: number): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${appState.game.game.code}/players/${playerNumber}`, {
+        method: "DELETE"
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+        });
+
+      dispatch({
+        type: "REQUEST_UPDATE_PLAYER"
       });
     }
   }

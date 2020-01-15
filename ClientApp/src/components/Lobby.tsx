@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
-import { SSL_OP_TLS_ROLLBACK_BUG } from "constants";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -25,6 +24,7 @@ type PlayerTileProps = {
   code: string;
   swapTeams: (player: GameStore.Player) => void;
   leaveGame: () => void;
+  deleteBot: (playerNumber: number) => void;
 };
 
 const PlayerTile = ({
@@ -32,6 +32,7 @@ const PlayerTile = ({
   localPlayer,
   swapTeams,
   leaveGame,
+  deleteBot,
   code
 }: PlayerTileProps) => (
   <div>
@@ -66,6 +67,16 @@ const PlayerTile = ({
             style={{ marginTop: "10px" }}
           >
             Swap Teams
+          </button>
+        )}
+        {localPlayer.isOrganizer && player.isBot && (
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={() => deleteBot(player.number)}
+            style={{ marginTop: "10px", marginLeft: "5px" }}
+          >
+            Delete Bot
           </button>
         )}
         {player.number == localPlayer.number && !localPlayer.isOrganizer && (
@@ -112,6 +123,10 @@ class Lobby extends React.PureComponent<GameProps> {
 
   public quitGame() {
     this.props.quitGame();
+  }
+
+  public deleteBot(playerNumber: number) {
+    this.props.deleteBot(playerNumber);
   }
 
   public render() {
@@ -177,6 +192,7 @@ class Lobby extends React.PureComponent<GameProps> {
                   key={player.number}
                   swapTeams={() => this.swapTeams(player)}
                   leaveGame={() => this.quitGame()}
+                  deleteBot={() => this.deleteBot(player.number)}
                 />
               ))}
           </div>
@@ -193,6 +209,7 @@ class Lobby extends React.PureComponent<GameProps> {
                   key={player.number}
                   swapTeams={() => this.swapTeams(player)}
                   leaveGame={() => this.quitGame()}
+                  deleteBot={() => this.deleteBot(player.number)}
                 />
               ))}
           </div>
