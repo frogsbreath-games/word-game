@@ -170,7 +170,7 @@ namespace WordGame.API.Controllers
 
 			await _repository.DeleteGame(code);
 
-			await _lobbyContext.Clients.Group($"{code}-lobby").GameDeleted();
+			await _lobbyContext.Clients.Players(game.Players).GameDeleted();
 
 			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -273,7 +273,7 @@ namespace WordGame.API.Controllers
 
 			await _repository.UpdateGame(code, game);
 
-			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerLeft(player);
+			await _lobbyContext.Clients.Players(game.Players).PlayerLeft(player);
 
 			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -309,7 +309,7 @@ namespace WordGame.API.Controllers
 
 			await _repository.UpdateGame(code, game);
 
-			await _lobbyContext.Clients.Group($"{code}-lobby").GameStarted(game);
+			await _lobbyContext.Clients.Players(game.Players).GameStarted(game);
 
 			return Ok(game);
 		}
@@ -344,7 +344,7 @@ namespace WordGame.API.Controllers
 
 			await SignInAsPlayer(player, code);
 
-			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerAdded(player);
+			await _lobbyContext.Clients.Players(game.Players).PlayerAdded(player);
 
 			return Ok(game);
 		}
@@ -368,7 +368,7 @@ namespace WordGame.API.Controllers
 
 			await _repository.UpdateGame(code, game);
 
-			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerAdded(player);
+			await _lobbyContext.Clients.Players(game.Players).PlayerAdded(player);
 
 			return Ok(player);
 		}
@@ -434,7 +434,7 @@ namespace WordGame.API.Controllers
 
 			await _repository.UpdateGame(code, game);
 
-			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerLeft(player);
+			await _lobbyContext.Clients.Players(game.Players).PlayerLeft(player);
 
 			return new ApiResponse("Bot Deleted");
 		}
@@ -473,7 +473,7 @@ namespace WordGame.API.Controllers
 
 			await _repository.UpdateGame(code, game);
 
-			await _lobbyContext.Clients.Group($"{code}-lobby").PlayerUpdated(player);
+			await _lobbyContext.Clients.Players(game.Players).PlayerUpdated(player);
 
 			return Ok(player);
 		}

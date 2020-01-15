@@ -10,22 +10,9 @@ using WordGame.API.Extensions;
 
 namespace WordGame.API.Hubs
 {
-	[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
-	public class LobbyHub : Hub<ILobbyClient>
+	public class LobbyHub : AuthorizedGroupHub<ILobbyClient>
 	{
-		protected string GroupName => $"{Context.User.GetGameCode()}-lobby";
-
-		public override async Task OnConnectedAsync()
-		{
-			await Groups.AddToGroupAsync(Context.ConnectionId, GroupName);
-			await base.OnConnectedAsync();
-		}
-
-		public override async Task OnDisconnectedAsync(Exception exception)
-		{
-			await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName);
-			await base.OnDisconnectedAsync(exception);
-		}
+		protected override string GroupName => $"{Context.User.GetGameCode()}-lobby";
 
 		public Task SendMessage(string message)
 		{
