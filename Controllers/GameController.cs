@@ -271,9 +271,7 @@ namespace WordGame.API.Controllers
 
 			game.Players.Remove(player);
 
-			await _repository.UpdateGame(code, game);
-
-			await _lobbyContext.Clients.Players(game.Players).PlayerLeft(player);
+			await UpdateGame(game);
 
 			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -307,9 +305,7 @@ namespace WordGame.API.Controllers
 
 			game.StartGame(board, Team.Red);
 
-			await _repository.UpdateGame(code, game);
-
-			await _lobbyContext.Clients.Players(game.Players).GameStarted(game);
+			await UpdateGame(game);
 
 			return Ok(game);
 		}
@@ -340,11 +336,9 @@ namespace WordGame.API.Controllers
 
 			var player = game.AddNewPlayer(_nameGenerator.GetRandomName());
 
-			await _repository.UpdateGame(code, game);
+			await UpdateGame(game);
 
 			await SignInAsPlayer(player, code);
-
-			await _lobbyContext.Clients.Players(game.Players).PlayerAdded(player);
 
 			return Ok(game);
 		}
@@ -366,9 +360,7 @@ namespace WordGame.API.Controllers
 
 			var player = game.AddNewPlayer(_nameGenerator.GetRandomName(), isBot: true);
 
-			await _repository.UpdateGame(code, game);
-
-			await _lobbyContext.Clients.Players(game.Players).PlayerAdded(player);
+			await UpdateGame(game);
 
 			return Ok(player);
 		}
@@ -432,9 +424,7 @@ namespace WordGame.API.Controllers
 
 			game.Players.Remove(player);
 
-			await _repository.UpdateGame(code, game);
-
-			await _lobbyContext.Clients.Players(game.Players).PlayerLeft(player);
+			await UpdateGame(game);
 
 			return new ApiResponse("Bot Deleted");
 		}
@@ -471,9 +461,7 @@ namespace WordGame.API.Controllers
 				playerModel.Name,
 				playerModel.IsSpyMaster);
 
-			await _repository.UpdateGame(code, game);
-
-			await _lobbyContext.Clients.Players(game.Players).PlayerUpdated(player);
+			await UpdateGame(game);
 
 			return Ok(player);
 		}
@@ -506,6 +494,13 @@ namespace WordGame.API.Controllers
 				{
 					IsPersistent = true
 				});
+		}
+
+		protected Task UpdateGame(Game game)
+		{
+			return Task.WhenAll(
+				_lobbyContext.Clients.Players(game.Players).GameUpdated(game),
+				_repository.UpdateGame(game.Code, game));
 		}
 	}
 }
