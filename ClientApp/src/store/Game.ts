@@ -98,11 +98,6 @@ interface RequestUpdatePlayerAction {
   type: "REQUEST_UPDATE_PLAYER";
 }
 
-interface ReceiveUpdatePlayerAction {
-  type: "RECEIVE_UPDATE_PLAYER";
-  player: Player;
-}
-
 interface RequestJoinGameAction {
   type: "REQUEST_JOIN_GAME";
 }
@@ -133,19 +128,9 @@ interface RequestAddBotAction {
   type: "REQUEST_BOT_PLAYER";
 }
 
-interface ReceiveAddBotAction {
-  type: "RECEIVE_BOT_PLAYER";
-  player: Player;
-}
-
-interface ReceiveAddPlayerAction {
-  type: "RECEIVE_NEW_PLAYER";
-  player: Player;
-}
-
-interface ReceivePlayerLeftAction {
-  type: "RECEIVE_PLAYER_LEFT";
-  player: Player;
+interface ReceiveUpdateGameAction {
+  type: "RECEIVE_UPDATE_GAME";
+  game: Game;
 }
 interface ReceiveMessage {
   type: "RECEIVE_MESSAGE";
@@ -159,7 +144,6 @@ type KnownAction =
   | RequestNewGameAction
   | ReceiveNewGameAction
   | RequestUpdatePlayerAction
-  | ReceiveUpdatePlayerAction
   | RequestJoinGameAction
   | ReceiveJoinedGameAction
   | RequestLeaveDeleteAction
@@ -171,9 +155,7 @@ type KnownAction =
   | RequestStartGameAction
   | ReceiveStartGameAction
   | RequestAddBotAction
-  | ReceiveAddBotAction
-  | ReceiveAddPlayerAction
-  | ReceivePlayerLeftAction
+  | ReceiveUpdateGameAction
   | ReceiveMessage;
 
 // ----------------
@@ -189,43 +171,6 @@ export const actionCreators = {
         .withUrl(`hubs/lobby`)
         .build();
 
-      connection.on("PlayerAdded", data => {
-        console.log("Player Added!");
-        console.log(data);
-        const player = data as Player;
-
-        if (player.isBot) {
-          dispatch({
-            type: "RECEIVE_BOT_PLAYER",
-            player: player
-          });
-        } else {
-          dispatch({
-            type: "RECEIVE_NEW_PLAYER",
-            player: player
-          });
-        }
-      });
-
-      connection.on("PlayerUpdated", data => {
-        console.log("Player Updated!");
-        console.log(data);
-        dispatch({
-          type: "RECEIVE_UPDATE_PLAYER",
-          player: data as Player
-        });
-      });
-
-      connection.on("PlayerLeft", data => {
-        debugger;
-        console.log("Player Left!");
-        console.log(data);
-        dispatch({
-          type: "RECEIVE_PLAYER_LEFT",
-          player: data as Player
-        });
-      });
-
       connection.on("MessageSent", data => {
         debugger;
         console.log(data.message);
@@ -235,11 +180,12 @@ export const actionCreators = {
         });
       });
 
-      connection.on("GameStarted", data => {
-        console.log("Game Started!");
+      connection.on("GameUpdated", data => {
+        console.log("Game Updated!");
+        debugger;
         console.log(data);
         dispatch({
-          type: "RECEIVE_START_GAME",
+          type: "RECEIVE_UPDATE_GAME",
           game: data as Game
         });
       });
@@ -375,10 +321,6 @@ export const actionCreators = {
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
           console.log(data);
-          dispatch({
-            type: "RECEIVE_UPDATE_PLAYER",
-            player: data.data as Player
-          });
         });
 
       dispatch({
@@ -491,10 +433,6 @@ export const actionCreators = {
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
           console.log(data);
-          dispatch({
-            type: "RECEIVE_BOT_PLAYER",
-            player: data.data as Player
-          });
         });
 
       dispatch({
@@ -664,27 +602,6 @@ export const reducer: Reducer<GameState> = (
         connection: state.connection,
         messages: state.messages
       };
-    case "RECEIVE_UPDATE_PLAYER":
-      var updatedPlayers = state.game.players.filter(
-        player => player.number !== action.player.number
-      );
-      updatedPlayers.push(action.player);
-      var updatedLocalPlayer;
-      if (
-        state.localPlayer.number &&
-        state.localPlayer.number === action.player.number
-      ) {
-        updatedLocalPlayer = action.player;
-      } else {
-        updatedLocalPlayer = state.localPlayer;
-      }
-      return {
-        isLoading: false,
-        localPlayer: updatedLocalPlayer,
-        game: { ...state.game, players: updatedPlayers },
-        connection: state.connection,
-        messages: state.messages
-      };
     case "REQUEST_BOT_PLAYER":
       return {
         isLoading: true,
@@ -693,40 +610,11 @@ export const reducer: Reducer<GameState> = (
         connection: state.connection,
         messages: state.messages
       };
-    case "RECEIVE_BOT_PLAYER":
-      var players = state.game.players.slice();
-      if (!players.some(p => p.number === action.player.number)) {
-        players.splice(action.player.number, 0, action.player);
-      }
+    case "RECEIVE_UPDATE_GAME":
       return {
         isLoading: false,
         localPlayer: state.localPlayer,
-        game: { ...state.game, players: players },
-        connection: state.connection,
-        messages: state.messages
-      };
-    case "RECEIVE_NEW_PLAYER":
-      var players = state.game.players.slice();
-      if (!players.some(p => p.number === action.player.number)) {
-        players.splice(action.player.number, 0, action.player);
-      }
-      return {
-        isLoading: false,
-        localPlayer: state.localPlayer,
-        game: { ...state.game, players: players },
-        connection: state.connection,
-        messages: state.messages
-      };
-    case "RECEIVE_PLAYER_LEFT":
-      var players = state.game.players.slice();
-      const index = players.findIndex(p => p.number === action.player.number);
-      if (index > 0) {
-        players.splice(index, 1);
-      }
-      return {
-        isLoading: false,
-        localPlayer: state.localPlayer,
-        game: { ...state.game, players: players },
+        game: action.game,
         connection: state.connection,
         messages: state.messages
       };

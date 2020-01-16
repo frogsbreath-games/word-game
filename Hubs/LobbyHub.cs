@@ -25,14 +25,8 @@ namespace WordGame.API.Hubs
     {
         Task MessageSent(LobbyMessage message);
 
-        Task PlayerAdded(Player newPlayer);
-
-        Task PlayerUpdated(Player updatedPlayer);
-
-        Task PlayerLeft(Player leavingPlayer);
-
-        Task GameStarted(Game game);
-
         Task GameDeleted();
+
+        Task GameUpdated(Game game);
     }
 }
