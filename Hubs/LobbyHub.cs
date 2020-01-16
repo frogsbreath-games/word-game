@@ -10,29 +10,29 @@ using WordGame.API.Extensions;
 
 namespace WordGame.API.Hubs
 {
-	public class LobbyHub : AuthorizedGroupHub<ILobbyClient>
-	{
-		protected override string GroupName => $"{Context.User.GetGameCode()}-lobby";
+    public class LobbyHub : AuthorizedGroupHub<ILobbyClient>
+    {
+        protected override string GroupName => $"{Context.User.GetGameCode()}-lobby";
 
-		public Task SendMessage(string message)
-		{
-			return Clients.Group(GroupName).MessageSent(
-				Context.User.Identity.Name, message);
-		}
-	}
+        public Task SendMessage(string message)
+        {
+            return Clients.Group(GroupName).MessageSent(
+                new LobbyMessage(Context.User.Identity.Name, message));
+        }
+    }
 
-	public interface ILobbyClient
-	{
-		Task MessageSent(string sender, string message);
+    public interface ILobbyClient
+    {
+        Task MessageSent(LobbyMessage message);
 
-		Task PlayerAdded(Player newPlayer);
+        Task PlayerAdded(Player newPlayer);
 
-		Task PlayerUpdated(Player updatedPlayer);
+        Task PlayerUpdated(Player updatedPlayer);
 
-		Task PlayerLeft(Player leavingPlayer);
+        Task PlayerLeft(Player leavingPlayer);
 
-		Task GameStarted(Game game);
+        Task GameStarted(Game game);
 
-		Task GameDeleted();
-	}
+        Task GameDeleted();
+    }
 }
