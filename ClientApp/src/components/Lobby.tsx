@@ -94,10 +94,40 @@ const PlayerTile = ({
   </div>
 );
 
-class Lobby extends React.PureComponent<GameProps> {
+type State = { input: string };
+class Lobby extends React.PureComponent<GameProps, State> {
+  constructor(props: GameProps) {
+    super(props);
+    this.state = { input: "" };
+    this.sendMessage = this.sendMessage.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  public sendMessage() {
+    debugger;
+    console.log(this.state.input);
+    if (this.props.connection) {
+      this.props.connection
+        .invoke("SendMessage", this.state.input)
+        .catch(err => console.error(err));
+
+      this.setState({ input: "" });
+    }
+  }
+
+  handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({ input: event.target.value });
+  }
+
+  handleSubmit(event: React.MouseEvent) {
+    event.preventDefault();
+  }
+
   public componentDidMount() {
-    const connection = this.props.connection;
-    if (this.props.game.status === "lobby" && connection !== undefined) {
+    if (
+      this.props.game.status === "lobby" &&
+      this.props.connection !== undefined
+    ) {
       console.log("Connection is not undefined");
     } else {
       this.ensureConnectionExists();
@@ -213,6 +243,19 @@ class Lobby extends React.PureComponent<GameProps> {
                 />
               ))}
           </div>
+        </div>
+        <div className="row">
+          <input
+            type="text"
+            value={this.state.input}
+            onChange={this.handleChange}
+          />
+
+          <button onClick={() => this.sendMessage()}>Send</button>
+          {this.props.messages &&
+            this.props.messages.map(message => (
+              <span>{message.name + ": " + message.message}</span>
+            ))}
         </div>
       </React.Fragment>
     );

@@ -2,6 +2,7 @@ import { Action, Reducer } from "redux";
 import { AppThunkAction } from "./";
 import * as signalr from "@aspnet/signalr";
 import { useDispatch } from "react-redux";
+import { connect } from "http2";
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -11,6 +12,7 @@ export interface GameState {
   localPlayer: Player;
   game: Game;
   connection?: signalR.HubConnection;
+  messages: Message[];
 }
 
 export interface Game {
@@ -49,6 +51,11 @@ export interface APIResponse {
   message: string;
   data: object;
   errorArray: object[];
+}
+
+export interface Message {
+  name: string;
+  message: Message;
 }
 
 // -----------------
@@ -140,6 +147,10 @@ interface ReceivePlayerLeftAction {
   type: "RECEIVE_PLAYER_LEFT";
   player: Player;
 }
+interface ReceiveMessage {
+  type: "RECEIVE_MESSAGE";
+  message: Message;
+}
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
@@ -162,7 +173,8 @@ type KnownAction =
   | RequestAddBotAction
   | ReceiveAddBotAction
   | ReceiveAddPlayerAction
-  | ReceivePlayerLeftAction;
+  | ReceivePlayerLeftAction
+  | ReceiveMessage;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -170,72 +182,81 @@ type KnownAction =
 
 export const actionCreators = {
   createConnection: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    const appState = getState();
     // Only load data if it's something we don't already have (and are not already loading)
-    const connection = new signalr.HubConnectionBuilder()
-      .withUrl(`hubs/lobby`)
-      .build();
+    if (appState && appState.game && !appState.game.connection) {
+      const connection = new signalr.HubConnectionBuilder()
+        .withUrl(`hubs/lobby`)
+        .build();
 
-    connection.on("PlayerAdded", data => {
-      console.log("Player Added!");
-      debugger;
-      console.log(data);
-      const player = data as Player;
+      connection.on("PlayerAdded", data => {
+        console.log("Player Added!");
+        console.log(data);
+        const player = data as Player;
 
-      if (player.isBot) {
+        if (player.isBot) {
+          dispatch({
+            type: "RECEIVE_BOT_PLAYER",
+            player: player
+          });
+        } else {
+          dispatch({
+            type: "RECEIVE_NEW_PLAYER",
+            player: player
+          });
+        }
+      });
+
+      connection.on("PlayerUpdated", data => {
+        console.log("Player Updated!");
+        console.log(data);
         dispatch({
-          type: "RECEIVE_BOT_PLAYER",
-          player: player
+          type: "RECEIVE_UPDATE_PLAYER",
+          player: data as Player
         });
-      } else {
+      });
+
+      connection.on("PlayerLeft", data => {
+        debugger;
+        console.log("Player Left!");
+        console.log(data);
         dispatch({
-          type: "RECEIVE_NEW_PLAYER",
-          player: player
+          type: "RECEIVE_PLAYER_LEFT",
+          player: data as Player
         });
-      }
-    });
-
-    connection.on("PlayerUpdated", data => {
-      console.log("Player Updated!");
-      debugger;
-      console.log(data);
-      dispatch({
-        type: "RECEIVE_UPDATE_PLAYER",
-        player: data as Player
       });
-    });
 
-    connection.on("PlayerLeft", data => {
-      console.log("Player Left!");
-      debugger;
-      console.log(data);
-      dispatch({
-        type: "RECEIVE_PLAYER_LEFT",
-        player: data as Player
-      });
-    });
-
-    connection.on("GameStarted", data => {
-      console.log("Game Started!");
-      debugger;
-      console.log(data);
-      dispatch({
-        type: "RECEIVE_START_GAME",
-        game: data as Game
-      });
-    });
-
-    //Todo - GameDeleted
-
-    connection
-      .start()
-      .then(() =>
+      connection.on("MessageSent", data => {
+        debugger;
+        console.log(data.message);
         dispatch({
-          type: "CREATE_HUB_CONNECTION",
-          connection: connection
-        })
-      )
-      .then(() => console.log("Connection started!"))
-      .catch(err => console.log("Error while establishing connection :("));
+          type: "RECEIVE_MESSAGE",
+          message: data as Message
+        });
+      });
+
+      connection.on("GameStarted", data => {
+        console.log("Game Started!");
+        console.log(data);
+        dispatch({
+          type: "RECEIVE_START_GAME",
+          game: data as Game
+        });
+      });
+
+      //Todo - GameDeleted
+
+      connection
+        .start()
+        .then(() =>
+          dispatch({
+            type: "CREATE_HUB_CONNECTION",
+            connection: connection
+          })
+        )
+        .then(() => console.log("Connection started!"))
+        .catch(err => console.log("Error while establishing connection :("));
+    }
   },
   requestNewGame: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
     // Only load data if it's something we don't already have (and are not already loading)
@@ -509,7 +530,8 @@ export const actionCreators = {
 const unloadedState: GameState = {
   isLoading: false,
   localPlayer: {} as Player,
-  game: {} as Game
+  game: {} as Game,
+  messages: [] as Message[]
 };
 
 export const reducer: Reducer<GameState> = (
@@ -527,97 +549,120 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         localPlayer: state.localPlayer,
         game: state.game,
-        connection: action.connection
+        connection: action.connection,
+        messages: state.messages
       };
+    case "RECEIVE_MESSAGE": {
+      return {
+        isLoading: false,
+        localPlayer: state.localPlayer,
+        game: state.game,
+        connection: state.connection,
+        messages: [...state.messages, action.message]
+      };
+    }
     case "REQUEST_CURRENT_GAME":
       return {
         isLoading: true,
         localPlayer: state.localPlayer,
         game: state.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_CURRENT_GAME":
       return {
         isLoading: false,
         localPlayer: state.localPlayer,
         game: action.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "REQUEST_CURRENT_PLAYER":
       return {
         isLoading: true,
         localPlayer: state.localPlayer,
         game: state.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_CURRENT_PLAYER":
       return {
         isLoading: false,
         localPlayer: action.localPlayer,
         game: state.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "REQUEST_NEW_GAME":
       return {
         isLoading: true,
         localPlayer: state.localPlayer,
         game: state.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_NEW_GAME":
       return {
         isLoading: false,
         localPlayer: action.game.players[0],
         game: action.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "REQUEST_JOIN_GAME":
       return {
         isLoading: true,
         localPlayer: state.localPlayer,
         game: state.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_JOIN_GAME":
       return {
         isLoading: false,
         localPlayer: action.game.players[action.game.players.length - 1],
         game: action.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "REQUEST_START_GAME":
       return {
         isLoading: true,
         localPlayer: state.localPlayer,
         game: state.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_START_GAME":
       return {
         isLoading: false,
         localPlayer: state.localPlayer,
         game: action.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "REQUEST_DELETE_GAME":
       return {
         isLoading: true,
         localPlayer: state.localPlayer,
         game: state.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_DELETE_GAME":
       return {
         isLoading: false,
         localPlayer: {} as Player,
-        game: {} as Game
+        game: {} as Game,
+        messages: state.messages
       };
     case "REQUEST_UPDATE_PLAYER":
       return {
         isLoading: true,
         localPlayer: state.localPlayer,
         game: state.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_UPDATE_PLAYER":
       var updatedPlayers = state.game.players.filter(
@@ -637,14 +682,16 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         localPlayer: updatedLocalPlayer,
         game: { ...state.game, players: updatedPlayers },
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "REQUEST_BOT_PLAYER":
       return {
         isLoading: true,
         localPlayer: state.localPlayer,
         game: state.game,
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_BOT_PLAYER":
       var players = state.game.players.slice();
@@ -655,7 +702,8 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         localPlayer: state.localPlayer,
         game: { ...state.game, players: players },
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_NEW_PLAYER":
       var players = state.game.players.slice();
@@ -666,7 +714,8 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         localPlayer: state.localPlayer,
         game: { ...state.game, players: players },
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     case "RECEIVE_PLAYER_LEFT":
       var players = state.game.players.slice();
@@ -678,7 +727,8 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         localPlayer: state.localPlayer,
         game: { ...state.game, players: players },
-        connection: state.connection
+        connection: state.connection,
+        messages: state.messages
       };
     default:
       return state;
