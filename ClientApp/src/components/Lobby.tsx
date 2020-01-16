@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
+import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -57,6 +58,19 @@ const PlayerTile = ({
           }}
         >
           <h5>{player.name}</h5>
+          {player.number === localPlayer.number && (
+            <PlayerIcon
+              //Need to know how to do this better
+              className="justify-content-end"
+              style={{
+                opacity: 0.5,
+                width: "50px",
+                float: "right",
+                marginTop: "-25px",
+                fill: player.team === "red" ? red : blue
+              }}
+            />
+          )}
           <p>{player.isSpyMaster ? "Spy Master" : "Agent"}</p>
         </div>
         {(localPlayer.isOrganizer || player.number === localPlayer.number) && (
@@ -124,13 +138,12 @@ class Lobby extends React.PureComponent<GameProps, State> {
   }
 
   public componentDidMount() {
-    if (
-      this.props.game.status === "lobby" &&
-      this.props.connection !== undefined
-    ) {
-      console.log("Connection is not undefined");
-    } else {
-      this.ensureConnectionExists();
+    //game has not been retrieved do not create a connection ever
+    if (this.props.game.status) {
+      //if we are supposed to be in the lobby and we don't have a connection make one
+      if (this.props.game.status === "lobby" && !this.props.connection) {
+        this.ensureConnectionExists();
+      }
     }
   }
 
@@ -212,36 +225,38 @@ class Lobby extends React.PureComponent<GameProps, State> {
           <div className="col-sm-6">
             <h1 style={{ color: red }}>Red</h1>
             <hr />
-            {this.props.game.players
-              .filter(player => player.team === "red")
-              .map(player => (
-                <PlayerTile
-                  player={player}
-                  localPlayer={this.props.localPlayer}
-                  code={this.props.game.code}
-                  key={player.number}
-                  swapTeams={() => this.swapTeams(player)}
-                  leaveGame={() => this.quitGame()}
-                  deleteBot={() => this.deleteBot(player.number)}
-                />
-              ))}
+            {this.props.game.players &&
+              this.props.game.players
+                .filter(player => player.team === "red")
+                .map(player => (
+                  <PlayerTile
+                    player={player}
+                    localPlayer={this.props.localPlayer}
+                    code={this.props.game.code}
+                    key={player.number}
+                    swapTeams={() => this.swapTeams(player)}
+                    leaveGame={() => this.quitGame()}
+                    deleteBot={() => this.deleteBot(player.number)}
+                  />
+                ))}
           </div>
           <div className="col-sm-6">
             <h1 style={{ color: blue }}>Blue</h1>
             <hr />
-            {this.props.game.players
-              .filter(player => player.team === "blue")
-              .map(player => (
-                <PlayerTile
-                  player={player}
-                  localPlayer={this.props.localPlayer}
-                  code={this.props.game.code}
-                  key={player.number}
-                  swapTeams={() => this.swapTeams(player)}
-                  leaveGame={() => this.quitGame()}
-                  deleteBot={() => this.deleteBot(player.number)}
-                />
-              ))}
+            {this.props.game.players &&
+              this.props.game.players
+                .filter(player => player.team === "blue")
+                .map(player => (
+                  <PlayerTile
+                    player={player}
+                    localPlayer={this.props.localPlayer}
+                    code={this.props.game.code}
+                    key={player.number}
+                    swapTeams={() => this.swapTeams(player)}
+                    leaveGame={() => this.quitGame()}
+                    deleteBot={() => this.deleteBot(player.number)}
+                  />
+                ))}
           </div>
         </div>
         <div className="row">
