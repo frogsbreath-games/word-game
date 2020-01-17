@@ -71,9 +71,10 @@ namespace WordGame.API
 				});
 
 			services.AddMongo(Configuration);
+			services.AddScoped<IRandomAccessor, RandomAccessor>();
 			services.AddScoped<IGameRepository, GameRepository>();
-			services.AddSingleton<INameGenerator, NameGenerator>();
-			services.AddSingleton<IGameBoardGenerator, GameBoardGenerator>();
+			services.AddScoped<INameGenerator, NameGenerator>();
+			services.AddScoped<IGameBoardGenerator, GameBoardGenerator>();
 
 			GlobalHost.DependencyResolver.Register(typeof(IUserIdProvider), () => new PlayerIdProvider());
 

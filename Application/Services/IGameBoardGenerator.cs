@@ -17,6 +17,13 @@ namespace WordGame.API.Application.Services
 
 	public class GameBoardGenerator : IGameBoardGenerator
 	{
+		protected readonly IRandomAccessor _rand;
+
+		public GameBoardGenerator(IRandomAccessor rand)
+		{
+			_rand = rand ?? throw new ArgumentNullException(nameof(rand));
+		}
+
 		public List<WordTile> GenerateGameBoard(Team startingTeam)
 		{
 			if (startingTeam != Team.Red && startingTeam != Team.Blue)
@@ -29,9 +36,7 @@ namespace WordGame.API.Application.Services
 			teams.AddRange(Enumerable.Repeat(Team.Neutral, 7));
 			teams.Add(Team.Black);
 
-			var random = new Random(unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId));
-
-			teams.Shuffle(random);
+			teams.Shuffle(_rand.Random);
 
 			var ret = new List<WordTile>();
 
@@ -40,7 +45,7 @@ namespace WordGame.API.Application.Services
 			{
 				do
 				{
-					word = WordList.Words[random.Next(0, WordList.Words.Length)];
+					word = WordList.Words[_rand.Random.Next(0, WordList.Words.Length)];
 				}
 				while (ret.Any(x => x.Word == word));
 
