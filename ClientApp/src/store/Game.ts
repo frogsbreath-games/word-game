@@ -190,7 +190,14 @@ export const actionCreators = {
         });
       });
 
-      //Todo - GameDeleted
+      connection.on("GameDeleted", data => {
+        console.log("Game Deleted!");
+        debugger;
+        console.log(data);
+        dispatch({
+          type: "RECEIVE_DELETE_GAME"
+        });
+      });
 
       connection
         .start()
