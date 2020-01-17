@@ -4,6 +4,7 @@ import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
 import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
+import { ReactComponent as SwapIcon } from "../assets/SwapIcon.svg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -80,7 +81,7 @@ const PlayerTile = ({
             onClick={() => swapTeams(player)}
             style={{ marginTop: "10px" }}
           >
-            Swap Teams
+            <SwapIcon width={25} style={{ opacity: 0.5, fill: "white" }} />
           </button>
         )}
         {localPlayer.isOrganizer && player.isBot && (
