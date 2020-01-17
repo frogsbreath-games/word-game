@@ -10,6 +10,9 @@ namespace WordGame.API.Domain.Enums
 		//Spy master is picking a word
 		Planning,
 
+		//Opposing Spy master is approving the word
+		PendingApproval,
+
 		//Agents are guessing words
 		Guessing,
 

@@ -35,6 +35,14 @@ namespace WordGame.API.Domain.Models
 
 			HintWord = hintWord ?? throw new ArgumentNullException(nameof(hintWord));
 			WordCount = wordCount;
+			Status = TurnStatus.PendingApproval;
+		}
+
+		public void ApproveHint()
+		{
+			if (Status != TurnStatus.PendingApproval)
+				throw new InvalidOperationException();
+
 			Status = TurnStatus.Guessing;
 		}
 	}
