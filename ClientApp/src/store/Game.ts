@@ -168,7 +168,7 @@ export const actionCreators = {
     // Only load data if it's something we don't already have (and are not already loading)
     if (appState && appState.game && !appState.game.connection) {
       const connection = new signalr.HubConnectionBuilder()
-        .withUrl(`hubs/lobby`)
+        .withUrl(`hubs/game`)
         .build();
 
       connection.on("MessageSent", data => {
