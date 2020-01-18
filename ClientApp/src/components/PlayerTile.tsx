@@ -80,7 +80,7 @@ const PlayerTile = ({
             <TrashIcon width={25} style={{ opacity: 0.5, fill: "white" }} />
           </button>
         )}
-        {player.number == localPlayer.number && !localPlayer.isOrganizer && (
+        {player.number === localPlayer.number && !localPlayer.isOrganizer && (
           <button
             className="btn btn-danger"
             type="button"

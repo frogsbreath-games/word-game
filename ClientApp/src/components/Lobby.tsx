@@ -24,7 +24,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
   public handleKeyPress(event: React.KeyboardEvent) {
     console.log("Key Pressed");
     var keyCode = event.keyCode || event.which;
-    if (keyCode == 13) {
+    if (keyCode === 13) {
       this.sendMessage();
     }
   }
@@ -192,8 +192,12 @@ class Lobby extends React.PureComponent<GameProps, State> {
           </div>
         </div>
         {this.props.messages &&
-          this.props.messages.map(message => (
-            <span>{message.name + ": " + message.message}</span>
+          this.props.messages.map((message, index) => (
+            <div key={index}>
+              <div style={{ margin: "2px" }}>
+                {message.name + ": " + message.message}
+              </div>
+            </div>
           ))}
       </React.Fragment>
     );

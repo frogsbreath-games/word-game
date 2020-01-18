@@ -1,8 +1,6 @@
 import { Action, Reducer } from "redux";
 import { AppThunkAction } from "./";
 import * as signalr from "@aspnet/signalr";
-import { useDispatch } from "react-redux";
-import { connect } from "http2";
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -489,7 +487,6 @@ export const reducer: Reducer<GameState> = (
   const action = incomingAction as KnownAction;
   switch (action.type) {
     case "CREATE_HUB_CONNECTION":
-      debugger;
       return {
         isLoading: false,
         localPlayer: state.localPlayer,
