@@ -115,7 +115,7 @@ namespace WordGame.API
 
 			app.UseEndpoints(endpoints =>
 			{
-				endpoints.MapHub<LobbyHub>("/hubs/lobby");
+				endpoints.MapHub<GameHub>("/hubs/game");
 				endpoints.MapControllerRoute(
 					name: "default",
 					pattern: "{controller}/{action=Index}/{id?}");

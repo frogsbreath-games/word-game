@@ -26,6 +26,10 @@ namespace WordGame.API.Domain.Models
 
 		public List<Guess> Guesses { get; protected set; } = new List<Guess>();
 
+		public int? GuessesRemaining => Status == TurnStatus.Guessing && WordCount.HasValue && WordCount.Value > 0
+			? WordCount.Value - Guesses.Count + 1
+			: (int?)null;
+
 		public void GiveHint(
 			string hintWord,
 			int wordCount)
@@ -35,6 +39,14 @@ namespace WordGame.API.Domain.Models
 
 			HintWord = hintWord ?? throw new ArgumentNullException(nameof(hintWord));
 			WordCount = wordCount;
+			Status = TurnStatus.PendingApproval;
+		}
+
+		public void ApproveHint()
+		{
+			if (Status != TurnStatus.PendingApproval)
+				throw new InvalidOperationException();
+
 			Status = TurnStatus.Guessing;
 		}
 	}

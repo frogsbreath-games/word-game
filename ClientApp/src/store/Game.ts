@@ -22,6 +22,8 @@ export interface Game {
   players: Player[];
   wordTiles: WordTile[];
   currentTurn?: Turn;
+  blueTilesRemaining: number;
+  redTilesRemaining: number;
 }
 
 export interface Turn {
@@ -30,6 +32,7 @@ export interface Turn {
   status: string;
   hintWord?: string;
   wordCount?: number;
+  guessesRemaining?: number;
 }
 
 export interface Player {
@@ -168,7 +171,7 @@ export const actionCreators = {
     // Only load data if it's something we don't already have (and are not already loading)
     if (appState && appState.game && !appState.game.connection) {
       const connection = new signalr.HubConnectionBuilder()
-        .withUrl(`hubs/lobby`)
+        .withUrl(`hubs/game`)
         .build();
 
       connection.on("MessageSent", data => {
@@ -190,7 +193,14 @@ export const actionCreators = {
         });
       });
 
-      //Todo - GameDeleted
+      connection.on("GameDeleted", data => {
+        console.log("Game Deleted!");
+        debugger;
+        console.log(data);
+        dispatch({
+          type: "RECEIVE_DELETE_GAME"
+        });
+      });
 
       connection
         .start()

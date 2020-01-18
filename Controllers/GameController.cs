@@ -27,14 +27,14 @@ namespace WordGame.API.Controllers
 		protected IGameRepository _repository;
 		protected INameGenerator _nameGenerator;
 		protected IGameBoardGenerator _gameBoardGenerator;
-		protected IHubContext<LobbyHub, ILobbyClient> _lobbyContext;
+		protected IHubContext<GameHub, IGameClient> _gameContext;
 
-		public GameController(IGameRepository repository, INameGenerator nameGenerator, IGameBoardGenerator gameBoardGenerator, IHubContext<LobbyHub, ILobbyClient> lobbyContext)
+		public GameController(IGameRepository repository, INameGenerator nameGenerator, IGameBoardGenerator gameBoardGenerator, IHubContext<GameHub, IGameClient> gameContext)
 		{
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 			_nameGenerator = nameGenerator ?? throw new ArgumentNullException(nameof(nameGenerator));
 			_gameBoardGenerator = gameBoardGenerator ?? throw new ArgumentNullException(nameof(gameBoardGenerator));
-			_lobbyContext = lobbyContext ?? throw new ArgumentNullException(nameof(lobbyContext));
+			_gameContext = gameContext ?? throw new ArgumentNullException(nameof(gameContext));
 		}
 
 		protected ApiResponse NotFound(string message)
@@ -170,7 +170,7 @@ namespace WordGame.API.Controllers
 
 			await _repository.DeleteGame(code);
 
-			await _lobbyContext.Clients.Players(game.Players).GameDeleted();
+			await _gameContext.Clients.Players(game.Players).GameDeleted();
 
 			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -499,7 +499,7 @@ namespace WordGame.API.Controllers
 		protected Task UpdateGame(Game game)
 		{
 			return Task.WhenAll(
-				_lobbyContext.Clients.Players(game.Players).GameUpdated(game),
+				_gameContext.Clients.Players(game.Players).GameUpdated(game),
 				_repository.UpdateGame(game.Code, game));
 		}
 	}
