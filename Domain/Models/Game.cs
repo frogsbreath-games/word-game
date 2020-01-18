@@ -24,6 +24,10 @@ namespace WordGame.API.Domain.Models
 
 		public List<WordTile> WordTiles { get; protected set; } = new List<WordTile>();
 
+		public int BlueTilesRemaining => WordTiles.Count(x => !x.IsRevealed && x.Team == Team.Blue);
+
+		public int RedTilesRemaining => WordTiles.Count(x => !x.IsRevealed && x.Team == Team.Red);
+
 		[JsonIgnore]
 		public List<Turn> Turns { get; protected set; } = new List<Turn>();
 

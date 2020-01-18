@@ -22,6 +22,8 @@ export interface Game {
   players: Player[];
   wordTiles: WordTile[];
   currentTurn?: Turn;
+  blueTilesRemaining: number;
+  redTilesRemaining: number;
 }
 
 export interface Turn {
@@ -30,6 +32,7 @@ export interface Turn {
   status: string;
   hintWord?: string;
   wordCount?: number;
+  guessesRemaining?: number;
 }
 
 export interface Player {

@@ -26,6 +26,10 @@ namespace WordGame.API.Domain.Models
 
 		public List<Guess> Guesses { get; protected set; } = new List<Guess>();
 
+		public int? GuessesRemaining => Status == TurnStatus.Guessing && WordCount.HasValue && WordCount.Value > 0
+			? WordCount.Value - Guesses.Count + 1
+			: (int?)null;
+
 		public void GiveHint(
 			string hintWord,
 			int wordCount)
