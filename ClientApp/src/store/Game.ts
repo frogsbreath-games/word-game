@@ -175,7 +175,6 @@ export const actionCreators = {
         .build();
 
       connection.on("MessageSent", data => {
-        debugger;
         console.log(data.message);
         dispatch({
           type: "RECEIVE_MESSAGE",
@@ -185,7 +184,6 @@ export const actionCreators = {
 
       connection.on("GameUpdated", data => {
         console.log("Game Updated!");
-        debugger;
         console.log(data);
         dispatch({
           type: "RECEIVE_UPDATE_GAME",
@@ -195,7 +193,6 @@ export const actionCreators = {
 
       connection.on("GameDeleted", data => {
         console.log("Game Deleted!");
-        debugger;
         console.log(data);
         dispatch({
           type: "RECEIVE_DELETE_GAME"

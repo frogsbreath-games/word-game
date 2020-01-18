@@ -4,6 +4,7 @@ import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
 import PlayerTile from "./PlayerTile";
+import { ReactComponent as MessageIcon } from "../assets/MessageIcon.svg";
 import { red, blue } from "../constants/ColorConstants";
 
 // At runtime, Redux will merge together...
@@ -16,17 +17,23 @@ class Lobby extends React.PureComponent<GameProps, State> {
     super(props);
     this.state = { input: "" };
     this.sendMessage = this.sendMessage.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
 
+  public handleKeyPress(event: React.KeyboardEvent) {
+    console.log("Key Pressed");
+    var keyCode = event.keyCode || event.which;
+    if (keyCode == 13) {
+      this.sendMessage();
+    }
+  }
+
   public sendMessage() {
-    debugger;
-    console.log(this.state.input);
     if (this.props.connection) {
       this.props.connection
         .invoke("SendMessage", this.state.input)
         .catch(err => console.error(err));
-
       this.setState({ input: "" });
     }
   }
@@ -161,19 +168,33 @@ class Lobby extends React.PureComponent<GameProps, State> {
                 ))}
           </div>
         </div>
-        <div className="row">
-          <input
-            type="text"
-            value={this.state.input}
-            onChange={this.handleChange}
-          />
-
-          <button onClick={() => this.sendMessage()}>Send</button>
-          {this.props.messages &&
-            this.props.messages.map(message => (
-              <span>{message.name + ": " + message.message}</span>
-            ))}
+        <div className="row" style={{ marginTop: "20px" }}>
+          <div className="input-group mb-3">
+            <div className="input-group-prepend">
+              <span className="input-group-text" id="inputGroup-sizing-default">
+                <MessageIcon
+                  style={{
+                    opacity: 0.5,
+                    height: "24px",
+                    fill: "black"
+                  }}
+                />
+              </span>
+            </div>
+            <input
+              className="form-control"
+              type="text"
+              placeholder="Message something..."
+              value={this.state.input}
+              onChange={this.handleChange}
+              onKeyPress={this.handleKeyPress}
+            />
+          </div>
         </div>
+        {this.props.messages &&
+          this.props.messages.map(message => (
+            <span>{message.name + ": " + message.message}</span>
+          ))}
       </React.Fragment>
     );
   }
