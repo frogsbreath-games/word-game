@@ -46,6 +46,13 @@ export interface WordTile {
   word: string;
   team: string;
   isRevealed: boolean;
+  votes: PlayerVote[];
+}
+
+export interface PlayerVote {
+  number: number;
+  name: string;
+  team: string;
 }
 
 export interface APIResponse {
