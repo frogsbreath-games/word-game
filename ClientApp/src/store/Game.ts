@@ -48,6 +48,11 @@ export interface WordTile {
   isRevealed: boolean;
 }
 
+export interface Hint {
+  hintWord: string;
+  wordCount: number;
+}
+
 export interface APIResponse {
   message: string;
   data: object;
@@ -138,6 +143,10 @@ interface ReceiveMessage {
   message: Message;
 }
 
+interface RequestGiveHint {
+  type: "REQUEST_GIVE_HINT";
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction =
@@ -157,7 +166,8 @@ type KnownAction =
   | ReceiveStartGameAction
   | RequestAddBotAction
   | ReceiveUpdateGameAction
-  | ReceiveMessage;
+  | ReceiveMessage
+  | RequestGiveHint;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -330,6 +340,30 @@ export const actionCreators = {
 
       dispatch({
         type: "REQUEST_UPDATE_PLAYER"
+      });
+    }
+  },
+  giveHint: (hint: Hint): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${appState.game.game.code}/giveHint`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(hint)
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+        });
+
+      dispatch({
+        type: "REQUEST_GIVE_HINT"
       });
     }
   },
@@ -607,6 +641,14 @@ export const reducer: Reducer<GameState> = (
         messages: state.messages
       };
     case "REQUEST_BOT_PLAYER":
+      return {
+        isLoading: true,
+        localPlayer: state.localPlayer,
+        game: state.game,
+        connection: state.connection,
+        messages: state.messages
+      };
+    case "REQUEST_GIVE_HINT":
       return {
         isLoading: true,
         localPlayer: state.localPlayer,

@@ -10,7 +10,7 @@ import "./Game.css";
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
   typeof GameStore.actionCreators;
 
-type State = { value: string };
+type State = { hintWord: string; wordCount: number };
 
 function getColor(color: string, isRevealed: boolean) {
   if (!isRevealed) {
@@ -61,14 +61,27 @@ const GameTile = ({ wordTile, localPlayer }: GameTypeProps) => (
 class Game extends React.PureComponent<GameProps, State> {
   constructor(props: GameProps) {
     super(props);
-    this.state = { value: "" };
+    this.state = { hintWord: "", wordCount: 0 };
 
-    this.handleChange = this.handleChange.bind(this);
+    this.handleWordChange = this.handleWordChange.bind(this);
+    this.handleCountChange = this.handleCountChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleSubmitClick = this.handleSubmitClick.bind(this);
   }
 
-  handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({ value: event.target.value });
+  handleWordChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({ hintWord: event.target.value });
+  }
+
+  handleCountChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({ wordCount: parseInt(event.target.value) });
+  }
+
+  handleSubmitClick() {
+    this.props.giveHint({
+      hintWord: this.state.hintWord,
+      wordCount: this.state.wordCount
+    } as GameStore.Hint);
   }
 
   handleSubmit(event: React.MouseEvent) {
@@ -91,6 +104,35 @@ class Game extends React.PureComponent<GameProps, State> {
             >
               Current Team: Red
             </h1>
+            <div className="input-group mx-auto">
+              <div className="input-group-prepend">
+                <span className="input-group-text" id="">
+                  Enter Hint & Count
+                </span>
+              </div>
+              <input
+                type="text"
+                value={this.state.hintWord}
+                onChange={this.handleWordChange}
+                className="form-control"
+                placeholder="duck"
+              />
+              <input
+                type="number"
+                value={this.state.wordCount}
+                onChange={this.handleCountChange}
+                className="form-control"
+              />
+              <div className="input-group-append">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  onClick={this.handleSubmitClick}
+                >
+                  Submit hint
+                </button>
+              </div>
+            </div>
           </div>
           <div className="game-board" style={{ marginTop: "10px" }}>
             {this.props.game.wordTiles &&
