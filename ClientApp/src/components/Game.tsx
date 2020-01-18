@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
+import { red, blue, tan, black, grey } from "../constants/ColorConstants";
 import "./Game.css";
 
 // At runtime, Redux will merge together...
@@ -10,16 +11,6 @@ type GameProps = GameStore.GameState & // ... state we've requested from the Red
   typeof GameStore.actionCreators;
 
 type State = { value: string };
-//blue
-var blue = "#009DDC";
-//red
-var red = "#C3423F";
-//tan for bystander
-var tan = "#C5AFA4";
-//grey for unrevealed
-var grey = "#C4C4C4";
-
-var black = "#2A2A2A";
 
 function getColor(color: string, isRevealed: boolean) {
   if (!isRevealed) {
