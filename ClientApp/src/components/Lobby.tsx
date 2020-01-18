@@ -5,6 +5,7 @@ import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
 import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
 import { ReactComponent as SwapIcon } from "../assets/SwapIcon.svg";
+import { ReactComponent as TrashIcon } from "../assets/TrashIcon.svg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -91,7 +92,7 @@ const PlayerTile = ({
             onClick={() => deleteBot(player.number)}
             style={{ marginTop: "10px", marginLeft: "5px" }}
           >
-            Delete Bot
+            <TrashIcon width={25} style={{ opacity: 0.5, fill: "white" }} />
           </button>
         )}
         {player.number == localPlayer.number && !localPlayer.isOrganizer && (
