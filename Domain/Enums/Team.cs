@@ -13,4 +13,17 @@ namespace WordGame.API.Domain.Enums
 		Neutral,
 		Unknown
 	}
+
+	public static class TeamEx
+	{
+		public static Team GetOpposingTeam(this Team team)
+		{
+			return team switch
+			{
+				Team.Red => Team.Blue,
+				Team.Blue => Team.Red,
+				_ => team
+			};
+		}
+	}
 }

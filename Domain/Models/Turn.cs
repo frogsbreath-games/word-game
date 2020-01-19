@@ -26,6 +26,8 @@ namespace WordGame.API.Domain.Models
 
 		public List<Guess> Guesses { get; protected set; } = new List<Guess>();
 
+		public List<PlayerVote> EndTurnVotes { get; protected set; } = new List<PlayerVote>();
+
 		public int? GuessesRemaining => Status == TurnStatus.Guessing && WordCount.HasValue && WordCount.Value > 0
 			? WordCount.Value - Guesses.Count + 1
 			: (int?)null;
@@ -48,6 +50,14 @@ namespace WordGame.API.Domain.Models
 				throw new InvalidOperationException();
 
 			Status = TurnStatus.Guessing;
+		}
+
+		public void End()
+		{
+			if (Status != TurnStatus.Guessing)
+				throw new InvalidOperationException();
+
+			Status = TurnStatus.Over;
 		}
 	}
 }
