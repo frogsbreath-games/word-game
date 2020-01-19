@@ -501,7 +501,7 @@ namespace WordGame.API.Controllers
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
         [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         public async Task<ApiResponse> approveHint(
-            [FromRoute] string code)
+                    [FromRoute] string code)
         {
             Game game = await _repository.GetGameByCode(code);
 
