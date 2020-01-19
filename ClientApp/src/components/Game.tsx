@@ -28,12 +28,14 @@ function getColor(color: string, isRevealed: boolean) {
   }
 }
 
-type GameTypeProps = {
+type GameTileProps = {
   wordTile: GameStore.WordTile;
   localPlayer: GameStore.Player;
+  handleVoteWord: (word: string) => void;
 };
-const GameTile = ({ wordTile, localPlayer }: GameTypeProps) => (
+const GameTile = ({ wordTile, localPlayer, handleVoteWord }: GameTileProps) => (
   <div
+    onClick={() => handleVoteWord(wordTile.word)}
     className="word-tile"
     style={{
       textAlign: "center",
@@ -55,6 +57,17 @@ const GameTile = ({ wordTile, localPlayer }: GameTypeProps) => (
     >
       {wordTile.word}
     </h6>
+    <h6
+      style={{
+        backgroundColor: "rgba(255, 255, 255, 0.75)",
+        padding: "5px",
+        borderRadius: "5px",
+        boxShadow:
+          "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)"
+      }}
+    >
+      Votes: {wordTile.votes.length}
+    </h6>
   </div>
 );
 
@@ -67,6 +80,7 @@ class Game extends React.PureComponent<GameProps, State> {
     this.handleCountChange = this.handleCountChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleSubmitClick = this.handleSubmitClick.bind(this);
+    this.handleVoteWord = this.handleVoteWord.bind(this);
   }
 
   handleWordChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -82,6 +96,10 @@ class Game extends React.PureComponent<GameProps, State> {
       hintWord: this.state.hintWord,
       wordCount: this.state.wordCount
     } as GameStore.Hint);
+  }
+
+  handleVoteWord(word: string) {
+    this.props.voteWord({ word: word });
   }
 
   handleSubmit(event: React.MouseEvent) {
@@ -179,6 +197,7 @@ class Game extends React.PureComponent<GameProps, State> {
                   wordTile={tile}
                   key={tile.word}
                   localPlayer={this.props.localPlayer}
+                  handleVoteWord={this.handleVoteWord}
                 />
               ))}
           </div>

@@ -70,6 +70,10 @@ export interface Hint {
   wordCount: number;
 }
 
+export interface Vote {
+  word: string;
+}
+
 export interface APIResponse {
   message: string;
   data: object;
@@ -302,6 +306,30 @@ export const actionCreators = {
           "Content-Type": "application/json"
         },
         body: JSON.stringify(player)
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+        });
+
+      dispatch({
+        type: "REQUEST_SERVER_ACTION"
+      });
+    }
+  },
+  voteWord: (guess: Vote): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${appState.game.game.code}/voteWord`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(guess)
       })
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
