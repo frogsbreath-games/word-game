@@ -103,11 +103,6 @@ interface ReceiveJoinedGameAction {
   game: Game;
 }
 
-interface ReceiveStartGameAction {
-  type: "RECEIVE_START_GAME";
-  game: Game;
-}
-
 interface ReceiveLeaveDeleteAction {
   type: "RECEIVE_DELETE_GAME";
 }
@@ -131,7 +126,6 @@ type KnownAction =
   | ReceiveLeaveDeleteAction
   | ReceiveCurrentGameAction
   | ReceiveCurrentPlayerAction
-  | ReceiveStartGameAction
   | ReceiveUpdateGameAction
   | ReceiveMessage;
 
@@ -370,10 +364,6 @@ export const actionCreators = {
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
           console.log(data);
-          dispatch({
-            type: "RECEIVE_START_GAME",
-            game: data.data as Game
-          });
         });
 
       dispatch({
@@ -539,14 +529,6 @@ export const reducer: Reducer<GameState> = (
       return {
         isLoading: false,
         localPlayer: action.game.players[action.game.players.length - 1],
-        game: action.game,
-        connection: state.connection,
-        messages: state.messages
-      };
-    case "RECEIVE_START_GAME":
-      return {
-        isLoading: false,
-        localPlayer: state.localPlayer,
         game: action.game,
         connection: state.connection,
         messages: state.messages
