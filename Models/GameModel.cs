@@ -29,7 +29,21 @@ namespace WordGame.API.Models
 			BlueTilesRemaining = game.BlueTilesRemaining;
 			RedTilesRemaining = game.RedTilesRemaining;
 			WinningTeam = game.GetWinningTeam();
-			CurrentTurn = game.CurrentTurn;
+			if (game.CurrentTurn is Turn currentTurn)
+			{
+				CurrentTurn = new TurnModel(
+					currentTurn.Team,
+					currentTurn.TurnNumber,
+					currentTurn.Status,
+					LocalPlayer.IsSpyMaster || currentTurn.Status != TurnStatus.PendingApproval
+						? currentTurn.HintWord
+						: null,
+					LocalPlayer.IsSpyMaster || currentTurn.Status != TurnStatus.PendingApproval
+						? currentTurn.WordCount
+						: null,
+					currentTurn.EndTurnVotes,
+					currentTurn.GuessesRemaining);
+			}
 			Actions = new GameActionsModel(game, LocalPlayer);
 		}
 
@@ -49,7 +63,7 @@ namespace WordGame.API.Models
 
 		public Team? WinningTeam { get; }
 
-		public Turn CurrentTurn { get; }
+		public TurnModel CurrentTurn { get; }
 
 		public GameActionsModel Actions { get; }
 	}

@@ -41,6 +41,7 @@ export interface Turn {
   hintWord?: string;
   wordCount?: number;
   guessesRemaining?: number;
+  endTurnVotes: PlayerVote[];
 }
 
 export interface Player {
