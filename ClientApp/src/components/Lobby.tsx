@@ -91,7 +91,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
       organizerButtons = (
         <div className="row mx-auto">
           <button
-            disabled={!this.props.game.canStart}
+            disabled={!this.props.game.actions.canStart}
             className="btn btn-primary"
             type="button"
             onClick={() => this.props.startGame(this.props.game.code)}
