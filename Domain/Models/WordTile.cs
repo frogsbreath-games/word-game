@@ -16,7 +16,7 @@ namespace WordGame.API.Domain.Models
 		}
 
 		public string Word { get; protected set; }
-		public Team Team { get; protected set; }
+		public Team Team { get; set; }
 		public bool IsRevealed { get; set; }
 		public List<PlayerVote> Votes { get; set; } = new List<PlayerVote>();
 	}

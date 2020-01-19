@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using WordGame.API.Domain.Models;
 using WordGame.API.Extensions;
+using WordGame.API.Models;
 
 namespace WordGame.API.Hubs
 {
@@ -21,6 +22,6 @@ namespace WordGame.API.Hubs
 
 		Task GameDeleted();
 
-		Task GameUpdated(Game game);
+		Task GameUpdated(GameModel gameModel);
 	}
 }

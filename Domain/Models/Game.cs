@@ -29,15 +29,17 @@ namespace WordGame.API.Domain.Models
 		public int RedTilesRemaining => WordTiles.Count(x => !x.IsRevealed && x.Team == Team.Red);
 
 		//This is pretty stupid
-		public Team? WinningTeam => BlueTilesRemaining == 0
-			? Team.Blue
-			: RedTilesRemaining == 0
-				? Team.Red
-				: Turns.Where(t => t.Team == Team.Red).SelectMany(t => t.Guesses.Where(g => g.Team == Team.Black)).Any()
-					? Team.Blue
-					: Turns.Where(t => t.Team == Team.Blue).SelectMany(t => t.Guesses.Where(g => g.Team == Team.Black)).Any()
-						? Team.Red
-						: (Team?)null;
+		public Team? GetWinningTeam() => Status == GameStatus.Lobby
+			? null
+			: BlueTilesRemaining == 0
+				? Team.Blue
+				: RedTilesRemaining == 0
+					? Team.Red
+					: Turns.Where(t => t.Team == Team.Red).SelectMany(t => t.Guesses.Where(g => g.Team == Team.Black)).Any()
+						? Team.Blue
+						: Turns.Where(t => t.Team == Team.Blue).SelectMany(t => t.Guesses.Where(g => g.Team == Team.Black)).Any()
+							? Team.Red
+							: (Team?)null;
 
 		[JsonIgnore]
 		public List<Turn> Turns { get; protected set; } = new List<Turn>();
@@ -111,7 +113,7 @@ namespace WordGame.API.Domain.Models
 
 		public void StartGame(List<WordTile> tiles, Team startingTeam)
 		{
-			if (!CanStart)
+			if (!GameCanStart())
 				throw new InvalidOperationException("Cannot start game!");
 
 			if (tiles.Count != 25)
@@ -132,7 +134,7 @@ namespace WordGame.API.Domain.Models
 
 			CurrentTurn.End();
 
-			if (!WinningTeam.HasValue)
+			if (!GetWinningTeam().HasValue)
 				Turns.Add(new Turn(CurrentTurn.Team.GetOpposingTeam(), CurrentTurn.TurnNumber + 1));
 		}
 
@@ -205,33 +207,30 @@ namespace WordGame.API.Domain.Models
 		public IEnumerable<Player> Agents => Players.Where(x => !x.IsSpyMaster);
 
 		//This is sort of inefficient but whatever
-		public bool CanStart
+		public bool GameCanStart()
 		{
-			get
-			{
-				if (Status != GameStatus.Lobby)
-					return false;
+			if (Status != GameStatus.Lobby)
+				return false;
 
-				if (RedPlayers.Count(x => x.IsSpyMaster) != 1)
-					return false;
+			if (RedPlayers.Count(x => x.IsSpyMaster) != 1)
+				return false;
 
-				if (BluePlayers.Count(x => x.IsSpyMaster) != 1)
-					return false;
+			if (BluePlayers.Count(x => x.IsSpyMaster) != 1)
+				return false;
 
-				if (RedPlayers.Count() < 2)
-					return false;
+			if (RedPlayers.Count() < 2)
+				return false;
 
-				if (BluePlayers.Count() < 2)
-					return false;
+			if (BluePlayers.Count() < 2)
+				return false;
 
-				if (Math.Abs(RedPlayers.Count() - BluePlayers.Count()) > 1)
-					return false;
+			if (Math.Abs(RedPlayers.Count() - BluePlayers.Count()) > 1)
+				return false;
 
-				if (Players.Count != (RedPlayers.Count() + BluePlayers.Count()))
-					return false;
+			if (Players.Count != (RedPlayers.Count() + BluePlayers.Count()))
+				return false;
 
-				return true;
-			}
+			return true;
 		}
 	}
 }

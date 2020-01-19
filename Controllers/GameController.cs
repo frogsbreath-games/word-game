@@ -87,7 +87,7 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse> ForceSignOut()
 		{
 			var currentGame = await GetCurrentGame();
-			if (currentGame.Data is Game game)
+			if (currentGame.Data is GameModel game)
 			{
 				if (User.IsInRole("Organizer"))
 				{
@@ -108,8 +108,8 @@ namespace WordGame.API.Controllers
 		}
 
 		[HttpPost]
-		[Creates(typeof(Game))]
-		public async Task<ApiResponse<Game>> CreateGame()
+		[Creates(typeof(GameModel))]
+		public async Task<ApiResponse<GameModel>> CreateGame()
 		{
 			if (User.Identity.IsAuthenticated)
 				return BadRequest("User is already in a game.");
@@ -122,9 +122,11 @@ namespace WordGame.API.Controllers
 
 			await _repository.AddGame(game);
 
-			await SignInAsPlayer(game.Players.First(), game.Code);
+			var player = game.Players.First();
 
-			return Created(game.Code, game);
+			await SignInAsPlayer(player, game.Code);
+
+			return Created(game.Code, new GameModel(game, player.Id));
 		}
 
 		[HttpGet, UserAuthorize]
@@ -138,21 +140,28 @@ namespace WordGame.API.Controllers
 
 		[HttpGet("{code}"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
-		[Returns(typeof(Game))]
-		public async Task<ApiResponse<Game>> GetGame([FromRoute] string code)
+		[Returns(typeof(GameModel))]
+		public async Task<ApiResponse<GameModel>> GetGame([FromRoute] string code)
 		{
 			Game game = await _repository.GetGameByCode(code);
 
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
 
-			return Ok(game);
+			var playerId = User.GetPlayerId();
+
+			var player = game.Players.SingleOrDefault(x => x.Id == playerId);
+
+			if (player is null)
+				return BadRequest("Cannot get game player is not in.");
+
+			return Ok(new GameModel(game, playerId));
 		}
 
 		[HttpGet("current"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
-		[Returns(typeof(Game))]
-		public Task<ApiResponse<Game>> GetCurrentGame()
+		[Returns(typeof(GameModel))]
+		public Task<ApiResponse<GameModel>> GetCurrentGame()
 			=> GetGame(User.GetGameCode());
 
 		[HttpDelete("{code}"), UserAuthorize(UserRole.Organizer)]
@@ -293,7 +302,7 @@ namespace WordGame.API.Controllers
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
 
-			if (!game.CanStart)
+			if (!game.GameCanStart())
 				return BadRequest($"Cannot start game!");
 
 			//Red always goes first (for now)
@@ -314,8 +323,8 @@ namespace WordGame.API.Controllers
 
 		[HttpPost("{code}/join")]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
-		public async Task<ApiResponse<Game>> JoinGame(
+		[ProducesResponseType(typeof(ApiResponse<GameModel>), (int)HttpStatusCode.OK)]
+		public async Task<ApiResponse<GameModel>> JoinGame(
 			[FromRoute] string code)
 		{
 			if (User.Identity.IsAuthenticated)
@@ -335,7 +344,7 @@ namespace WordGame.API.Controllers
 
 			await SignInAsPlayer(player, code);
 
-			return Ok(game);
+			return Ok(new GameModel(game, player.Id));
 		}
 
 		[HttpPost("{code}/players"), UserAuthorize(UserRole.Organizer)]
@@ -649,9 +658,13 @@ namespace WordGame.API.Controllers
 
 		protected Task UpdateGame(Game game)
 		{
-			return Task.WhenAll(
-				_gameContext.Clients.Players(game.Players).GameUpdated(game),
-				_repository.UpdateGame(game.Code, game));
+			var tasks = new List<Task> { _repository.UpdateGame(game.Code, game) };
+
+			tasks.AddRange(_gameContext.Clients.SendToPlayers(
+					game,
+					(client, model) => client.GameUpdated(model)));
+
+			return Task.WhenAll(tasks);
 		}
 	}
 }

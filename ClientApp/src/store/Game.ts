@@ -16,12 +16,22 @@ export interface GameState {
 export interface Game {
   code: string;
   status: string;
-  canStart: boolean;
   players: Player[];
   wordTiles: WordTile[];
   currentTurn?: Turn;
   blueTilesRemaining: number;
   redTilesRemaining: number;
+  actions: GameActions;
+}
+
+export interface GameActions {
+  canStart: boolean;
+  canDelete: boolean;
+  canAddBot: boolean;
+  canDeleteBot: boolean;
+  canGiveHint: boolean;
+  canApproveHint: boolean;
+  canVote: boolean;
 }
 
 export interface Turn {
