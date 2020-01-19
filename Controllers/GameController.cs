@@ -474,6 +474,12 @@ namespace WordGame.API.Controllers
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
 
+			if (game.Status != GameStatus.InProgress)
+				return BadRequest($"Cannot give hint in game that isn't in progress.");
+
+			if (game.CurrentTurn.Status != TurnStatus.Planning)
+				return BadRequest($"Cannot give hint outside the planning stage of the current turn.");
+
 			var id = User.GetPlayerId();
 
 			var player = game.Players.SingleOrDefault(x => x.Id == id);
@@ -508,6 +514,12 @@ namespace WordGame.API.Controllers
 
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
+
+			if (game.Status != GameStatus.InProgress)
+				return BadRequest($"Cannot approve hint in game that isn't in progress.");
+
+			if (game.CurrentTurn.Status != TurnStatus.PendingApproval)
+				return BadRequest($"Cannot approve hint outside the pending approval stage of the current turn.");
 
 			var id = User.GetPlayerId();
 
@@ -558,7 +570,7 @@ namespace WordGame.API.Controllers
 				return NotFound($"Cannot find player in game with code: [{code}]");
 
 			if (player.IsSpyMaster || player.Team != game.CurrentTurn.Team)
-				return BadRequest("This player cannot give a hint!");
+				return BadRequest("This player cannot vote for a word!");
 
 			game.SetPlayerVote(player, voteModel.Word);
 
@@ -599,7 +611,7 @@ namespace WordGame.API.Controllers
 				return NotFound($"Cannot find player in game with code: [{code}]");
 
 			if (player.IsSpyMaster || player.Team != game.CurrentTurn.Team)
-				return BadRequest("This player cannot give a hint!");
+				return BadRequest("This player cannot vote to end turn!");
 
 			game.VoteEndTurn(player);
 
