@@ -574,6 +574,46 @@ namespace WordGame.API.Controllers
 			[FromBody] VoteModel voteModel)
 			=> VoteWord(User.GetGameCode(), voteModel);
 
+		[HttpPost("{code}/voteEndTurn"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public async Task<ApiResponse> VoteEndTurn(
+			[FromRoute] string code)
+		{
+			Game game = await _repository.GetGameByCode(code);
+
+			if (game is null)
+				return NotFound($"Cannot find game with code: [{code}]");
+
+			if (game.Status != GameStatus.InProgress)
+				return BadRequest($"Cannot vote end turn in game that isn't in progress.");
+
+			if (game.CurrentTurn.Status != TurnStatus.Guessing)
+				return BadRequest($"Cannot vote end turn outside the guessing stage of the current turn.");
+
+			var id = User.GetPlayerId();
+
+			var player = game.Players.SingleOrDefault(x => x.Id == id);
+
+			if (player is null)
+				return NotFound($"Cannot find player in game with code: [{code}]");
+
+			if (player.IsSpyMaster || player.Team != game.CurrentTurn.Team)
+				return BadRequest("This player cannot give a hint!");
+
+			game.VoteEndTurn(player);
+
+			await UpdateGame(game);
+
+			return Accepted("Player voted to end turn.");
+		}
+
+		[HttpPost("current/voteEndTurn"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> CurrentGameVoteEndTurn()
+			=> VoteEndTurn(User.GetGameCode());
+
 		protected Task SignInAsPlayer(Player player, string code)
 		{
 			var claims = new List<Claim>
