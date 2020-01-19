@@ -74,14 +74,13 @@ export interface Message {
 // -----------------
 // ACTIONS - These are serializable (hence replayable) descriptions of state transitions.
 // They do not themselves have any side-effects; they just describe something that is going to happen.
+interface RequestServerAction {
+  type: "REQUEST_SERVER_ACTION";
+}
 
 interface CreateHubConnectionAction {
   type: "CREATE_HUB_CONNECTION";
   connection: signalR.HubConnection;
-}
-
-interface RequestNewGameAction {
-  type: "REQUEST_NEW_GAME";
 }
 
 interface ReceiveNewGameAction {
@@ -89,17 +88,9 @@ interface ReceiveNewGameAction {
   game: Game;
 }
 
-interface RequestCurrentGameAction {
-  type: "REQUEST_CURRENT_GAME";
-}
-
 interface ReceiveCurrentGameAction {
   type: "RECEIVE_CURRENT_GAME";
   game: Game;
-}
-
-interface RequestCurrentPlayerAction {
-  type: "REQUEST_CURRENT_PLAYER";
 }
 
 interface ReceiveCurrentPlayerAction {
@@ -107,21 +98,9 @@ interface ReceiveCurrentPlayerAction {
   localPlayer: Player;
 }
 
-interface RequestUpdatePlayerAction {
-  type: "REQUEST_UPDATE_PLAYER";
-}
-
-interface RequestJoinGameAction {
-  type: "REQUEST_JOIN_GAME";
-}
-
 interface ReceiveJoinedGameAction {
   type: "RECEIVE_JOIN_GAME";
   game: Game;
-}
-
-interface RequestStartGameAction {
-  type: "REQUEST_START_GAME";
 }
 
 interface ReceiveStartGameAction {
@@ -129,16 +108,8 @@ interface ReceiveStartGameAction {
   game: Game;
 }
 
-interface RequestLeaveDeleteAction {
-  type: "REQUEST_DELETE_GAME";
-}
-
 interface ReceiveLeaveDeleteAction {
   type: "RECEIVE_DELETE_GAME";
-}
-
-interface RequestAddBotAction {
-  type: "REQUEST_BOT_PLAYER";
 }
 
 interface ReceiveUpdateGameAction {
@@ -150,31 +121,19 @@ interface ReceiveMessage {
   message: Message;
 }
 
-interface RequestGiveHint {
-  type: "REQUEST_GIVE_HINT";
-}
-
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction =
+  | RequestServerAction
   | CreateHubConnectionAction
-  | RequestNewGameAction
   | ReceiveNewGameAction
-  | RequestUpdatePlayerAction
-  | RequestJoinGameAction
   | ReceiveJoinedGameAction
-  | RequestLeaveDeleteAction
   | ReceiveLeaveDeleteAction
-  | RequestCurrentGameAction
   | ReceiveCurrentGameAction
-  | RequestCurrentPlayerAction
   | ReceiveCurrentPlayerAction
-  | RequestStartGameAction
   | ReceiveStartGameAction
-  | RequestAddBotAction
   | ReceiveUpdateGameAction
-  | ReceiveMessage
-  | RequestGiveHint;
+  | ReceiveMessage;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -241,7 +200,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_NEW_GAME"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -276,7 +235,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_CURRENT_GAME"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -310,7 +269,7 @@ export const actionCreators = {
                 type: "RECEIVE_CURRENT_GAME",
                 game: data.data as Game
               });
-              dispatch({ type: "REQUEST_CURRENT_GAME" });
+              dispatch({ type: "REQUEST_SERVER_ACTION" });
             });
         })
         .catch(error => {
@@ -322,7 +281,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_CURRENT_PLAYER"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -346,7 +305,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_UPDATE_PLAYER"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -370,7 +329,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_GIVE_HINT"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -394,7 +353,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_JOIN_GAME"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -418,7 +377,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_START_GAME"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -441,7 +400,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_DELETE_GAME"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -462,7 +421,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_DELETE_GAME"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -482,7 +441,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_BOT_PLAYER"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   },
@@ -502,7 +461,7 @@ export const actionCreators = {
         });
 
       dispatch({
-        type: "REQUEST_UPDATE_PLAYER"
+        type: "REQUEST_SERVER_ACTION"
       });
     }
   }
@@ -527,6 +486,14 @@ export const reducer: Reducer<GameState> = (
   }
   const action = incomingAction as KnownAction;
   switch (action.type) {
+    case "REQUEST_SERVER_ACTION":
+      return {
+        isLoading: true,
+        localPlayer: state.localPlayer,
+        game: state.game,
+        connection: state.connection,
+        messages: state.messages
+      };
     case "CREATE_HUB_CONNECTION":
       return {
         isLoading: false,
@@ -544,14 +511,6 @@ export const reducer: Reducer<GameState> = (
         messages: [...state.messages, action.message]
       };
     }
-    case "REQUEST_CURRENT_GAME":
-      return {
-        isLoading: true,
-        localPlayer: state.localPlayer,
-        game: state.game,
-        connection: state.connection,
-        messages: state.messages
-      };
     case "RECEIVE_CURRENT_GAME":
       return {
         isLoading: false,
@@ -560,26 +519,10 @@ export const reducer: Reducer<GameState> = (
         connection: state.connection,
         messages: state.messages
       };
-    case "REQUEST_CURRENT_PLAYER":
-      return {
-        isLoading: true,
-        localPlayer: state.localPlayer,
-        game: state.game,
-        connection: state.connection,
-        messages: state.messages
-      };
     case "RECEIVE_CURRENT_PLAYER":
       return {
         isLoading: false,
         localPlayer: action.localPlayer,
-        game: state.game,
-        connection: state.connection,
-        messages: state.messages
-      };
-    case "REQUEST_NEW_GAME":
-      return {
-        isLoading: true,
-        localPlayer: state.localPlayer,
         game: state.game,
         connection: state.connection,
         messages: state.messages
@@ -592,27 +535,11 @@ export const reducer: Reducer<GameState> = (
         connection: state.connection,
         messages: state.messages
       };
-    case "REQUEST_JOIN_GAME":
-      return {
-        isLoading: true,
-        localPlayer: state.localPlayer,
-        game: state.game,
-        connection: state.connection,
-        messages: state.messages
-      };
     case "RECEIVE_JOIN_GAME":
       return {
         isLoading: false,
         localPlayer: action.game.players[action.game.players.length - 1],
         game: action.game,
-        connection: state.connection,
-        messages: state.messages
-      };
-    case "REQUEST_START_GAME":
-      return {
-        isLoading: true,
-        localPlayer: state.localPlayer,
-        game: state.game,
         connection: state.connection,
         messages: state.messages
       };
@@ -624,43 +551,11 @@ export const reducer: Reducer<GameState> = (
         connection: state.connection,
         messages: state.messages
       };
-    case "REQUEST_DELETE_GAME":
-      return {
-        isLoading: true,
-        localPlayer: state.localPlayer,
-        game: state.game,
-        connection: state.connection,
-        messages: state.messages
-      };
     case "RECEIVE_DELETE_GAME":
       return {
         isLoading: false,
         localPlayer: {} as Player,
         game: {} as Game,
-        messages: state.messages
-      };
-    case "REQUEST_UPDATE_PLAYER":
-      return {
-        isLoading: true,
-        localPlayer: state.localPlayer,
-        game: state.game,
-        connection: state.connection,
-        messages: state.messages
-      };
-    case "REQUEST_BOT_PLAYER":
-      return {
-        isLoading: true,
-        localPlayer: state.localPlayer,
-        game: state.game,
-        connection: state.connection,
-        messages: state.messages
-      };
-    case "REQUEST_GIVE_HINT":
-      return {
-        isLoading: true,
-        localPlayer: state.localPlayer,
-        game: state.game,
-        connection: state.connection,
         messages: state.messages
       };
     case "RECEIVE_UPDATE_GAME":
