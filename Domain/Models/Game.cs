@@ -44,7 +44,7 @@ namespace WordGame.API.Domain.Models
 		[JsonIgnore]
 		public List<Turn> Turns { get; protected set; } = new List<Turn>();
 
-		public Turn CurrentTurn => Turns.OrderBy(x => x.TurnNumber).FirstOrDefault();
+		public Turn CurrentTurn => Turns.OrderBy(x => x.TurnNumber).LastOrDefault();
 
 		public Game(
 			string code,
