@@ -3,9 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WordGame.API.Application.Authorization;
 
 namespace WordGame.API.Hubs
 {
+	[UserAuthorize]
 	public abstract class AuthorizedGroupHub<TClient> : Hub<TClient>
 		where TClient : class
 	{

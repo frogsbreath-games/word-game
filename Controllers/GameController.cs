@@ -9,7 +9,9 @@ using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using WordGame.API.Application.Authorization;
 using WordGame.API.Application.Services;
+using WordGame.API.Attributes;
 using WordGame.API.Domain.Enums;
 using WordGame.API.Domain.Models;
 using WordGame.API.Domain.Repositories;
@@ -58,6 +60,13 @@ namespace WordGame.API.Controllers
 			return new ApiResponse(message);
 		}
 
+		protected new ApiResponse Accepted(string message)
+		{
+			Response.StatusCode = (int)HttpStatusCode.Accepted;
+
+			return new ApiResponse(message);
+		}
+
 		protected ApiResponse<T> Created<T>(string pathPart, T obj)
 		{
 			Response.StatusCode = (int)HttpStatusCode.Created;
@@ -74,8 +83,7 @@ namespace WordGame.API.Controllers
 		}
 
 		//This should only be used if your game got deleted without you somehow.
-		[HttpPost("forceSignOut")]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpPost("forceSignOut"), UserAuthorize]
 		public async Task<ApiResponse> ForceSignOut()
 		{
 			var currentGame = await GetCurrentGame();
@@ -100,7 +108,7 @@ namespace WordGame.API.Controllers
 		}
 
 		[HttpPost]
-		[ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.Created)]
+		[Creates(typeof(Game))]
 		public async Task<ApiResponse<Game>> CreateGame()
 		{
 			if (User.Identity.IsAuthenticated)
@@ -119,9 +127,8 @@ namespace WordGame.API.Controllers
 			return Created(game.Code, game);
 		}
 
-		[HttpGet]
-		[ProducesResponseType(typeof(ApiResponse<List<Game>>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpGet, UserAuthorize]
+		[Returns(typeof(List<Game>))]
 		public async Task<ApiResponse<List<Game>>> GetAll(
 			[FromQuery] int skip = 0,
 			[FromQuery] int take = 100)
@@ -129,10 +136,9 @@ namespace WordGame.API.Controllers
 			return Ok(await _repository.GetGames(skip, take));
 		}
 
-		[HttpGet("{code}")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpGet("{code}"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[Returns(typeof(Game))]
 		public async Task<ApiResponse<Game>> GetGame([FromRoute] string code)
 		{
 			Game game = await _repository.GetGameByCode(code);
@@ -143,17 +149,15 @@ namespace WordGame.API.Controllers
 			return Ok(game);
 		}
 
-		[HttpGet("current")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpGet("current"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[Returns(typeof(Game))]
 		public Task<ApiResponse<Game>> GetCurrentGame()
 			=> GetGame(User.GetGameCode());
 
-		[HttpDelete("{code}")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+		[HttpDelete("{code}"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
 		public async Task<ApiResponse> DeleteGame([FromRoute] string code)
 		{
 			Game game = await _repository.GetGameByCode(code);
@@ -174,20 +178,18 @@ namespace WordGame.API.Controllers
 
 			await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-			return new ApiResponse("Game deleted");
+			return Accepted("Game deleted");
 		}
 
-		[HttpDelete("current")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+		[HttpDelete("current"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
 		public Task<ApiResponse> DeleteCurrentGame()
 			=> DeleteGame(User.GetGameCode());
 
-		[HttpGet("{code}/players")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<List<Player>>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpGet("{code}/players"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[Returns(typeof(List<Player>))]
 		public async Task<ApiResponse<List<Player>>> GetGamePlayers(
 			[FromRoute] string code,
 			[FromQuery] Team? team = null,
@@ -209,10 +211,9 @@ namespace WordGame.API.Controllers
 			return Ok(players.ToList());
 		}
 
-		[HttpGet("current/players")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<List<Player>>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpGet("current/players"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[Returns(typeof(List<Player>))]
 		public Task<ApiResponse<List<Player>>> GetCurrentGamePlayers(
 			[FromQuery] Team? team = null,
 			[FromQuery] bool? isSpyMaster = null)
@@ -221,10 +222,9 @@ namespace WordGame.API.Controllers
 				team,
 				isSpyMaster);
 
-		[HttpGet("{code}/players/self")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpGet("{code}/players/self"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[Returns(typeof(Player))]
 		public async Task<ApiResponse<Player>> GetSelfGamePlayer(
 			[FromRoute] string code)
 		{
@@ -243,17 +243,15 @@ namespace WordGame.API.Controllers
 			return Ok(player);
 		}
 
-		[HttpGet("current/players/self")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpGet("current/players/self"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[Returns(typeof(Player))]
 		public Task<ApiResponse<Player>> GetCurrentGameSelf()
 			=> GetSelfGamePlayer(User.GetGameCode());
 
-		[HttpPost("{code}/quit")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+		[HttpPost("{code}/quit"), UserAuthorize(UserRole.Player)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Player")]
 		public async Task<ApiResponse> QuitGame(
 			[FromRoute] string code)
 		{
@@ -278,18 +276,16 @@ namespace WordGame.API.Controllers
 			return new ApiResponse("Disconnected");
 		}
 
-		[HttpPost("current/quit")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+		[HttpPost("current/quit"), UserAuthorize(UserRole.Player)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Player")]
 		public Task<ApiResponse> QuitCurrentGame()
 			=> QuitGame(User.GetGameCode());
 
-		[HttpPost("{code}/start")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
-		public async Task<ApiResponse<Game>> StartGame(
+		[HttpPost("{code}/start"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public async Task<ApiResponse> StartGame(
 			[FromRoute] string code)
 		{
 			Game game = await _repository.GetGameByCode(code);
@@ -307,18 +303,17 @@ namespace WordGame.API.Controllers
 
 			await UpdateGame(game);
 
-			return Ok(game);
+			return Accepted("Game Started");
 		}
 
-		[HttpPost("current/start")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
-		public Task<ApiResponse<Game>> StartCurrentGame()
+		[HttpPost("current/start"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> StartCurrentGame()
 			=> StartGame(User.GetGameCode());
 
 		[HttpPost("{code}/join")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ProducesResponseType(typeof(ApiResponse<Game>), (int)HttpStatusCode.OK)]
 		public async Task<ApiResponse<Game>> JoinGame(
 			[FromRoute] string code)
@@ -343,11 +338,10 @@ namespace WordGame.API.Controllers
 			return Ok(game);
 		}
 
-		[HttpPost("{code}/players")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
-		public async Task<ApiResponse<Player>> AddGameBot(
+		[HttpPost("{code}/players"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public async Task<ApiResponse> AddGameBot(
 			[FromRoute] string code)
 		{
 			Game game = await _repository.GetGameByCode(code);
@@ -358,24 +352,22 @@ namespace WordGame.API.Controllers
 			if (game.Status != GameStatus.Lobby)
 				return BadRequest($"Cannot add bot to game in status: [{game.Status}]");
 
-			var player = game.AddNewPlayer(_nameGenerator.GetRandomName(), isBot: true);
+			game.AddNewPlayer(_nameGenerator.GetRandomName(), isBot: true);
 
 			await UpdateGame(game);
 
-			return Ok(player);
+			return Accepted("Bot Added.");
 		}
 
-		[HttpPost("current/players")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
-		public Task<ApiResponse<Player>> AddCurrentGameBot()
+		[HttpPost("current/players"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> AddCurrentGameBot()
 			=> AddGameBot(User.GetGameCode());
 
-		[HttpGet("{code}/players/{number}")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpGet("{code}/players/{number}"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[Returns(typeof(Player))]
 		public async Task<ApiResponse<Player>> GetGamePlayer(
 			[FromRoute] string code,
 			[FromRoute] int number)
@@ -393,18 +385,16 @@ namespace WordGame.API.Controllers
 			return Ok(player);
 		}
 
-		[HttpGet("current/players/{number}")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpGet("current/players/{number}"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[Returns(typeof(Player))]
 		public Task<ApiResponse<Player>> GetCurrentGamePlayer(
 			[FromRoute] int number)
 			=> GetGamePlayer(User.GetGameCode(), number);
 
-		[HttpDelete("{code}/players/{number}")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+		[HttpDelete("{code}/players/{number}"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
 		public async Task<ApiResponse> DeleteGameBot(
 			[FromRoute] string code,
 			[FromRoute] int number)
@@ -426,22 +416,20 @@ namespace WordGame.API.Controllers
 
 			await UpdateGame(game);
 
-			return new ApiResponse("Bot Deleted");
+			return Accepted("Bot Deleted");
 		}
 
-		[HttpDelete("current/players/{number}")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Organizer")]
+		[HttpDelete("current/players/{number}"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
 		public Task<ApiResponse> DeleteCurrentGameBot(
 			[FromRoute] int number)
 			=> DeleteGameBot(User.GetGameCode(), number);
 
-		[HttpPost("{code}/players/{number}")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
-		public async Task<ApiResponse<Player>> UpdatePlayer(
+		[HttpPost("{code}/players/{number}"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public async Task<ApiResponse> UpdatePlayer(
 			[FromRoute] string code,
 			[FromRoute] int number,
 			[FromBody] PlayerModel playerModel)
@@ -463,13 +451,20 @@ namespace WordGame.API.Controllers
 
 			await UpdateGame(game);
 
-			return Ok(player);
+			return Accepted("Player Updated.");
 		}
 
-		[HttpPost("{code}/giveHint")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+		[HttpPost("current/players/{number}"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> UpdatePlayerInCurrentGame(
+			[FromRoute] int number,
+			[FromBody] PlayerModel playerModel)
+			=> UpdatePlayer(User.GetGameCode(), number, playerModel);
+
+		[HttpPost("{code}/giveHint"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
 		public async Task<ApiResponse> GiveHint(
 			[FromRoute] string code,
 			[FromBody] HintModel hintModel)
@@ -493,15 +488,21 @@ namespace WordGame.API.Controllers
 
 			await UpdateGame(game);
 
-			return new ApiResponse("Hint submitted.");
+			return Accepted("Hint submitted.");
 		}
 
-		[HttpPost("{code}/approveHint")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
-		public async Task<ApiResponse> approveHint(
-					[FromRoute] string code)
+		[HttpPost("current/giveHint"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> GiveCurrentGameHint(
+			[FromBody] HintModel hintModel)
+			=> GiveHint(User.GetGameCode(), hintModel);
+
+		[HttpPost("{code}/approveHint"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public async Task<ApiResponse> ApproveHint(
+			[FromRoute] string code)
 		{
 			Game game = await _repository.GetGameByCode(code);
 
@@ -522,24 +523,21 @@ namespace WordGame.API.Controllers
 
 			await UpdateGame(game);
 
-			return new ApiResponse("Hint approved.");
+			return Accepted("Hint approved.");
 		}
 
-		[HttpPost("current/players/{number}")]
-		[ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-		[ProducesResponseType(typeof(ApiResponse<Player>), (int)HttpStatusCode.OK)]
-		[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
-		public Task<ApiResponse<Player>> UpdatePlayerInCurrentGame(
-			[FromRoute] int number,
-			[FromBody] PlayerModel playerModel)
-			=> UpdatePlayer(User.GetGameCode(), number, playerModel);
+		[HttpPost("current/approveHint"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> ApproveCurrentGameHint()
+			=> ApproveHint(User.GetGameCode());
 
 		protected Task SignInAsPlayer(Player player, string code)
 		{
 			var claims = new List<Claim>
 			{
 				new Claim(ClaimTypes.NameIdentifier, player.Id.ToString()),
-				new Claim(ClaimTypes.Role, player.IsOrganizer ? "Organizer" : "Player"),
+				new Claim(ClaimTypes.Role, player.IsOrganizer ? nameof(UserRole.Organizer) : nameof(UserRole.Player)),
 				new Claim(ClaimTypes.Name, player.Name),
 				new Claim("Game", code)
 			};
