@@ -532,6 +532,48 @@ namespace WordGame.API.Controllers
 		public Task<ApiResponse> ApproveCurrentGameHint()
 			=> ApproveHint(User.GetGameCode());
 
+		[HttpPost("{code}/voteWord"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public async Task<ApiResponse> VoteWord(
+			[FromRoute] string code,
+			[FromBody] VoteModel voteModel)
+		{
+			Game game = await _repository.GetGameByCode(code);
+
+			if (game is null)
+				return NotFound($"Cannot find game with code: [{code}]");
+
+			if (game.Status != GameStatus.InProgress)
+				return BadRequest($"Cannot cast word vote in game that isn't in progress.");
+
+			if (game.CurrentTurn.Status != TurnStatus.Guessing)
+				return BadRequest($"Cannot cast word vote outside the guessing stage of the current turn.");
+
+			var id = User.GetPlayerId();
+
+			var player = game.Players.SingleOrDefault(x => x.Id == id);
+
+			if (player is null)
+				return NotFound($"Cannot find player in game with code: [{code}]");
+
+			if (player.IsSpyMaster || player.Team != game.CurrentTurn.Team)
+				return BadRequest("This player cannot give a hint!");
+
+			game.SetPlayerVote(player, voteModel.Word);
+
+			await UpdateGame(game);
+
+			return Accepted("Player Word Vote Set.");
+		}
+
+		[HttpPost("current/voteWord"), UserAuthorize]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> CurrentGameVoteWord(
+			[FromBody] VoteModel voteModel)
+			=> VoteWord(User.GetGameCode(), voteModel);
+
 		protected Task SignInAsPlayer(Player player, string code)
 		{
 			var claims = new List<Claim>
