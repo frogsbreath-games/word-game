@@ -486,7 +486,7 @@ namespace WordGame.API.Controllers
             if (player is null)
                 return NotFound($"Cannot find player in game with code: [{code}]");
 
-            if (!player.IsSpyMaster && player.Team == game.CurrentTurn.Team)
+            if (!player.IsSpyMaster || player.Team != game.CurrentTurn.Team)
                 return BadRequest("This player cannot give a hint!");
 
             game.CurrentTurn.GiveHint(hintModel.HintWord, hintModel.WordCount);
@@ -515,7 +515,7 @@ namespace WordGame.API.Controllers
             if (player is null)
                 return NotFound($"Cannot find player in game with code: [{code}]");
 
-            if (!player.IsSpyMaster && player.Team != game.CurrentTurn.Team)
+            if (!player.IsSpyMaster || player.Team == game.CurrentTurn.Team)
                 return BadRequest("This player cannot approve a hint!");
 
             game.CurrentTurn.ApproveHint();

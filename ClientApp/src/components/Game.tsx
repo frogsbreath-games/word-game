@@ -92,6 +92,12 @@ class Game extends React.PureComponent<GameProps, State> {
     if (!this.props.game.status || this.props.game.status !== "inProgress") {
       return <Redirect to="/game-home" />;
     }
+    let currentTeam;
+    let currentStatus;
+    if (this.props.game.currentTurn) {
+      currentTeam = this.props.game.currentTurn.team;
+      currentStatus = this.props.game.currentTurn.status;
+    }
 
     return (
       <React.Fragment>
@@ -99,11 +105,16 @@ class Game extends React.PureComponent<GameProps, State> {
           <div style={{ textAlign: "center" }}>
             <h1
               style={{
-                color: getColor("red", true)
+                color: getColor(
+                  currentTeam === undefined ? "black" : currentTeam,
+                  true
+                )
               }}
             >
-              Current Team: Red
+              Current Team: {currentTeam}
             </h1>
+            <h3>{currentStatus}</h3>
+
             <div className="input-group mx-auto">
               <div className="input-group-prepend">
                 <span className="input-group-text" id="">
