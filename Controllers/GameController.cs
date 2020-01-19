@@ -486,7 +486,7 @@ namespace WordGame.API.Controllers
             if (player is null)
                 return NotFound($"Cannot find player in game with code: [{code}]");
 
-            if (!player.IsSpyMaster && player.Team != game.CurrentTurn.Team)
+            if (!player.IsSpyMaster && player.Team == game.CurrentTurn.Team)
                 return BadRequest("This player cannot give a hint!");
 
             game.CurrentTurn.GiveHint(hintModel.HintWord, hintModel.WordCount);
@@ -494,6 +494,35 @@ namespace WordGame.API.Controllers
             await UpdateGame(game);
 
             return new ApiResponse("Hint submitted.");
+        }
+
+        [HttpPost("{code}/approveHint")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public async Task<ApiResponse> approveHint(
+            [FromRoute] string code)
+        {
+            Game game = await _repository.GetGameByCode(code);
+
+            if (game is null)
+                return NotFound($"Cannot find game with code: [{code}]");
+
+            var id = User.GetPlayerId();
+
+            var player = game.Players.SingleOrDefault(x => x.Id == id);
+
+            if (player is null)
+                return NotFound($"Cannot find player in game with code: [{code}]");
+
+            if (!player.IsSpyMaster && player.Team != game.CurrentTurn.Team)
+                return BadRequest("This player cannot approve a hint!");
+
+            game.CurrentTurn.ApproveHint();
+
+            await UpdateGame(game);
+
+            return new ApiResponse("Hint approved.");
         }
 
         [HttpPost("current/players/{number}")]
