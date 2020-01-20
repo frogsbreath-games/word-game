@@ -124,7 +124,6 @@ class Game extends React.PureComponent<GameProps, State> {
     if (!this.props.game.status || this.props.game.status !== "inProgress") {
       return <Redirect to="/game-home" />;
     }
-    const approvalStatus = "pendingApproval";
     let currentTeam;
     let currentStatus;
     if (this.props.game.currentTurn) {
@@ -148,61 +147,58 @@ class Game extends React.PureComponent<GameProps, State> {
             </h1>
             <h3>{currentStatus}</h3>
             {/* this should only be seen by spy master when it is hint phase */}
-            {this.props.localPlayer.isSpyMaster &&
-              this.props.localPlayer.team === currentTeam && (
-                <div className="input-group mx-auto">
-                  <div className="input-group-prepend">
-                    <span className="input-group-text" id="">
-                      Enter Hint & Count
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    value={this.state.hintWord}
-                    onChange={this.handleWordChange}
-                    className="form-control"
-                    placeholder="Enter hint here..."
-                  />
-                  <input
-                    type="number"
-                    value={this.state.wordCount}
-                    onChange={this.handleCountChange}
-                    className="form-control"
-                    min="0"
-                  />
-                  <div className="input-group-append">
-                    <button
-                      className="btn btn-outline-secondary"
-                      type="button"
-                      onClick={this.handleSubmitClick}
-                    >
-                      Submit hint
-                    </button>
-                  </div>
+            {this.props.game.actions.canGiveHint && (
+              <div className="input-group mx-auto">
+                <div className="input-group-prepend">
+                  <span className="input-group-text" id="">
+                    Enter Hint & Count
+                  </span>
                 </div>
-              )}
-            {this.props.localPlayer.isSpyMaster &&
-              this.props.localPlayer.team !== currentTeam &&
-              currentStatus === approvalStatus && (
-                <div>
-                  <h3>
-                    Pending hint:{" "}
-                    {this.props.game.currentTurn
-                      ? this.props.game.currentTurn.hintWord
-                      : ""}
-                  </h3>
+                <input
+                  type="text"
+                  value={this.state.hintWord}
+                  onChange={this.handleWordChange}
+                  className="form-control"
+                  placeholder="Enter hint here..."
+                />
+                <input
+                  type="number"
+                  value={this.state.wordCount}
+                  onChange={this.handleCountChange}
+                  className="form-control"
+                  min="0"
+                />
+                <div className="input-group-append">
                   <button
+                    className="btn btn-outline-secondary"
                     type="button"
-                    className="btn btn-primary"
-                    style={{ width: 300 }}
-                    onClick={() => {
-                      this.props.approveHint();
-                    }}
+                    onClick={this.handleSubmitClick}
                   >
-                    Approve
+                    Submit hint
                   </button>
                 </div>
-              )}
+              </div>
+            )}
+            {this.props.game.actions.canApproveHint && (
+              <div>
+                <h3>
+                  Pending hint:{" "}
+                  {this.props.game.currentTurn
+                    ? this.props.game.currentTurn.hintWord
+                    : ""}
+                </h3>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ width: 300 }}
+                  onClick={() => {
+                    this.props.approveHint();
+                  }}
+                >
+                  Approve
+                </button>
+              </div>
+            )}
           </div>
           <div className="game-board" style={{ marginTop: "10px" }}>
             {this.props.game.wordTiles &&
@@ -231,7 +227,7 @@ class Game extends React.PureComponent<GameProps, State> {
               </button>
             </div>
           )}
-          {this.props.localPlayer.isOrganizer && (
+          {this.props.game.actions.canDelete && (
             <div className="row">
               <button
                 className="btn btn-danger"
