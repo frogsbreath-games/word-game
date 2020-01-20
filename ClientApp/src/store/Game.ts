@@ -342,6 +342,26 @@ export const actionCreators = {
       });
     }
   },
+  voteEndTurn: (): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${appState.game.game.code}/voteEndTurn`, {
+        method: "POST"
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+        });
+
+      dispatch({
+        type: "REQUEST_SERVER_ACTION"
+      });
+    }
+  },
   giveHint: (hint: Hint): AppThunkAction<KnownAction> => (
     dispatch,
     getState

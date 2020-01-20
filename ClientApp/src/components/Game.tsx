@@ -201,6 +201,18 @@ class Game extends React.PureComponent<GameProps, State> {
                 />
               ))}
           </div>
+          {this.props.game.actions.canVote && (
+            <div className="row">
+              <button
+                className="btn btn-info"
+                type="button"
+                onClick={() => this.props.voteEndTurn()}
+                style={{ marginTop: "10px", marginLeft: "20px" }}
+              >
+                End Turn ({this.props.game.currentTurn ? this.props.game.currentTurn.endTurnVotes.length : 0})
+              </button>
+            </div>
+          )}
           {this.props.localPlayer.isOrganizer && (
             <div className="row">
               <button
