@@ -21,6 +21,20 @@ class Lobby extends React.PureComponent<GameProps, State> {
     this.handleChange = this.handleChange.bind(this);
   }
 
+  public componentDidMount() {
+    //game has not been retrieved do not create a connection ever
+    if (this.props.game.status) {
+      //if we are supposed to be in the lobby and we don't have a connection make one
+      if (this.props.game.status === "lobby" && !this.props.connection) {
+        this.ensureConnectionExists();
+      }
+    }
+  }
+
+  private ensureConnectionExists() {
+    this.props.createConnection();
+  }
+
   public handleKeyPress(event: React.KeyboardEvent) {
     console.log("Key Pressed");
     var keyCode = event.keyCode || event.which;
@@ -44,20 +58,6 @@ class Lobby extends React.PureComponent<GameProps, State> {
 
   handleSubmit(event: React.MouseEvent) {
     event.preventDefault();
-  }
-
-  public componentDidMount() {
-    //game has not been retrieved do not create a connection ever
-    if (this.props.game.status) {
-      //if we are supposed to be in the lobby and we don't have a connection make one
-      if (this.props.game.status === "lobby" && !this.props.connection) {
-        this.ensureConnectionExists();
-      }
-    }
-  }
-
-  private ensureConnectionExists() {
-    this.props.createConnection();
   }
 
   public swapTeams(player: GameStore.Player) {

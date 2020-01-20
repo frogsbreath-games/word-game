@@ -83,6 +83,20 @@ class Game extends React.PureComponent<GameProps, State> {
     this.handleVoteWord = this.handleVoteWord.bind(this);
   }
 
+  public componentDidMount() {
+    //game has not been retrieved do not create a connection ever
+    if (this.props.game.status) {
+      //if we are supposed to be in the lobby and we don't have a connection make one
+      if (this.props.game.status === "lobby" && !this.props.connection) {
+        this.ensureConnectionExists();
+      }
+    }
+  }
+
+  private ensureConnectionExists() {
+    this.props.createConnection();
+  }
+
   handleWordChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ hintWord: event.target.value });
   }
@@ -209,7 +223,11 @@ class Game extends React.PureComponent<GameProps, State> {
                 onClick={() => this.props.voteEndTurn()}
                 style={{ marginTop: "10px", marginLeft: "20px" }}
               >
-                End Turn ({this.props.game.currentTurn ? this.props.game.currentTurn.endTurnVotes.length : 0})
+                End Turn (
+                {this.props.game.currentTurn
+                  ? this.props.game.currentTurn.endTurnVotes.length
+                  : 0}
+                )
               </button>
             </div>
           )}
