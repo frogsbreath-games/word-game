@@ -209,6 +209,16 @@ class Game extends React.PureComponent<GameProps, State> {
                 </button>
               </div>
             )}
+            {currentStatus === "guessing" && (
+              <div>
+                <h1>
+                  Hint:{" "}
+                  {this.props.game.currentTurn
+                    ? this.props.game.currentTurn.hintWord
+                    : ""}
+                </h1>
+              </div>
+            )}
           </div>
           <div className="game-board" style={{ marginTop: "10px" }}>
             {this.props.game.wordTiles &&
