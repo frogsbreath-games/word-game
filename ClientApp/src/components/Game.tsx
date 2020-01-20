@@ -197,6 +197,16 @@ class Game extends React.PureComponent<GameProps, State> {
                 >
                   Approve
                 </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  style={{ width: 300, marginLeft: "20px" }}
+                  onClick={() => {
+                    this.props.refuseHint();
+                  }}
+                >
+                  Refuse
+                </button>
               </div>
             )}
           </div>

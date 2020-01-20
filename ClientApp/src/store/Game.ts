@@ -342,10 +342,7 @@ export const actionCreators = {
       });
     }
   },
-  voteEndTurn: (): AppThunkAction<KnownAction> => (
-    dispatch,
-    getState
-  ) => {
+  voteEndTurn: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
     // Only load data if it's something we don't already have (and are not already loading)
     const appState = getState();
     if (appState && appState.game) {
@@ -369,7 +366,7 @@ export const actionCreators = {
     // Only load data if it's something we don't already have (and are not already loading)
     const appState = getState();
     if (appState && appState.game) {
-      fetch(`api/games/${appState.game.game.code}/giveHint`, {
+      fetch(`api/games/current/giveHint`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -390,7 +387,24 @@ export const actionCreators = {
     // Only load data if it's something we don't already have (and are not already loading)
     const appState = getState();
     if (appState && appState.game) {
-      fetch(`api/games/${appState.game.game.code}/approveHint`, {
+      fetch(`api/games/current/approveHint`, {
+        method: "POST"
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+        });
+
+      dispatch({
+        type: "REQUEST_SERVER_ACTION"
+      });
+    }
+  },
+  refuseHint: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/current/refuseHint`, {
         method: "POST"
       })
         .then(response => response.json() as Promise<APIResponse>)

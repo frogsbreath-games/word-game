@@ -8,6 +8,7 @@ import { red, blue } from "../constants/ColorConstants";
 type PlayerTileProps = {
   player: GameStore.Player;
   localPlayer: GameStore.Player;
+  gameActions: GameStore.GameActions;
   key: number;
   code: string;
   swapTeams: (player: GameStore.Player) => void;
@@ -17,6 +18,7 @@ type PlayerTileProps = {
 
 const PlayerTile = ({
   player,
+  gameActions,
   localPlayer,
   swapTeams,
   leaveGame,
@@ -70,7 +72,7 @@ const PlayerTile = ({
             <SwapIcon width={25} style={{ opacity: 0.5, fill: "white" }} />
           </button>
         )}
-        {localPlayer.isOrganizer && player.isBot && (
+        {gameActions.canDeleteBot && player.isBot && (
           <button
             className="btn btn-secondary"
             type="button"

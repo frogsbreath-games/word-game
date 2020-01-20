@@ -19,6 +19,9 @@ class Lobby extends React.PureComponent<GameProps, State> {
     this.sendMessage = this.sendMessage.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.swapTeams = this.swapTeams.bind(this);
+    this.deleteBot = this.deleteBot.bind(this);
+    this.quitGame = this.quitGame.bind(this);
   }
 
   public componentDidMount() {
@@ -36,7 +39,6 @@ class Lobby extends React.PureComponent<GameProps, State> {
   }
 
   public handleKeyPress(event: React.KeyboardEvent) {
-    console.log("Key Pressed");
     var keyCode = event.keyCode || event.which;
     if (keyCode === 13) {
       this.sendMessage();
@@ -141,11 +143,12 @@ class Lobby extends React.PureComponent<GameProps, State> {
                   <PlayerTile
                     player={player}
                     localPlayer={this.props.localPlayer}
+                    gameActions={this.props.game.actions}
                     code={this.props.game.code}
                     key={player.number}
-                    swapTeams={() => this.swapTeams(player)}
-                    leaveGame={() => this.quitGame()}
-                    deleteBot={() => this.deleteBot(player.number)}
+                    swapTeams={this.swapTeams}
+                    leaveGame={this.quitGame}
+                    deleteBot={this.deleteBot}
                   />
                 ))}
           </div>
@@ -159,11 +162,12 @@ class Lobby extends React.PureComponent<GameProps, State> {
                   <PlayerTile
                     player={player}
                     localPlayer={this.props.localPlayer}
+                    gameActions={this.props.game.actions}
                     code={this.props.game.code}
                     key={player.number}
-                    swapTeams={() => this.swapTeams(player)}
-                    leaveGame={() => this.quitGame()}
-                    deleteBot={() => this.deleteBot(player.number)}
+                    swapTeams={this.swapTeams}
+                    leaveGame={this.quitGame}
+                    deleteBot={this.deleteBot}
                   />
                 ))}
           </div>
