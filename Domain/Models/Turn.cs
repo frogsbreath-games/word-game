@@ -6,69 +6,68 @@ using WordGame.API.Domain.Enums;
 
 namespace WordGame.API.Domain.Models
 {
-    public class Turn
-    {
-        public Turn(Team team, int turnNumber)
-        {
-            Team = team;
-            TurnNumber = turnNumber;
-        }
+	public class Turn
+	{
+		public Turn(Team team, int turnNumber)
+		{
+			Team = team;
+			TurnNumber = turnNumber;
+		}
 
-        public Team Team { get; protected set; }
+		public Team Team { get; protected set; }
 
-        public int TurnNumber { get; protected set; }
+		public int TurnNumber { get; protected set; }
 
-        public TurnStatus Status { get; protected set; }
+		public TurnStatus Status { get; protected set; }
 
-        public string HintWord { get; protected set; }
+		public string HintWord { get; protected set; }
 
-        public int? WordCount { get; protected set; }
+		public int? WordCount { get; protected set; }
 
-        public List<Guess> Guesses { get; protected set; } = new List<Guess>();
+		public List<Guess> Guesses { get; protected set; } = new List<Guess>();
 
-        public List<PlayerVote> EndTurnVotes { get; protected set; } = new List<PlayerVote>();
+		public List<PlayerVote> EndTurnVotes { get; protected set; } = new List<PlayerVote>();
 
-        public int? GuessesRemaining => Status == TurnStatus.Guessing && WordCount.HasValue && WordCount.Value > 0
-            ? WordCount.Value - Guesses.Count + 1
-            : (int?)null;
+		public int? GuessesRemaining => Status == TurnStatus.Guessing && WordCount.HasValue && WordCount.Value > 0
+			? WordCount.Value - Guesses.Count + 1
+			: (int?)null;
 
-        public void GiveHint(
-            string hintWord,
-            int wordCount)
-        {
-            if (Status != TurnStatus.Planning)
-                throw new InvalidOperationException();
+		public void GiveHint(
+			string hintWord,
+			int wordCount)
+		{
+			if (Status != TurnStatus.Planning)
+				throw new InvalidOperationException();
 
-            HintWord = hintWord ?? throw new ArgumentNullException(nameof(hintWord));
-            WordCount = wordCount;
-            Status = TurnStatus.PendingApproval;
-        }
+			HintWord = hintWord ?? throw new ArgumentNullException(nameof(hintWord));
+			WordCount = wordCount;
+			Status = TurnStatus.PendingApproval;
+		}
 
-        public void ApproveHint()
-        {
-            if (Status != TurnStatus.PendingApproval)
-                throw new InvalidOperationException();
+		public void ApproveHint()
+		{
+			if (Status != TurnStatus.PendingApproval)
+				throw new InvalidOperationException();
 
-            Status = TurnStatus.Guessing;
-        }
+			Status = TurnStatus.Guessing;
+		}
 
-        public void refuseHint()
-        {
-            if (Status != TurnStatus.PendingApproval)
-                throw new InvalidOperationException();
+		public void RefuseHint()
+		{
+			if (Status != TurnStatus.PendingApproval)
+				throw new InvalidOperationException();
 
-            HintWord = null;
-            WordCount = null;
-            Status = TurnStatus.Planning;
+			HintWord = null;
+			WordCount = null;
+			Status = TurnStatus.Planning;
+		}
 
-        }
+		public void End()
+		{
+			if (Status != TurnStatus.Guessing)
+				throw new InvalidOperationException();
 
-        public void End()
-        {
-            if (Status != TurnStatus.Guessing)
-                throw new InvalidOperationException();
-
-            Status = TurnStatus.Over;
-        }
-    }
+			Status = TurnStatus.Over;
+		}
+	}
 }

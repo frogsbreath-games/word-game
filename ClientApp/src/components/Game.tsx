@@ -126,9 +126,15 @@ class Game extends React.PureComponent<GameProps, State> {
     }
     let currentTeam;
     let currentStatus;
+    let hintWord;
+    let wordCount;
+    let guessesRemaining;
     if (this.props.game.currentTurn) {
       currentTeam = this.props.game.currentTurn.team;
       currentStatus = this.props.game.currentTurn.status;
+      hintWord = this.props.game.currentTurn.hintWord;
+      wordCount = this.props.game.currentTurn.wordCount;
+      guessesRemaining = this.props.game.currentTurn.guessesRemaining;
     }
 
     return (
@@ -182,10 +188,7 @@ class Game extends React.PureComponent<GameProps, State> {
             {this.props.game.actions.canApproveHint && (
               <div>
                 <h3>
-                  Pending hint:{" "}
-                  {this.props.game.currentTurn
-                    ? this.props.game.currentTurn.hintWord
-                    : ""}
+                  Pending hint: "{hintWord}"
                 </h3>
                 <button
                   type="button"
@@ -212,11 +215,13 @@ class Game extends React.PureComponent<GameProps, State> {
             {currentStatus === "guessing" && (
               <div>
                 <h1>
-                  Hint:{" "}
-                  {this.props.game.currentTurn
-                    ? this.props.game.currentTurn.hintWord
-                    : ""}
+                  Hint: "{hintWord}" ({wordCount})
                 </h1>
+                <h5>
+                  {guessesRemaining
+                    ? guessesRemaining + " guesses remaining"
+                    : "Unlimited guesses remaining"}
+                </h5>
               </div>
             )}
           </div>

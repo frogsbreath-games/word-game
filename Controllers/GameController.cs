@@ -557,7 +557,7 @@ namespace WordGame.API.Controllers
 		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ReturnsStatus(HttpStatusCode.Accepted)]
 		public async Task<ApiResponse> RefuseHint(
-			   [FromRoute] string code)
+				[FromRoute] string code)
 		{
 			Game game = await _repository.GetGameByCode(code);
 
@@ -580,7 +580,7 @@ namespace WordGame.API.Controllers
 			if (!player.IsSpyMaster || player.Team == game.CurrentTurn.Team)
 				return BadRequest("This player cannot approve a hint!");
 
-			game.CurrentTurn.refuseHint();
+			game.CurrentTurn.RefuseHint();
 
 			await UpdateGame(game);
 
