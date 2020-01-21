@@ -5,6 +5,7 @@ import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
 import { red, blue, tan, black, grey } from "../constants/ColorConstants";
 import "./Game.css";
+import { ReactComponent as RevealedIcon } from "../assets/RevealedIcon.svg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -31,11 +32,17 @@ function getColor(color: string, isRevealed: boolean) {
 type GameTileProps = {
   wordTile: GameStore.WordTile;
   localPlayer: GameStore.Player;
-  handleVoteWord: (word: string) => void;
+  turnStatus: string;
+  handleVoteWord: (word: string, isRevealed: boolean) => void;
 };
-const GameTile = ({ wordTile, localPlayer, handleVoteWord }: GameTileProps) => (
+const GameTile = ({
+  wordTile,
+  localPlayer,
+  turnStatus,
+  handleVoteWord
+}: GameTileProps) => (
   <div
-    onClick={() => handleVoteWord(wordTile.word)}
+    onClick={() => handleVoteWord(wordTile.word, wordTile.isRevealed)}
     className="word-tile"
     style={{
       textAlign: "center",
@@ -52,22 +59,45 @@ const GameTile = ({ wordTile, localPlayer, handleVoteWord }: GameTileProps) => (
         padding: "5px",
         borderRadius: "5px",
         boxShadow:
-          "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)"
+          "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)",
+        wordWrap: "break-word"
       }}
     >
       {wordTile.word}
     </h6>
-    <h6
-      style={{
-        backgroundColor: "rgba(255, 255, 255, 0.75)",
-        padding: "5px",
-        borderRadius: "5px",
-        boxShadow:
-          "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)"
-      }}
-    >
-      Votes: {wordTile.votes.length}
-    </h6>
+    {turnStatus === "guessing" &&
+      !localPlayer.isSpyMaster &&
+      !wordTile.isRevealed && (
+        <h6
+          style={{
+            backgroundColor: "rgba(255, 255, 255, 0.75)",
+            padding: "5px",
+            borderRadius: "5px",
+            boxShadow:
+              "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)"
+          }}
+        >
+          Votes: {wordTile.votes.length}
+        </h6>
+      )}
+    {localPlayer.isSpyMaster && wordTile.isRevealed && (
+      <div
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.75)",
+          padding: "5px",
+          borderRadius: "5px",
+          boxShadow:
+            "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)"
+        }}
+      >
+        <RevealedIcon
+          style={{
+            position: "relative",
+            width: "75px"
+          }}
+        />
+      </div>
+    )}
   </div>
 );
 
@@ -112,8 +142,11 @@ class Game extends React.PureComponent<GameProps, State> {
     } as GameStore.Hint);
   }
 
-  handleVoteWord(word: string) {
-    this.props.voteWord({ word: word });
+  handleVoteWord(word: string, isRevealed: boolean) {
+    //ensure user is allowed to vote and not casting vote for revealed tile
+    if (this.props.game.actions.canVote && !isRevealed) {
+      this.props.voteWord({ word: word });
+    }
   }
 
   handleSubmit(event: React.MouseEvent) {
@@ -125,7 +158,7 @@ class Game extends React.PureComponent<GameProps, State> {
       return <Redirect to="/game-home" />;
     }
     let currentTeam;
-    let currentStatus;
+    let currentStatus: string = "";
     let hintWord;
     let wordCount;
     let guessesRemaining;
@@ -187,9 +220,7 @@ class Game extends React.PureComponent<GameProps, State> {
             )}
             {this.props.game.actions.canApproveHint && (
               <div>
-                <h3>
-                  Pending hint: "{hintWord}"
-                </h3>
+                <h3>Pending hint: "{hintWord}"</h3>
                 <button
                   type="button"
                   className="btn btn-primary"
@@ -233,6 +264,7 @@ class Game extends React.PureComponent<GameProps, State> {
                   key={tile.word}
                   localPlayer={this.props.localPlayer}
                   handleVoteWord={this.handleVoteWord}
+                  turnStatus={currentStatus}
                 />
               ))}
           </div>
