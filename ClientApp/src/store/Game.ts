@@ -279,6 +279,12 @@ export const actionCreators = {
                 game: data.data as Game
               });
               dispatch({ type: "REQUEST_SERVER_ACTION" });
+            })
+            .catch(error => {
+              dispatch({
+                type: "RECEIVE_CURRENT_GAME",
+                game: {} as Game
+              });
             });
         })
         .catch(error => {
