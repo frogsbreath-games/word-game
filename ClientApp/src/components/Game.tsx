@@ -3,7 +3,17 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
-import { red, blue, tan, black, grey } from "../constants/ColorConstants";
+import {
+  red,
+  darkRed,
+  lightRed,
+  blue,
+  lightBlue,
+  darkBlue,
+  tan,
+  black,
+  grey
+} from "../constants/ColorConstants";
 import "./Game.css";
 import { ReactComponent as RevealedIcon } from "../assets/RevealedIcon.svg";
 
@@ -29,12 +39,48 @@ function getColor(color: string, isRevealed: boolean) {
   }
 }
 
+type TeamTileProps = {
+  team: string;
+  tilesRemaining: number;
+  activeTeam: boolean;
+};
+
+const TeamTile = ({ team, tilesRemaining, activeTeam }: TeamTileProps) => (
+  <div
+    className="team-tile"
+    style={{
+      backgroundColor: getColor(team, true)
+    }}
+  >
+    <h3
+      style={{
+        justifySelf: "center",
+        alignSelf: "center",
+        textAlign: "center",
+        backgroundColor: team === "red" ? lightRed : lightBlue,
+        borderRadius: "5px",
+        padding: "10px",
+        margin: "10px",
+        border: "solid",
+        borderColor: team === "red" ? darkRed : darkBlue
+      }}
+    >
+      {team + " Team"}
+    </h3>
+    <div style={{ textAlign: "end" }}>
+      <h3>Remaining Tiles: {tilesRemaining}</h3>
+      {activeTeam && <h6 className="light-label">Current Turn</h6>}
+    </div>
+  </div>
+);
+
 type GameTileProps = {
   wordTile: GameStore.WordTile;
   localPlayer: GameStore.Player;
   turnStatus: string;
   handleVoteWord: (word: string, isRevealed: boolean) => void;
 };
+
 const GameTile = ({
   wordTile,
   localPlayer,
@@ -53,43 +99,14 @@ const GameTile = ({
       padding: "10px"
     }}
   >
-    <h6
-      style={{
-        backgroundColor: "rgba(255, 255, 255, 0.75)",
-        padding: "5px",
-        borderRadius: "5px",
-        boxShadow:
-          "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)",
-        wordWrap: "break-word"
-      }}
-    >
-      {wordTile.word}
-    </h6>
+    <h6 className="light-label">{wordTile.word}</h6>
     {turnStatus === "guessing" &&
       !localPlayer.isSpyMaster &&
       !wordTile.isRevealed && (
-        <h6
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.75)",
-            padding: "5px",
-            borderRadius: "5px",
-            boxShadow:
-              "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)"
-          }}
-        >
-          Votes: {wordTile.votes.length}
-        </h6>
+        <h6 className="light-label">Votes: {wordTile.votes.length}</h6>
       )}
     {localPlayer.isSpyMaster && wordTile.isRevealed && (
-      <div
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.75)",
-          padding: "5px",
-          borderRadius: "5px",
-          boxShadow:
-            "0 1px 3px rgba(255, 255, 255, 0.24), 0 1px 3px rgba(255, 255, 255, 0.36)"
-        }}
-      >
+      <div className="light-label">
         <RevealedIcon
           style={{
             position: "relative",
@@ -173,18 +190,30 @@ class Game extends React.PureComponent<GameProps, State> {
     return (
       <React.Fragment>
         <div>
+          <div className="game-banner">
+            <TeamTile
+              team={this.props.localPlayer.team}
+              tilesRemaining={
+                this.props.localPlayer.team === "red"
+                  ? this.props.game.redTilesRemaining
+                  : this.props.game.blueTilesRemaining
+              }
+              activeTeam={currentTeam === this.props.localPlayer.team}
+            />
+            <TeamTile
+              team={this.props.localPlayer.team === "red" ? "blue" : "red"}
+              tilesRemaining={
+                this.props.localPlayer.team !== "red"
+                  ? this.props.game.redTilesRemaining
+                  : this.props.game.blueTilesRemaining
+              }
+              activeTeam={currentTeam !== this.props.localPlayer.team}
+            />
+          </div>
           <div style={{ textAlign: "center" }}>
-            <h1
-              style={{
-                color: getColor(
-                  currentTeam === undefined ? "black" : currentTeam,
-                  true
-                )
-              }}
-            >
-              Current Team: {currentTeam}
-            </h1>
-            <h3>{currentStatus}</h3>
+            <h3 style={{ textAlign: "center", wordBreak: "break-word" }}>
+              {currentStatus}
+            </h3>
             {/* this should only be seen by spy master when it is hint phase */}
             {this.props.game.actions.canGiveHint && (
               <div className="input-group mx-auto">
@@ -303,12 +332,20 @@ class Game extends React.PureComponent<GameProps, State> {
             this.props.events.map((event, index) => (
               <div key={index}>
                 <div style={{ margin: "2px" }}>
-                  <span style={{
-                    color: "#AAA"
-                  }}>{"[" + event.timestamp + "] "}</span>
-                  <span style={{
+                  <span
+                    style={{
+                      color: "#AAA"
+                    }}
+                  >
+                    {"[" + event.timestamp + "] "}
+                  </span>
+                  <span
+                    style={{
                       color: getColor(event.team, true)
-                    }}>{event.player ? event.player : "Team " + event.team}</span>
+                    }}
+                  >
+                    {event.player ? event.player : "Team " + event.team}
+                  </span>
                   <span>{" " + event.message}</span>
                 </div>
               </div>
