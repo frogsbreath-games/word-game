@@ -10,6 +10,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WordGame.API.Application.Authorization;
+using WordGame.API.Application.Resources;
 using WordGame.API.Application.Services;
 using WordGame.API.Attributes;
 using WordGame.API.Domain.Enums;
@@ -29,13 +30,20 @@ namespace WordGame.API.Controllers
 		protected IGameRepository _repository;
 		protected INameGenerator _nameGenerator;
 		protected IGameBoardGenerator _gameBoardGenerator;
+		protected IRandomAccessor _randomAccessor;
 		protected IHubContext<GameHub, IGameClient> _gameContext;
 
-		public GameController(IGameRepository repository, INameGenerator nameGenerator, IGameBoardGenerator gameBoardGenerator, IHubContext<GameHub, IGameClient> gameContext)
+		public GameController(
+			IGameRepository repository,
+			INameGenerator nameGenerator,
+			IGameBoardGenerator gameBoardGenerator,
+			IRandomAccessor randomAccessor,
+			IHubContext<GameHub, IGameClient> gameContext)
 		{
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 			_nameGenerator = nameGenerator ?? throw new ArgumentNullException(nameof(nameGenerator));
 			_gameBoardGenerator = gameBoardGenerator ?? throw new ArgumentNullException(nameof(gameBoardGenerator));
+			_randomAccessor = randomAccessor ?? throw new ArgumentNullException(nameof(randomAccessor));
 			_gameContext = gameContext ?? throw new ArgumentNullException(nameof(gameContext));
 		}
 
@@ -722,7 +730,117 @@ namespace WordGame.API.Controllers
 			foreach (var @event in events)
 				tasks.Add(_gameContext.Clients.Players(game.Players).GameEvent(@event));
 
+			Task.Run(() => BotTask(game));
+
 			return Task.WhenAll(tasks);
 		}
+
+		protected async Task BotTask(Game game)
+		{
+			if (game.Status != GameStatus.InProgress)
+				return;
+
+			if (GetBot(game) != null)
+			{
+				//wait 2 seconds
+				await Task.Delay(2000);
+				game = await _repository.GetGameByCode(game.Code);
+
+				if (GetBot(game) is Bot bot)
+					await (bot.Job switch
+					{
+						BotJob.ApprovingSpyMaster => ExecuteApprovingSpyMasterBotJob(game, bot.Player),
+						BotJob.PlanningSpyMaster => ExecutePlanningSpyMasterBotJob(game, bot.Player),
+						BotJob.GuessingAgent => ExecuteGuessingAgentBotJob(game, bot.Player),
+						_ => Task.CompletedTask
+					});
+			}
+		}
+
+		protected Bot GetBot(Game game)
+		{
+			if (game.CurrentTurn.Status == TurnStatus.Planning)
+			{
+				if (game.SpyMasters.SingleOrDefault(p => p.IsBot
+					&& p.Team == game.CurrentTurn.Team) is Player p)
+					return new Bot
+					{
+						Job = BotJob.PlanningSpyMaster,
+						Player = p
+					};
+			}
+
+			if (game.CurrentTurn.Status == TurnStatus.PendingApproval)
+			{
+				if (game.SpyMasters.SingleOrDefault(p => p.IsBot
+					&& p.Team != game.CurrentTurn.Team) is Player p)
+					return new Bot
+					{
+						Job = BotJob.ApprovingSpyMaster,
+						Player = p
+					};
+			}
+
+			if (game.CurrentTurn.Status == TurnStatus.Guessing)
+			{
+				var guessingPlayers = game.Agents.Where(p => p.Team == game.CurrentTurn.Team);
+				if (guessingPlayers.All(p => p.IsBot))
+					return new Bot
+					{
+						Job = BotJob.GuessingAgent,
+						Player = guessingPlayers.First()
+					};
+			}
+
+			return null;
+		}
+
+		protected async Task ExecutePlanningSpyMasterBotJob(Game game, Player player)
+		{
+			string word = WordList.Words[_randomAccessor.Random.Next(0, WordList.Words.Length)];
+			int number = _randomAccessor.Random.Next(1, 4);
+
+			game.CurrentTurn.GiveHint(word, number);
+
+			await UpdateGame(game);
+			//This event only goes to spymasters
+			await _gameContext.Clients.Players(game.SpyMasters).GameEvent(
+				GameEvent.HintGiven(player, DateTime.Now, word, number));
+		}
+
+		protected Task ExecuteApprovingSpyMasterBotJob(Game game, Player player)
+		{
+			game.CurrentTurn.ApproveHint();
+
+			return UpdateGame(game,
+				GameEvent.HintApproved(player, DateTime.Now, game.CurrentTurn.HintWord, game.CurrentTurn.WordCount.Value));
+		}
+
+		protected Task ExecuteGuessingAgentBotJob(Game game, Player player)
+		{
+			var availableTiles = game.WordTiles.Where(x => !x.IsRevealed).ToList();
+
+			//Random Guess
+			string word = availableTiles[_randomAccessor.Random.Next(0, availableTiles.Count)].Word;
+
+			game.SetPlayerVote(player, word);
+
+			return UpdateGame(game,
+				GameEvent.Guessed(player, DateTime.Now, word));
+		}
+	}
+
+	//TODO Move
+	public class Bot
+	{
+		public BotJob Job { get; set; }
+		public Player Player { get; set; }
+	}
+
+	public enum BotJob
+	{
+		PlanningSpyMaster,
+		ApprovingSpyMaster,
+		GuessingAgent
 	}
 }

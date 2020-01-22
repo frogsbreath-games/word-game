@@ -12,7 +12,7 @@ namespace WordGame.API.Domain.Models
 		{
 			Player = player?.Name ?? throw new ArgumentNullException(nameof(player));
 			Team = player.Team;
-			Timestamp = timestamp.ToShortTimeString();
+			Timestamp = timestamp.ToLongTimeString();
 			Type = type;
 			Data = data;
 		}
@@ -20,7 +20,7 @@ namespace WordGame.API.Domain.Models
 		protected GameEvent(Team team, DateTime timestamp, GameEventType type, IDictionary<string, object> data = null)
 		{
 			Team = team;
-			Timestamp = timestamp.ToShortTimeString();
+			Timestamp = timestamp.ToLongTimeString();
 			Type = type;
 			Data = data;
 		}
