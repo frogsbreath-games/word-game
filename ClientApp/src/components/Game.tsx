@@ -53,15 +53,9 @@ const TeamTile = ({ team, tilesRemaining, activeTeam }: TeamTileProps) => (
     }}
   >
     <h3
+      className="team-label"
       style={{
-        justifySelf: "center",
-        alignSelf: "center",
-        textAlign: "center",
         backgroundColor: team === "red" ? lightRed : lightBlue,
-        borderRadius: "5px",
-        padding: "10px",
-        margin: "10px",
-        border: "solid",
         borderColor: team === "red" ? darkRed : darkBlue
       }}
     >

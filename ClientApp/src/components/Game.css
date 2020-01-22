@@ -12,6 +12,16 @@
   border-radius: 5px;
 }
 
+.team-label {
+  justify-self: center;
+  align-self: center;
+  text-align: center;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px;
+  border: solid;
+}
+
 .light-label {
   background-color: rgba(255, 255, 255, 0.75);
   padding: 5px;
