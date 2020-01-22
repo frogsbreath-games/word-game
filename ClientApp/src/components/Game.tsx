@@ -297,6 +297,23 @@ class Game extends React.PureComponent<GameProps, State> {
             </div>
           )}
         </div>
+        <div className="game-event-window">
+          <h6>Game Log</h6>
+          {this.props.events &&
+            this.props.events.map((event, index) => (
+              <div key={index}>
+                <div style={{ margin: "2px" }}>
+                  <span style={{
+                    color: "#AAA"
+                  }}>{"[" + event.timestamp + "] "}</span>
+                  <span style={{
+                      color: getColor(event.team, true)
+                    }}>{event.player ? event.player : "Team " + event.team}</span>
+                  <span>{" " + event.message}</span>
+                </div>
+              </div>
+            ))}
+        </div>
       </React.Fragment>
     );
   }

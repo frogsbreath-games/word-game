@@ -23,5 +23,7 @@ namespace WordGame.API.Hubs
 		Task GameDeleted();
 
 		Task GameUpdated(GameModel gameModel);
+
+		Task GameEvent(GameEvent gameEvent);
 	}
 }

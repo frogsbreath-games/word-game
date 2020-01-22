@@ -11,6 +11,16 @@ export interface GameState {
   game: Game;
   connection?: signalR.HubConnection;
   messages: Message[];
+  events: GameEvent[];
+}
+
+export interface GameEvent {
+  player?: string;
+  team: string;
+  timestamp: string;
+  type: string;
+  message: string;
+  data?: object;
 }
 
 export interface Game {
@@ -126,9 +136,15 @@ interface ReceiveUpdateGameAction {
   type: "RECEIVE_UPDATE_GAME";
   game: Game;
 }
+
 interface ReceiveMessage {
   type: "RECEIVE_MESSAGE";
   message: Message;
+}
+
+interface ReceiveGameEvent {
+  type: "RECEIVE_GAME_EVENT";
+  event: GameEvent;
 }
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
@@ -142,7 +158,8 @@ type KnownAction =
   | ReceiveCurrentGameAction
   | ReceiveCurrentPlayerAction
   | ReceiveUpdateGameAction
-  | ReceiveMessage;
+  | ReceiveMessage
+  | ReceiveGameEvent;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -171,6 +188,15 @@ export const actionCreators = {
         dispatch({
           type: "RECEIVE_UPDATE_GAME",
           game: data as Game
+        });
+      });
+
+      connection.on("GameEvent", data => {
+        console.log("Game Event Received!");
+        console.log(data);
+        dispatch({
+          type: "RECEIVE_GAME_EVENT",
+          event: data as GameEvent
         });
       });
 
@@ -560,7 +586,8 @@ const unloadedState: GameState = {
   isLoading: false,
   localPlayer: {} as Player,
   game: {} as Game,
-  messages: [] as Message[]
+  messages: [] as Message[],
+  events: [] as GameEvent[]
 };
 
 export const reducer: Reducer<GameState> = (
@@ -578,7 +605,8 @@ export const reducer: Reducer<GameState> = (
         localPlayer: state.localPlayer,
         game: state.game,
         connection: state.connection,
-        messages: state.messages
+        messages: state.messages,
+        events: state.events
       };
     case "CREATE_HUB_CONNECTION":
       return {
@@ -586,7 +614,8 @@ export const reducer: Reducer<GameState> = (
         localPlayer: state.localPlayer,
         game: state.game,
         connection: action.connection,
-        messages: state.messages
+        messages: state.messages,
+        events: state.events
       };
     case "RECEIVE_MESSAGE": {
       return {
@@ -594,7 +623,8 @@ export const reducer: Reducer<GameState> = (
         localPlayer: state.localPlayer,
         game: state.game,
         connection: state.connection,
-        messages: [...state.messages, action.message]
+        messages: [...state.messages, action.message],
+        events: state.events
       };
     }
     case "RECEIVE_CURRENT_GAME":
@@ -603,7 +633,8 @@ export const reducer: Reducer<GameState> = (
         localPlayer: state.localPlayer,
         game: action.game,
         connection: state.connection,
-        messages: state.messages
+        messages: state.messages,
+        events: state.events
       };
     case "RECEIVE_CURRENT_PLAYER":
       return {
@@ -611,7 +642,8 @@ export const reducer: Reducer<GameState> = (
         localPlayer: action.localPlayer,
         game: state.game,
         connection: state.connection,
-        messages: state.messages
+        messages: state.messages,
+        events: state.events
       };
     case "RECEIVE_NEW_GAME":
       return {
@@ -619,7 +651,8 @@ export const reducer: Reducer<GameState> = (
         localPlayer: action.game.players[0],
         game: action.game,
         connection: state.connection,
-        messages: state.messages
+        messages: state.messages,
+        events: state.events
       };
     case "RECEIVE_JOIN_GAME":
       return {
@@ -627,14 +660,16 @@ export const reducer: Reducer<GameState> = (
         localPlayer: action.game.players[action.game.players.length - 1],
         game: action.game,
         connection: state.connection,
-        messages: state.messages
+        messages: state.messages,
+        events: state.events
       };
     case "RECEIVE_DELETE_GAME":
       return {
         isLoading: false,
         localPlayer: {} as Player,
         game: {} as Game,
-        messages: state.messages
+        messages: state.messages,
+        events: state.events
       };
     case "RECEIVE_UPDATE_GAME":
       return {
@@ -642,7 +677,17 @@ export const reducer: Reducer<GameState> = (
         localPlayer: state.localPlayer,
         game: action.game,
         connection: state.connection,
-        messages: state.messages
+        messages: state.messages,
+        events: state.events
+      };
+    case "RECEIVE_GAME_EVENT":
+      return {
+        isLoading: state.isLoading,
+        localPlayer: state.localPlayer,
+        game: state.game,
+        connection: state.connection,
+        messages: state.messages,
+        events: [...state.events, action.event],
       };
     default:
       return state;

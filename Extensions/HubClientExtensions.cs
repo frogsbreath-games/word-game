@@ -29,5 +29,14 @@ namespace WordGame.API.Extensions
 					clients.User(id.ToString()),
 					new GameModel(game, id)));
 		}
+
+		public static IEnumerable<Task> SendToPlayers<T>(this IHubClients<T> clients, Game game, Func<T, Task> func)
+		{
+			return game.Players
+				.Where(p => !p.IsBot)
+				.Select(p => p.Id)
+				.Select(id => func(
+					clients.User(id.ToString())));
+		}
 	}
 }

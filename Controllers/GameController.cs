@@ -305,12 +305,19 @@ namespace WordGame.API.Controllers
 			if (!game.GameCanStart())
 				return BadRequest($"Cannot start game!");
 
+			var id = User.GetPlayerId();
+
+			var player = game.Players.SingleOrDefault(x => x.Id == id);
+
+			if (player is null)
+				return NotFound($"Cannot find player in game with code: [{code}]");
+
 			//Red always goes first (for now)
 			var board = _gameBoardGenerator.GenerateGameBoard(Team.Red);
 
 			game.StartGame(board, Team.Red);
 
-			await UpdateGame(game);
+			await UpdateGame(game, GameEvent.GameStarted(player, DateTime.Now));
 
 			return Accepted("Game Started");
 		}
@@ -502,6 +509,9 @@ namespace WordGame.API.Controllers
 			game.CurrentTurn.GiveHint(hintModel.HintWord, hintModel.WordCount);
 
 			await UpdateGame(game);
+			//This event only goes to spymasters
+			await _gameContext.Clients.Players(game.SpyMasters).GameEvent(
+				GameEvent.HintGiven(player, DateTime.Now, hintModel.HintWord, hintModel.WordCount));
 
 			return Accepted("Hint submitted.");
 		}
@@ -542,7 +552,10 @@ namespace WordGame.API.Controllers
 
 			game.CurrentTurn.ApproveHint();
 
-			await UpdateGame(game);
+			await UpdateGame(game,
+				GameEvent.HintApproved(player, DateTime.Now,
+					game.CurrentTurn.HintWord,
+					game.CurrentTurn.WordCount.Value));
 
 			return Accepted("Hint approved.");
 		}
@@ -624,7 +637,8 @@ namespace WordGame.API.Controllers
 
 			game.SetPlayerVote(player, voteModel.Word);
 
-			await UpdateGame(game);
+			await UpdateGame(game,
+				GameEvent.Guessed(player, DateTime.Now, voteModel.Word));
 
 			return Accepted("Player Word Vote Set.");
 		}
@@ -665,7 +679,7 @@ namespace WordGame.API.Controllers
 
 			game.VoteEndTurn(player);
 
-			await UpdateGame(game);
+			await UpdateGame(game, GameEvent.VotedEndTurn(player, DateTime.Now));
 
 			return Accepted("Player voted to end turn.");
 		}
@@ -697,13 +711,16 @@ namespace WordGame.API.Controllers
 				});
 		}
 
-		protected Task UpdateGame(Game game)
+		protected Task UpdateGame(Game game, params GameEvent[] events)
 		{
 			var tasks = new List<Task> { _repository.UpdateGame(game.Code, game) };
 
 			tasks.AddRange(_gameContext.Clients.SendToPlayers(
 					game,
 					(client, model) => client.GameUpdated(model)));
+
+			foreach (var @event in events)
+				tasks.Add(_gameContext.Clients.Players(game.Players).GameEvent(@event));
 
 			return Task.WhenAll(tasks);
 		}
