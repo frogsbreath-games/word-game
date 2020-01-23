@@ -1,0 +1,51 @@
+:root {
+  --blue: #009ddc;
+  --light-blue: #6bbbdb;
+  --dark-blue: #004c6b;
+  --red: #c3423f;
+  --light-red: #dd5f5d;
+  --dark-red: #6d2726;
+  --tan: #c5afa4;
+  --dark-tan: #695f5a;
+  --grey: #c4c4c4;
+  --dark-grey: #757575;
+  --black: #3b3b3b;
+}
+
+.player-tile-container {
+  border-radius: 3px;
+  margin: 15px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 3px rgba(0, 0, 0, 0.36);
+}
+
+.player-tile-container.blue {
+  background-color: var(--blue);
+}
+
+.player-tile-container.red {
+  background-color: var(--red);
+}
+
+.player-tile-label {
+  background-color: rgba(255, 255, 255, 0.75);
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.24),
+    0 1px 3px rgba(255, 255, 255, 0.36);
+}
+
+.player-icon-svg {
+  opacity: 0.5;
+  width: 50px;
+  float: right;
+  margin-top: -25px;
+}
+
+.player-icon-svg.red {
+  fill: var(--red);
+}
+
+.player-icon-svg.blue {
+  fill: var(--blue);
+}

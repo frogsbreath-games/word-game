@@ -22,6 +22,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
     this.swapTeams = this.swapTeams.bind(this);
     this.deleteBot = this.deleteBot.bind(this);
     this.quitGame = this.quitGame.bind(this);
+    this.handleRoleChange = this.handleRoleChange.bind(this);
   }
 
   public componentDidMount() {
@@ -36,6 +37,15 @@ class Lobby extends React.PureComponent<GameProps, State> {
 
   private ensureConnectionExists() {
     this.props.createConnection();
+  }
+
+  public handleRoleChange(player: GameStore.Player) {
+    if (player.isSpyMaster) {
+      player.isSpyMaster = false;
+    } else {
+      player.isSpyMaster = true;
+    }
+    this.props.updatePlayer(player);
   }
 
   public handleKeyPress(event: React.KeyboardEvent) {
@@ -149,6 +159,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
                     swapTeams={this.swapTeams}
                     leaveGame={this.quitGame}
                     deleteBot={this.deleteBot}
+                    changeRole={this.handleRoleChange}
                   />
                 ))}
           </div>
@@ -168,6 +179,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
                     swapTeams={this.swapTeams}
                     leaveGame={this.quitGame}
                     deleteBot={this.deleteBot}
+                    changeRole={this.handleRoleChange}
                   />
                 ))}
           </div>
