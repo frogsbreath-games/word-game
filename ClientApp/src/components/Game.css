@@ -10,6 +10,7 @@
   margin: 10px;
   padding: 10px;
   border-radius: 5px;
+  border: solid;
 }
 
 .team-label {
@@ -20,6 +21,41 @@
   padding: 10px;
   margin: 10px;
   border: solid;
+}
+
+.player-icon {
+  height: 40px;
+  width: 40px;
+  background-color: #bbb;
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  z-index: 1;
+  margin-left: -10px;
+  margin-top: -5px;
+}
+
+.player-badge {
+  width: 20px;
+  opacity: 0.5;
+  justify-self: center;
+  align-self: center;
+  fill: white;
+  margin-bottom: 5px;
+}
+
+.player-tracker {
+  display: grid;
+  padding: 10px;
+  grid-template-columns: 50% 50%;
+}
+
+.player-icon-inner {
+  height: 60px;
+  width: 60px;
+  background-color: #bbb;
+  border-radius: 50%;
+  position: absolute;
 }
 
 .light-label {

@@ -16,6 +16,7 @@ import {
 } from "../constants/ColorConstants";
 import "./Game.css";
 import { ReactComponent as RevealedIcon } from "../assets/RevealedIcon.svg";
+import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -42,14 +43,15 @@ function getColor(color: string, isRevealed: boolean) {
 type TeamTileProps = {
   team: string;
   tilesRemaining: number;
-  activeTeam: boolean;
+  isTeamsTurn: boolean;
 };
 
-const TeamTile = ({ team, tilesRemaining, activeTeam }: TeamTileProps) => (
+const TeamTile = ({ team, tilesRemaining, isTeamsTurn }: TeamTileProps) => (
   <div
     className="team-tile"
     style={{
-      backgroundColor: getColor(team, true)
+      backgroundColor: getColor(team, true),
+      borderColor: team === "red" ? darkRed : darkBlue
     }}
   >
     <h3
@@ -63,7 +65,36 @@ const TeamTile = ({ team, tilesRemaining, activeTeam }: TeamTileProps) => (
     </h3>
     <div style={{ textAlign: "end" }}>
       <h3>Remaining Tiles: {tilesRemaining}</h3>
-      {activeTeam && <h6 className="light-label">Current Turn</h6>}
+      {isTeamsTurn && <h6 className="light-label">Current Turn</h6>}
+    </div>
+  </div>
+);
+
+type PlayerTrackerProps = {
+  playerName: string;
+  team: string;
+};
+
+const PlayerTracker = ({ playerName, team }: PlayerTrackerProps) => (
+  <div className="player-tracker">
+    <h6
+      style={{
+        backgroundColor: team === "red" ? lightRed : lightBlue,
+        padding: "5px",
+        borderRadius: "5px"
+      }}
+    >
+      {playerName}
+    </h6>
+    <div
+      className="player-icon"
+      style={{
+        border: "solid",
+        borderColor: team === "red" ? darkRed : darkBlue,
+        backgroundColor: team === "red" ? red : blue
+      }}
+    >
+      <PlayerIcon className="player-badge" />
     </div>
   </div>
 );
@@ -169,6 +200,16 @@ class Game extends React.PureComponent<GameProps, State> {
       return <Redirect to="/game-home" />;
     }
     let currentTeam;
+    let apposingTeam = this.props.localPlayer.team === "red" ? "blue" : "red";
+    //probably a better way to do this?
+    let localTeamsTilesRemaining =
+      this.props.localPlayer.team === "red"
+        ? this.props.game.redTilesRemaining
+        : this.props.game.blueTilesRemaining;
+    let apposingTeamTilesRemaining =
+      this.props.localPlayer.team === "red"
+        ? this.props.game.redTilesRemaining
+        : this.props.game.blueTilesRemaining;
     let currentStatus: string = "";
     let hintWord;
     let wordCount;
@@ -187,27 +228,24 @@ class Game extends React.PureComponent<GameProps, State> {
           <div className="game-banner">
             <TeamTile
               team={this.props.localPlayer.team}
-              tilesRemaining={
-                this.props.localPlayer.team === "red"
-                  ? this.props.game.redTilesRemaining
-                  : this.props.game.blueTilesRemaining
-              }
-              activeTeam={currentTeam === this.props.localPlayer.team}
+              tilesRemaining={localTeamsTilesRemaining}
+              isTeamsTurn={currentTeam === this.props.localPlayer.team}
             />
             <TeamTile
-              team={this.props.localPlayer.team === "red" ? "blue" : "red"}
-              tilesRemaining={
-                this.props.localPlayer.team !== "red"
-                  ? this.props.game.redTilesRemaining
-                  : this.props.game.blueTilesRemaining
-              }
-              activeTeam={currentTeam !== this.props.localPlayer.team}
+              team={apposingTeam}
+              tilesRemaining={apposingTeamTilesRemaining}
+              isTeamsTurn={currentTeam !== this.props.localPlayer.team}
             />
           </div>
+          <div style={{ display: "grid", gridTemplateColumns: "50% 50%" }}>
+            <PlayerTracker
+              team={this.props.localPlayer.team}
+              playerName={this.props.localPlayer.name}
+            />
+            {/* not sure where to put status */}
+            <h4 style={{ textAlign: "center" }}>{currentStatus}</h4>
+          </div>
           <div style={{ textAlign: "center" }}>
-            <h3 style={{ textAlign: "center", wordBreak: "break-word" }}>
-              {currentStatus}
-            </h3>
             {/* this should only be seen by spy master when it is hint phase */}
             {this.props.game.actions.canGiveHint && (
               <div className="input-group mx-auto">
