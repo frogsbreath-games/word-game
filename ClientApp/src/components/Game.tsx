@@ -3,17 +3,7 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
-import {
-  red,
-  darkRed,
-  lightRed,
-  blue,
-  lightBlue,
-  darkBlue,
-  tan,
-  black,
-  grey
-} from "../constants/ColorConstants";
+import { red, blue, tan, black, grey } from "../constants/ColorConstants";
 import "./Game.css";
 import { ReactComponent as RevealedIcon } from "../assets/RevealedIcon.svg";
 import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
@@ -47,23 +37,9 @@ type TeamTileProps = {
 };
 
 const TeamTile = ({ team, tilesRemaining, isTeamsTurn }: TeamTileProps) => (
-  <div
-    className="team-tile"
-    style={{
-      backgroundColor: getColor(team, true),
-      borderColor: team === "red" ? darkRed : darkBlue
-    }}
-  >
-    <h3
-      className="team-label"
-      style={{
-        backgroundColor: team === "red" ? lightRed : lightBlue,
-        borderColor: team === "red" ? darkRed : darkBlue
-      }}
-    >
-      {team + " Team"}
-    </h3>
-    <div style={{ textAlign: "end" }}>
+  <div className={"team-tile " + team}>
+    <h3 className={"team-label " + team}>{team + " Team"}</h3>
+    <div>
       <h3>Remaining Tiles: {tilesRemaining}</h3>
       {isTeamsTurn && <h6 className="light-label">Current Turn</h6>}
     </div>
@@ -76,24 +52,9 @@ type PlayerTrackerProps = {
 };
 
 const PlayerTracker = ({ playerName, team }: PlayerTrackerProps) => (
-  <div className="player-tracker">
-    <h6
-      style={{
-        backgroundColor: team === "red" ? lightRed : lightBlue,
-        padding: "5px",
-        borderRadius: "5px"
-      }}
-    >
-      {playerName}
-    </h6>
-    <div
-      className="player-icon"
-      style={{
-        border: "solid",
-        borderColor: team === "red" ? darkRed : darkBlue,
-        backgroundColor: team === "red" ? red : blue
-      }}
-    >
+  <div className={"player-tracker " + team}>
+    <h6>{playerName}</h6>
+    <div className={"player-icon " + team}>
       <PlayerIcon className="player-badge" />
     </div>
   </div>
@@ -114,15 +75,10 @@ const GameTile = ({
 }: GameTileProps) => (
   <div
     onClick={() => handleVoteWord(wordTile.word, wordTile.isRevealed)}
-    className="word-tile"
-    style={{
-      textAlign: "center",
-      backgroundColor: getColor(
-        wordTile.team,
-        localPlayer.isSpyMaster || wordTile.isRevealed
-      ),
-      padding: "10px"
-    }}
+    className={
+      "word-tile " +
+      (wordTile.isRevealed || localPlayer.isSpyMaster ? wordTile.team : "grey")
+    }
   >
     <h6 className="light-label">{wordTile.word}</h6>
     {turnStatus === "guessing" &&
@@ -132,12 +88,7 @@ const GameTile = ({
       )}
     {localPlayer.isSpyMaster && wordTile.isRevealed && (
       <div className="light-label">
-        <RevealedIcon
-          style={{
-            position: "relative",
-            width: "75px"
-          }}
-        />
+        <RevealedIcon className="reveal-icon" />
       </div>
     )}
   </div>

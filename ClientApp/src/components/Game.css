@@ -1,3 +1,15 @@
+:root {
+  --blue: #009ddc;
+  --light-blue: #6bbbdb;
+  --dark-blue: #004c6b;
+  --red: #c3423f;
+  --light-red: #dd5f5d;
+  --dark-red: #6d2726;
+  --tan: #c5afa4;
+  --grey: #c4c4c4;
+  --black: #2a2a2a;
+}
+
 .game-banner {
   display: grid;
   grid-template-columns: 50% 50%;
@@ -6,11 +18,22 @@
 .team-tile {
   display: grid;
   grid-template-columns: 40% 60%;
+  grid-template-areas: "team info";
   text-transform: uppercase;
   margin: 10px;
   padding: 10px;
   border-radius: 5px;
   border: solid;
+}
+
+.team-tile.blue {
+  background-color: var(--blue);
+  border-color: var(--dark-blue);
+}
+
+.team-tile.red {
+  background-color: var(--red);
+  border-color: var(--dark-red);
 }
 
 .team-label {
@@ -23,16 +46,36 @@
   border: solid;
 }
 
+.team-label.blue {
+  background-color: var(--light-blue);
+  border-color: var(--dark-blue);
+}
+
+.team-label.red {
+  background-color: var(--light-red);
+  border-color: var(--dark-red);
+}
+
 .player-icon {
   height: 40px;
   width: 40px;
   background-color: #bbb;
   border-radius: 50%;
+  border: solid;
   position: relative;
   display: grid;
   z-index: 1;
   margin-left: -10px;
   margin-top: -5px;
+}
+
+.player-icon.blue {
+  background-color: var(--blue);
+  border-color: var(--dark-blue);
+}
+.player-icon.red {
+  background-color: var(--red);
+  border-color: var(--dark-red);
 }
 
 .player-badge {
@@ -48,6 +91,19 @@
   display: grid;
   padding: 10px;
   grid-template-columns: 50% 50%;
+}
+
+.player-tracker > h6 {
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.player-tracker.blue > h6 {
+  background-color: var(--light-blue);
+}
+
+.player-tracker.red > h6 {
+  background-color: var(--light-red);
 }
 
 .player-icon-inner {
@@ -85,11 +141,32 @@
   border-radius: 3px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.36);
   transition: transform 1s;
+  text-align: center;
+  padding: 10px;
+}
+
+.word-tile.blue {
+  background-color: var(--blue);
+}
+
+.word-tile.red {
+  background-color: var(--red);
+}
+
+.word-tile.neutral {
+  background-color: var(--tan);
+}
+
+.word-tile.grey {
+  background-color: var(--grey);
+}
+
+.word-tile.black {
+  background-color: var(--black);
 }
 
 .word-tile:hover {
   filter: brightness(110%);
-  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .game-event-window {
@@ -103,4 +180,8 @@
 
 .game-event-window > h6 {
   text-transform: uppercase;
+}
+
+.reveal-icon {
+  width: 75px;
 }
