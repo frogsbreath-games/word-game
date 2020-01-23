@@ -176,18 +176,6 @@ class Game extends React.PureComponent<GameProps, State> {
     return (
       <React.Fragment>
         <div>
-          <div className="game-banner">
-            <TeamTile
-              team={this.props.localPlayer.team}
-              tilesRemaining={localTeamsTilesRemaining}
-              isTeamsTurn={currentTeam === this.props.localPlayer.team}
-            />
-            <TeamTile
-              team={apposingTeam}
-              tilesRemaining={apposingTeamTilesRemaining}
-              isTeamsTurn={currentTeam !== this.props.localPlayer.team}
-            />
-          </div>
           <div style={{ display: "grid", gridTemplateColumns: "50% 50%" }}>
             <PlayerTracker
               team={this.props.localPlayer.team}
@@ -296,18 +284,18 @@ class Game extends React.PureComponent<GameProps, State> {
               </button>
             </div>
           )}
-          {this.props.game.actions.canDelete && (
-            <div className="row">
-              <button
-                className="btn btn-danger"
-                type="button"
-                onClick={() => this.props.deleteGame(this.props.game.code)}
-                style={{ marginTop: "10px", marginLeft: "20px" }}
-              >
-                Delete Game
-              </button>
-            </div>
-          )}
+          <div className="game-banner">
+            <TeamTile
+              team={this.props.localPlayer.team}
+              tilesRemaining={localTeamsTilesRemaining}
+              isTeamsTurn={currentTeam === this.props.localPlayer.team}
+            />
+            <TeamTile
+              team={apposingTeam}
+              tilesRemaining={apposingTeamTilesRemaining}
+              isTeamsTurn={currentTeam !== this.props.localPlayer.team}
+            />
+          </div>
         </div>
         <div className="game-event-window">
           <h6>Game Log</h6>
@@ -334,6 +322,18 @@ class Game extends React.PureComponent<GameProps, State> {
               </div>
             ))}
         </div>
+        {this.props.game.actions.canDelete && (
+          <div className="row">
+            <button
+              className="btn btn-danger"
+              type="button"
+              onClick={() => this.props.deleteGame(this.props.game.code)}
+              style={{ marginTop: "10px", marginLeft: "20px" }}
+            >
+              Delete Game
+            </button>
+          </div>
+        )}
       </React.Fragment>
     );
   }

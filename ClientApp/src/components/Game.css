@@ -6,8 +6,10 @@
   --light-red: #dd5f5d;
   --dark-red: #6d2726;
   --tan: #c5afa4;
+  --dark-tan: #695f5a;
   --grey: #c4c4c4;
-  --black: #2a2a2a;
+  --dark-grey: #757575;
+  --black: #3b3b3b;
 }
 
 .game-banner {
@@ -23,17 +25,14 @@
   margin: 10px;
   padding: 10px;
   border-radius: 5px;
-  border: solid;
 }
 
 .team-tile.blue {
-  background-color: var(--blue);
-  border-color: var(--dark-blue);
+  background-color: var(--light-blue);
 }
 
 .team-tile.red {
-  background-color: var(--red);
-  border-color: var(--dark-red);
+  background-color: var(--light-red);
 }
 
 .team-label {
@@ -41,19 +40,16 @@
   align-self: center;
   text-align: center;
   border-radius: 5px;
-  padding: 10px;
+  padding: 5px 5px 10px 5px;
   margin: 10px;
-  border: solid;
 }
 
 .team-label.blue {
-  background-color: var(--light-blue);
-  border-color: var(--dark-blue);
+  background-color: var(--blue);
 }
 
 .team-label.red {
-  background-color: var(--light-red);
-  border-color: var(--dark-red);
+  background-color: var(--red);
 }
 
 .player-icon {
@@ -90,7 +86,7 @@
 .player-tracker {
   display: grid;
   padding: 10px;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 80% 20%;
 }
 
 .player-tracker > h6 {
@@ -129,7 +125,6 @@
   grid-template-rows: repeat(5, 1fr);
   grid-column-gap: 10px;
   grid-row-gap: 10px;
-  background-color: lightgrey;
   padding: 10px;
   padding-right: 50px;
 }
@@ -143,22 +138,27 @@
   transition: transform 1s;
   text-align: center;
   padding: 10px;
+  border: solid;
 }
 
 .word-tile.blue {
   background-color: var(--blue);
+  border-color: var(--dark-blue);
 }
 
 .word-tile.red {
   background-color: var(--red);
+  border-color: var(--dark-red);
 }
 
 .word-tile.neutral {
   background-color: var(--tan);
+  border-color: var(--dark-tan);
 }
 
 .word-tile.grey {
   background-color: var(--grey);
+  border-color: var(--dark-grey);
 }
 
 .word-tile.black {
