@@ -323,9 +323,9 @@ namespace WordGame.API.Controllers
 			//Red always goes first (for now)
 			var board = _gameBoardGenerator.GenerateGameBoard(Team.Red);
 
-			game.StartGame(board, Team.Red);
+			game.StartGame(player, board, Team.Red);
 
-			await UpdateGame(game, GameEvent.GameStarted(player, DateTime.Now));
+			await UpdateGame(game);
 
 			return Accepted("Game Started");
 		}
@@ -514,12 +514,9 @@ namespace WordGame.API.Controllers
 			if (!player.IsSpyMaster || player.Team != game.CurrentTurn.Team)
 				return BadRequest("This player cannot give a hint!");
 
-			game.CurrentTurn.GiveHint(hintModel.HintWord, hintModel.WordCount);
+			game.GiveHint(player, hintModel.HintWord, hintModel.WordCount);
 
 			await UpdateGame(game);
-			//This event only goes to spymasters
-			await _gameContext.Clients.Players(game.SpyMasters).GameEvent(
-				GameEvent.HintGiven(player, DateTime.Now, hintModel.HintWord, hintModel.WordCount));
 
 			return Accepted("Hint submitted.");
 		}
@@ -558,12 +555,9 @@ namespace WordGame.API.Controllers
 			if (!player.IsSpyMaster || player.Team == game.CurrentTurn.Team)
 				return BadRequest("This player cannot approve a hint!");
 
-			game.CurrentTurn.ApproveHint();
+			game.ApproveHint(player);
 
-			await UpdateGame(game,
-				GameEvent.HintApproved(player, DateTime.Now,
-					game.CurrentTurn.HintWord,
-					game.CurrentTurn.WordCount.Value));
+			await UpdateGame(game);
 
 			return Accepted("Hint approved.");
 		}
@@ -645,8 +639,7 @@ namespace WordGame.API.Controllers
 
 			game.SetPlayerVote(player, voteModel.Word);
 
-			await UpdateGame(game,
-				GameEvent.Guessed(player, DateTime.Now, voteModel.Word));
+			await UpdateGame(game);
 
 			return Accepted("Player Word Vote Set.");
 		}
@@ -687,7 +680,7 @@ namespace WordGame.API.Controllers
 
 			game.VoteEndTurn(player);
 
-			await UpdateGame(game, GameEvent.VotedEndTurn(player, DateTime.Now));
+			await UpdateGame(game);
 
 			return Accepted("Player voted to end turn.");
 		}
@@ -719,7 +712,7 @@ namespace WordGame.API.Controllers
 				});
 		}
 
-		protected Task UpdateGame(Game game, params GameEvent[] events)
+		protected Task UpdateGame(Game game)
 		{
 			var tasks = new List<Task> { _repository.UpdateGame(game.Code, game) };
 
@@ -727,8 +720,11 @@ namespace WordGame.API.Controllers
 					game,
 					(client, model) => client.GameUpdated(model)));
 
-			foreach (var @event in events)
+			foreach (var @event in game.DispatchPublicEvents())
 				tasks.Add(_gameContext.Clients.Players(game.Players).GameEvent(@event));
+
+			foreach (var @event in game.DispatchSpyMasterEvents())
+				tasks.Add(_gameContext.Clients.Players(game.SpyMasters).GameEvent(@event));
 
 			Task.Run(() => BotTask(game));
 
@@ -800,20 +796,16 @@ namespace WordGame.API.Controllers
 			string word = WordList.Words[_randomAccessor.Random.Next(0, WordList.Words.Length)];
 			int number = _randomAccessor.Random.Next(1, 4);
 
-			game.CurrentTurn.GiveHint(word, number);
+			game.GiveHint(player, word, number);
 
 			await UpdateGame(game);
-			//This event only goes to spymasters
-			await _gameContext.Clients.Players(game.SpyMasters).GameEvent(
-				GameEvent.HintGiven(player, DateTime.Now, word, number));
 		}
 
 		protected Task ExecuteApprovingSpyMasterBotJob(Game game, Player player)
 		{
-			game.CurrentTurn.ApproveHint();
+			game.ApproveHint(player);
 
-			return UpdateGame(game,
-				GameEvent.HintApproved(player, DateTime.Now, game.CurrentTurn.HintWord, game.CurrentTurn.WordCount.Value));
+			return UpdateGame(game);
 		}
 
 		protected Task ExecuteGuessingAgentBotJob(Game game, Player player)
@@ -825,8 +817,7 @@ namespace WordGame.API.Controllers
 
 			game.SetPlayerVote(player, word);
 
-			return UpdateGame(game,
-				GameEvent.Guessed(player, DateTime.Now, word));
+			return UpdateGame(game);
 		}
 	}
 

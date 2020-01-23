@@ -10,6 +10,9 @@ namespace WordGame.API.Domain.Models
 {
 	public class Game
 	{
+		private List<GameEvent> _publicEvents = new List<GameEvent>();
+		private List<GameEvent> _spyMasterEvents = new List<GameEvent>();
+
 		[JsonIgnore]
 		public ObjectId Id { get; protected set; }
 
@@ -111,7 +114,7 @@ namespace WordGame.API.Domain.Models
 			return player;
 		}
 
-		public void StartGame(List<WordTile> tiles, Team startingTeam)
+		public void StartGame(Player player, List<WordTile> tiles, Team startingTeam)
 		{
 			if (!GameCanStart())
 				throw new InvalidOperationException("Cannot start game!");
@@ -125,6 +128,20 @@ namespace WordGame.API.Domain.Models
 			{
 				new Turn(startingTeam, 1)
 			};
+
+			AddPublicEvent(GameEvent.PlayerStartedGame(player, DateTime.Now));
+		}
+
+		private void AddPublicEvent(GameEvent @event)
+		{
+			_publicEvents ??= new List<GameEvent>();
+			_publicEvents.Add(@event);
+		}
+
+		private void AddSpyMasterEvent(GameEvent @event)
+		{
+			_spyMasterEvents ??= new List<GameEvent>();
+			_spyMasterEvents.Add(@event);
 		}
 
 		private void EndCurrentTurn()
@@ -134,7 +151,9 @@ namespace WordGame.API.Domain.Models
 
 			CurrentTurn.End();
 
-			if (!GetWinningTeam().HasValue)
+			if (GetWinningTeam() is Team winningTeam)
+				AddPublicEvent(GameEvent.TeamWon(winningTeam, DateTime.Now));
+			else
 				Turns.Add(new Turn(CurrentTurn.Team.GetOpposingTeam(), CurrentTurn.TurnNumber + 1));
 		}
 
@@ -150,14 +169,26 @@ namespace WordGame.API.Domain.Models
 
 			tile.Votes.Add(new PlayerVote(player.Team, player.Number, player.Name));
 
+			AddPublicEvent(GameEvent.PlayerVotedWord(player, DateTime.Now, word));
+
 			if (tile.Votes.Count == Agents.Count(p => p.Team == player.Team))
 			{
 				CurrentTurn.Guesses.Add(new Guess(word, CurrentTurn.Guesses.Count, tile.Team));
 				tile.Votes.Clear();
 				tile.IsRevealed = true;
 
-				if (tile.Team != player.Team || CurrentTurn.GuessesRemaining <= 0)
+				if (tile.Team == player.Team)
+				{
+					AddPublicEvent(GameEvent.TeamGuessedCorrectly(player.Team, DateTime.Now));
+
+					if (CurrentTurn.GuessesRemaining <= 0)
+						EndCurrentTurn();
+				}
+				else
+				{
+					AddPublicEvent(GameEvent.TeamGuessedIncorrectly(player.Team, DateTime.Now));
 					EndCurrentTurn();
+				}
 			}
 		}
 
@@ -166,6 +197,8 @@ namespace WordGame.API.Domain.Models
 			RemovePlayerVote(player);
 
 			CurrentTurn.EndTurnVotes.Add(new PlayerVote(player.Team, player.Number, player.Name));
+
+			AddPublicEvent(GameEvent.PlayerVotedEndTurn(player, DateTime.Now));
 
 			if (CurrentTurn.EndTurnVotes.Count == Agents.Count(p => p.Team == player.Team))
 			{
@@ -192,6 +225,20 @@ namespace WordGame.API.Domain.Models
 
 			if (CurrentTurn.EndTurnVotes.SingleOrDefault(v => v.Number == player.Number) is PlayerVote endVote)
 				CurrentTurn.EndTurnVotes.Remove(endVote);
+		}
+
+		public void GiveHint(Player player, string hintWord, int wordCount)
+		{
+			CurrentTurn.GiveHint(hintWord, wordCount);
+
+			AddSpyMasterEvent(GameEvent.PlayerGaveHint(player, DateTime.Now, hintWord, wordCount));
+		}
+
+		public void ApproveHint(Player player)
+		{
+			CurrentTurn.ApproveHint();
+
+			AddPublicEvent(GameEvent.PlayerApprovedHint(player, DateTime.Now, CurrentTurn.HintWord, CurrentTurn.WordCount.Value));
 		}
 
 		[JsonIgnore]
@@ -231,6 +278,22 @@ namespace WordGame.API.Domain.Models
 				return false;
 
 			return true;
+		}
+
+		public List<GameEvent> DispatchPublicEvents()
+		{
+			_publicEvents ??= new List<GameEvent>();
+			var events = new List<GameEvent>(_publicEvents);
+			_publicEvents.Clear();
+			return events;
+		}
+
+		public List<GameEvent> DispatchSpyMasterEvents()
+		{
+			_spyMasterEvents ??= new List<GameEvent>();
+			var events = new List<GameEvent>(_spyMasterEvents);
+			_spyMasterEvents.Clear();
+			return events;
 		}
 	}
 }

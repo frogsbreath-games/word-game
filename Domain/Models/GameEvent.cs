@@ -32,50 +32,69 @@ namespace WordGame.API.Domain.Models
 		public IDictionary<string, object> Data { get; protected set; }
 		public string Message => Type switch
 		{
-			GameEventType.GameStarted => " Started The Game",
-			GameEventType.HintApproved => $" Approved Hint Word \"{Data["word"]}\" ({Data["count"]})",
-			GameEventType.HintGiven => $" Gave Hint Word \"{Data["word"]}\" ({Data["count"]})",
-			GameEventType.Guessed => $" Guessed \"{Data["word"]}\"",
-			GameEventType.VotedEndTurn => $" Voted To Stop Guessing",
+			GameEventType.PlayerStartedGame => " Started The Game",
+			GameEventType.PlayerApprovedHint => $" Approved Hint Word \"{Data["word"]}\" ({Data["count"]})",
+			GameEventType.PlayerGaveHint => $" Gave Hint Word \"{Data["word"]}\" ({Data["count"]})",
+			GameEventType.PlayerVotedWord => $" Voted For \"{Data["word"]}\"",
+			GameEventType.PlayerVotedEndTurn => $" Voted To Stop Guessing",
+
+			GameEventType.TeamGuessedCorrectly => $" Guessed Correctly!",
+			GameEventType.TeamGuessedIncorrectly => $" Guessed Incorrectly :(",
+			GameEventType.TeamWon => " WON!",
 			_ => null
 		};
 
-		public static GameEvent GameStarted(Player player, DateTime timestamp)
-			=> new GameEvent(player, timestamp, GameEventType.GameStarted);
+		public static GameEvent PlayerStartedGame(Player player, DateTime timestamp)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerStartedGame);
 
-		public static GameEvent HintApproved(Player player, DateTime timestamp, string word, int count)
-			=> new GameEvent(player, timestamp, GameEventType.HintApproved,
+		public static GameEvent PlayerApprovedHint(Player player, DateTime timestamp, string word, int count)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerApprovedHint,
 				new Dictionary<string, object>
 				{
 					["word"] = word,
 					["count"] = count
 				});
 
-		public static GameEvent HintGiven(Player player, DateTime timestamp, string word, int count)
-			=> new GameEvent(player, timestamp, GameEventType.HintGiven,
+		public static GameEvent PlayerGaveHint(Player player, DateTime timestamp, string word, int count)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerGaveHint,
 				new Dictionary<string, object>
 				{
 					["word"] = word,
 					["count"] = count
 				});
 
-		public static GameEvent Guessed(Player player, DateTime timestamp, string word)
-			=> new GameEvent(player, timestamp, GameEventType.Guessed,
+		public static GameEvent PlayerVotedWord(Player player, DateTime timestamp, string word)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerVotedWord,
 				new Dictionary<string, object>
 				{
 					["word"] = word
 				});
 
-		public static GameEvent VotedEndTurn(Player player, DateTime timestamp)
-			=> new GameEvent(player, timestamp, GameEventType.VotedEndTurn);
+		public static GameEvent PlayerVotedEndTurn(Player player, DateTime timestamp)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerVotedEndTurn);
+
+		public static GameEvent TeamGuessedCorrectly(Team team, DateTime timestamp)
+			=> new GameEvent(team, timestamp, GameEventType.TeamGuessedCorrectly);
+
+		public static GameEvent TeamGuessedIncorrectly(Team team, DateTime timestamp)
+			=> new GameEvent(team, timestamp, GameEventType.TeamGuessedIncorrectly);
+
+		public static GameEvent TeamWon(Team team, DateTime timestamp)
+			=> new GameEvent(team, timestamp, GameEventType.TeamWon);
 	}
 
 	public enum GameEventType
 	{
-		GameStarted,
-		HintApproved,
-		HintGiven,
-		Guessed,
-		VotedEndTurn
+		//Player Action Events
+		PlayerStartedGame,
+		PlayerApprovedHint,
+		PlayerGaveHint,
+		PlayerVotedWord,
+		PlayerVotedEndTurn,
+
+		//Team Events
+		TeamGuessedCorrectly,
+		TeamGuessedIncorrectly,
+		TeamWon
 	}
 }
