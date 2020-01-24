@@ -31,6 +31,9 @@ namespace WordGame.API.Domain.Models
 
 		public int RedTilesRemaining => WordTiles.Count(x => !x.IsRevealed && x.Team == Team.Red);
 
+		public int GetTilesRemaining(Team team)
+			=> WordTiles.Count(x => !x.IsRevealed && x.Team == team);
+
 		//This is pretty stupid
 		public Team? GetWinningTeam() => Status == GameStatus.Lobby
 			? null
@@ -239,6 +242,15 @@ namespace WordGame.API.Domain.Models
 			CurrentTurn.ApproveHint();
 
 			AddPublicEvent(GameEvent.PlayerApprovedHint(player, DateTime.Now, CurrentTurn.HintWord, CurrentTurn.WordCount.Value));
+		}
+
+		public void RefuseHint(Player player)
+		{
+			string word = CurrentTurn.HintWord;
+			int count = CurrentTurn.WordCount.Value;
+			CurrentTurn.RefuseHint();
+
+			AddSpyMasterEvent(GameEvent.PlayerRefusedHint(player, DateTime.Now, word, count));
 		}
 
 		[JsonIgnore]

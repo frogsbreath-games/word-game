@@ -747,6 +747,7 @@ namespace WordGame.API.Controllers
 					{
 						BotJob.ApprovingSpyMaster => ExecuteApprovingSpyMasterBotJob(game, bot.Player),
 						BotJob.PlanningSpyMaster => ExecutePlanningSpyMasterBotJob(game, bot.Player),
+						BotJob.ConformingAgent => ExecuteConformingAgentBotJob(game, bot.Player),
 						BotJob.GuessingAgent => ExecuteGuessingAgentBotJob(game, bot.Player),
 						_ => Task.CompletedTask
 					});
@@ -780,6 +781,28 @@ namespace WordGame.API.Controllers
 			if (game.CurrentTurn.Status == TurnStatus.Guessing)
 			{
 				var guessingPlayers = game.Agents.Where(p => p.Team == game.CurrentTurn.Team);
+				var botPlayers = guessingPlayers.Where(p => p.IsBot);
+
+				if (game.WordTiles.FirstOrDefault(wt => wt.Votes.Any()) is WordTile tile)
+				{
+					if (botPlayers.FirstOrDefault(p => !tile.Votes.Select(x => x.Number).Contains(p.Number)) is Player player)
+						return new Bot
+						{
+							Job = BotJob.ConformingAgent,
+							Player = player
+						};
+				}
+
+				if (game.CurrentTurn.EndTurnVotes.Any())
+				{
+					if (botPlayers.FirstOrDefault(p => !game.CurrentTurn.EndTurnVotes.Select(x => x.Number).Contains(p.Number)) is Player player)
+						return new Bot
+						{
+							Job = BotJob.ConformingAgent,
+							Player = player
+						};
+				}
+				
 				if (guessingPlayers.All(p => p.IsBot))
 					return new Bot
 					{
@@ -803,7 +826,26 @@ namespace WordGame.API.Controllers
 
 		protected Task ExecuteApprovingSpyMasterBotJob(Game game, Player player)
 		{
-			game.ApproveHint(player);
+			if (game.WordTiles.Any(x => x.Word.Contains(game.CurrentTurn.HintWord, StringComparison.OrdinalIgnoreCase)))
+				game.RefuseHint(player);
+			else
+				game.ApproveHint(player);
+
+			return UpdateGame(game);
+		}
+
+		protected Task ExecuteConformingAgentBotJob(Game game, Player player)
+		{
+			var availableTiles = game.WordTiles.Where(x => !x.IsRevealed).ToList();
+
+			if (game.WordTiles.FirstOrDefault(wt => wt.Votes.Any()) is WordTile tile)
+			{
+				game.SetPlayerVote(player, tile.Word);
+			}
+			else
+			{
+				game.VoteEndTurn(player);
+			}
 
 			return UpdateGame(game);
 		}
@@ -812,10 +854,17 @@ namespace WordGame.API.Controllers
 		{
 			var availableTiles = game.WordTiles.Where(x => !x.IsRevealed).ToList();
 
-			//Random Guess
-			string word = availableTiles[_randomAccessor.Random.Next(0, availableTiles.Count)].Word;
+			if (_randomAccessor.Random.Next(0, 100) > 10)
+			{
+				//Random Guess
+				string word = availableTiles[_randomAccessor.Random.Next(0, availableTiles.Count)].Word;
 
-			game.SetPlayerVote(player, word);
+				game.SetPlayerVote(player, word);
+			}
+			else
+			{
+				game.VoteEndTurn(player);
+			}
 
 			return UpdateGame(game);
 		}
@@ -832,6 +881,7 @@ namespace WordGame.API.Controllers
 	{
 		PlanningSpyMaster,
 		ApprovingSpyMaster,
+		ConformingAgent,
 		GuessingAgent
 	}
 }
