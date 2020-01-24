@@ -6,6 +6,8 @@ import { Redirect } from "react-router";
 import PlayerTile from "./PlayerTile";
 import { ReactComponent as MessageIcon } from "../assets/MessageIcon.svg";
 import { red, blue } from "../constants/ColorConstants";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
+import "./Lobby.css";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -146,42 +148,56 @@ class Lobby extends React.PureComponent<GameProps, State> {
           <div className="col-sm-6">
             <h1 style={{ color: red }}>Red</h1>
             <hr />
-            {this.props.game.players &&
-              this.props.game.players
+            <TransitionGroup>
+              {this.props.game.players
                 .filter(player => player.team === "red")
                 .map(player => (
-                  <PlayerTile
-                    player={player}
-                    localPlayer={this.props.localPlayer}
-                    gameActions={this.props.game.actions}
-                    code={this.props.game.code}
-                    key={player.number}
-                    swapTeams={this.swapTeams}
-                    leaveGame={this.quitGame}
-                    deleteBot={this.deleteBot}
-                    changeRole={this.handleRoleChange}
-                  />
+                  <CSSTransition
+                    key={player.name}
+                    timeout={500}
+                    classNames="item"
+                  >
+                    <PlayerTile
+                      player={player}
+                      localPlayer={this.props.localPlayer}
+                      gameActions={this.props.game.actions}
+                      code={this.props.game.code}
+                      key={player.number}
+                      swapTeams={this.swapTeams}
+                      leaveGame={this.quitGame}
+                      deleteBot={this.deleteBot}
+                      changeRole={this.handleRoleChange}
+                    />
+                  </CSSTransition>
                 ))}
+            </TransitionGroup>
           </div>
           <div className="col-sm-6">
             <h1 style={{ color: blue }}>Blue</h1>
             <hr />
-            {this.props.game.players &&
-              this.props.game.players
+            <TransitionGroup>
+              {this.props.game.players
                 .filter(player => player.team === "blue")
                 .map(player => (
-                  <PlayerTile
-                    player={player}
-                    localPlayer={this.props.localPlayer}
-                    gameActions={this.props.game.actions}
-                    code={this.props.game.code}
-                    key={player.number}
-                    swapTeams={this.swapTeams}
-                    leaveGame={this.quitGame}
-                    deleteBot={this.deleteBot}
-                    changeRole={this.handleRoleChange}
-                  />
+                  <CSSTransition
+                    key={player.name}
+                    timeout={500}
+                    classNames="item"
+                  >
+                    <PlayerTile
+                      player={player}
+                      localPlayer={this.props.localPlayer}
+                      gameActions={this.props.game.actions}
+                      code={this.props.game.code}
+                      key={player.number}
+                      swapTeams={this.swapTeams}
+                      leaveGame={this.quitGame}
+                      deleteBot={this.deleteBot}
+                      changeRole={this.handleRoleChange}
+                    />
+                  </CSSTransition>
                 ))}
+            </TransitionGroup>
           </div>
         </div>
         <div className="row" style={{ marginTop: "20px" }}>
