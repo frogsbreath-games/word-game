@@ -57,15 +57,14 @@
 }
 
 .playerIcon {
-  height: 40px;
-  width: 40px;
+  height: 50px;
+  width: 50px;
   background-color: #bbb;
-  border-radius: 50%;
+  border-radius: 20%;
   border: solid;
   position: relative;
   display: grid;
   z-index: 1;
-  margin-left: -10px;
   margin-top: -5px;
 }
 
@@ -81,22 +80,22 @@
 }
 
 .badge {
-  width: 20px;
+  width: 25px;
   opacity: 0.5;
   justify-self: center;
   align-self: center;
   fill: white;
-  margin-bottom: 5px;
 }
 
 .tracker {
   display: grid;
-  padding: 10px;
-  grid-template-columns: 80% 20%;
+  padding-top: 10px;
+  grid-template-columns: 0% 100%;
 }
 
-.tracker > h6 {
+.tracker > h4 {
   padding: 5px;
+  text-align: center;
   border-radius: 5px;
 }
 
@@ -185,6 +184,6 @@
   text-transform: uppercase;
 }
 
-.revealIcon {
+.reveal {
   width: 75px;
 }

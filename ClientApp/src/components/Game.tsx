@@ -55,14 +55,14 @@ type PlayerTrackerProps = {
 
 const PlayerTracker = ({ playerName, team }: PlayerTrackerProps) => (
   <div className={styles.tracker}>
-    <h6 className={team === "red" ? styles.redHeader : styles.blueHeader}>
-      {playerName}
-    </h6>
     <div
       className={team === "red" ? styles.redPlayerIcon : styles.bluePlayerIcon}
     >
       <PlayerIcon className={styles.badge} />
     </div>
+    <h4 className={team === "red" ? styles.redHeader : styles.blueHeader}>
+      {playerName}
+    </h4>
   </div>
 );
 
@@ -183,14 +183,8 @@ class Game extends React.PureComponent<GameProps, State> {
     return (
       <React.Fragment>
         <div>
-          <div style={{ display: "grid", gridTemplateColumns: "50% 50%" }}>
-            <PlayerTracker
-              team={this.props.localPlayer.team}
-              playerName={this.props.localPlayer.name}
-            />
-            {/* not sure where to put status */}
-            <h4 style={{ textAlign: "center" }}>{currentStatus}</h4>
-          </div>
+          {/* not sure where to put status */}
+          <h4 style={{ textAlign: "center" }}>{currentStatus}</h4>
           <div style={{ textAlign: "center" }}>
             {/* this should only be seen by spy master when it is hint phase */}
             {this.props.game.actions.canGiveHint && (
@@ -263,6 +257,10 @@ class Game extends React.PureComponent<GameProps, State> {
               </div>
             )}
           </div>
+          <PlayerTracker
+            team={this.props.localPlayer.team}
+            playerName={this.props.localPlayer.name}
+          />
           <div className={styles.board} style={{ marginTop: "10px" }}>
             {this.props.game.wordTiles &&
               this.props.game.wordTiles.map(tile => (
