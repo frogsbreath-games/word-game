@@ -4,7 +4,7 @@ import { ReactComponent as SwapIcon } from "../assets/SwapIcon.svg";
 import { ReactComponent as TrashIcon } from "../assets/TrashIcon.svg";
 import * as GameStore from "../store/Game";
 import { red, blue } from "../constants/ColorConstants";
-import "./PlayerTile.css";
+import styles from "./PlayerTile.module.css";
 
 type PlayerTileProps = {
   player: GameStore.Player;
@@ -29,13 +29,17 @@ const PlayerTile = ({
   code
 }: PlayerTileProps) => (
   <div>
-    <div className={"player-tile-container " + player.team}>
-      <div className="player-tile-label">
+    <div
+      className={
+        player.team === "red" ? styles.containerRed : styles.containerBlue
+      }
+    >
+      <div className={styles.tileLabel}>
         <h5>{player.name}</h5>
         {player.number === localPlayer.number && (
           <PlayerIcon
             //Need to know how to do this better
-            className={"player-icon-svg " + player.team}
+            className={player.team === "red" ? styles.redIcon : styles.blueIcon}
           />
         )}
         <div className="form-check">

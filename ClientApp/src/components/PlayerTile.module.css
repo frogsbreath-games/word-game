@@ -12,22 +12,24 @@
   --black: #3b3b3b;
 }
 
-.player-tile-container {
+.container {
   border-radius: 3px;
   margin: 15px;
   padding: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 3px rgba(0, 0, 0, 0.36);
 }
 
-.player-tile-container.blue {
+.containerBlue {
+  composes: container;
   background-color: var(--blue);
 }
 
-.player-tile-container.red {
+.containerRed {
+  composes: container;
   background-color: var(--red);
 }
 
-.player-tile-label {
+.tileLabel {
   background-color: rgba(255, 255, 255, 0.75);
   padding: 15px;
   border-radius: 5px;
@@ -35,17 +37,19 @@
     0 1px 3px rgba(255, 255, 255, 0.36);
 }
 
-.player-icon-svg {
+.icon {
   opacity: 0.5;
   width: 50px;
   float: right;
   margin-top: -25px;
 }
 
-.player-icon-svg.red {
+.redIcon {
+  composes: icon;
   fill: var(--red);
 }
 
-.player-icon-svg.blue {
+.blueIcon {
+  composes: icon;
   fill: var(--blue);
 }
