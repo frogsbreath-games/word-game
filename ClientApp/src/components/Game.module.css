@@ -79,6 +79,30 @@
   border-color: var(--dark-red);
 }
 
+.vote {
+  height: 25px;
+  width: 25px;
+  background-color: #bbb;
+  border-radius: 50%;
+  border: solid;
+  position: relative;
+  z-index: 1;
+  margin: 5px;
+  display: inline-block;
+}
+
+.blueVote {
+  composes: vote;
+  background-color: var(--light-blue);
+  border-color: var(--dark-blue);
+}
+
+.redVote {
+  composes: vote;
+  background-color: var(--light-red);
+  border-color: var(--dark-red);
+}
+
 .badge {
   width: 25px;
   opacity: 0.5;

@@ -88,11 +88,11 @@ const GameTile = ({
     }
   >
     <h6 className={styles.lightLabel}>{wordTile.word}</h6>
-    {turnStatus === "guessing" &&
-      !localPlayer.isSpyMaster &&
-      !wordTile.isRevealed && (
-        <h6 className={styles.lightLabel}>Votes: {wordTile.votes.length}</h6>
-      )}
+    {wordTile.votes.map(playerVote => (
+      <div
+        className={playerVote.team === "red" ? styles.redVote : styles.blueVote}
+      />
+    ))}
     {localPlayer.isSpyMaster && wordTile.isRevealed && (
       <div className={styles.lightLabel}>
         <RevealedIcon className={styles.reveal} />
@@ -165,7 +165,7 @@ class Game extends React.PureComponent<GameProps, State> {
         ? this.props.game.redTilesRemaining
         : this.props.game.blueTilesRemaining;
     let apposingTeamTilesRemaining =
-      this.props.localPlayer.team === "red"
+      this.props.localPlayer.team !== "red"
         ? this.props.game.redTilesRemaining
         : this.props.game.blueTilesRemaining;
     let currentStatus: string = "";
