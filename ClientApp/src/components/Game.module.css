@@ -12,12 +12,12 @@
   --black: #3b3b3b;
 }
 
-.game-banner {
+.banner {
   display: grid;
   grid-template-columns: 50% 50%;
 }
 
-.team-tile {
+.tile {
   display: grid;
   grid-template-columns: 40% 60%;
   grid-template-areas: "team info";
@@ -27,15 +27,17 @@
   border-radius: 5px;
 }
 
-.team-tile.blue {
+.blueTile {
+  composes: tile;
   background-color: var(--light-blue);
 }
 
-.team-tile.red {
+.redTile {
+  composes: tile;
   background-color: var(--light-red);
 }
 
-.team-label {
+.teamLabel {
   justify-self: center;
   align-self: center;
   text-align: center;
@@ -44,15 +46,17 @@
   margin: 10px;
 }
 
-.team-label.blue {
+.blueTeamLabel {
+  composes: teamLabel;
   background-color: var(--blue);
 }
 
-.team-label.red {
+.redTeamLabel {
+  composes: teamLabel;
   background-color: var(--red);
 }
 
-.player-icon {
+.playerIcon {
   height: 40px;
   width: 40px;
   background-color: #bbb;
@@ -65,16 +69,18 @@
   margin-top: -5px;
 }
 
-.player-icon.blue {
+.bluePlayerIcon {
+  composes: playerIcon;
   background-color: var(--blue);
   border-color: var(--dark-blue);
 }
-.player-icon.red {
+.redPlayerIcon {
+  composes: playerIcon;
   background-color: var(--red);
   border-color: var(--dark-red);
 }
 
-.player-badge {
+.badge {
   width: 20px;
   opacity: 0.5;
   justify-self: center;
@@ -83,34 +89,26 @@
   margin-bottom: 5px;
 }
 
-.player-tracker {
+.tracker {
   display: grid;
   padding: 10px;
   grid-template-columns: 80% 20%;
 }
 
-.player-tracker > h6 {
+.tracker > h6 {
   padding: 5px;
   border-radius: 5px;
 }
 
-.player-tracker.blue > h6 {
+.blueHeader {
   background-color: var(--light-blue);
 }
 
-.player-tracker.red > h6 {
+.redHeader {
   background-color: var(--light-red);
 }
 
-.player-icon-inner {
-  height: 60px;
-  width: 60px;
-  background-color: #bbb;
-  border-radius: 50%;
-  position: absolute;
-}
-
-.light-label {
+.lightLabel {
   background-color: rgba(255, 255, 255, 0.75);
   padding: 5px;
   border-radius: 5px;
@@ -119,7 +117,7 @@
   text-align: center;
   word-wrap: break-word;
 }
-.game-board {
+.board {
   display: grid;
   grid-template-columns: repeat(5, minmax(20%, 1fr));
   grid-template-rows: repeat(5, 1fr);
@@ -129,7 +127,7 @@
   padding-right: 50px;
 }
 
-.word-tile {
+.wordTile {
   width: 100%;
   height: 100%;
   min-height: 100px;
@@ -141,35 +139,40 @@
   border: solid;
 }
 
-.word-tile.blue {
+.blue {
+  composes: wordTile;
   background-color: var(--blue);
   border-color: var(--dark-blue);
 }
 
-.word-tile.red {
+.red {
+  composes: wordTile;
   background-color: var(--red);
   border-color: var(--dark-red);
 }
 
-.word-tile.neutral {
+.neutral {
+  composes: wordTile;
   background-color: var(--tan);
   border-color: var(--dark-tan);
 }
 
-.word-tile.grey {
+.grey {
+  composes: wordTile;
   background-color: var(--grey);
   border-color: var(--dark-grey);
 }
 
-.word-tile.black {
+.black {
+  composes: wordTile;
   background-color: var(--black);
 }
 
-.word-tile:hover {
+.wordTile:hover {
   filter: brightness(110%);
 }
 
-.game-event-window {
+.eventWindow {
   background: #f0f3f6;
   margin: 10px;
   padding: 15px;
@@ -178,10 +181,10 @@
   font-family: monospace;
 }
 
-.game-event-window > h6 {
+.eventWindow > h6 {
   text-transform: uppercase;
 }
 
-.reveal-icon {
+.revealIcon {
   width: 75px;
 }

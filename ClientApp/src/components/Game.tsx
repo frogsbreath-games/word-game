@@ -4,7 +4,7 @@ import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
 import { red, blue, tan, black, grey } from "../constants/ColorConstants";
-import "./Game.css";
+import styles from "./Game.module.css";
 import { ReactComponent as RevealedIcon } from "../assets/RevealedIcon.svg";
 import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
 
@@ -37,11 +37,13 @@ type TeamTileProps = {
 };
 
 const TeamTile = ({ team, tilesRemaining, isTeamsTurn }: TeamTileProps) => (
-  <div className={"team-tile " + team}>
-    <h3 className={"team-label " + team}>{team + " Team"}</h3>
+  <div className={team === "red" ? styles.redTile : styles.blueTile}>
+    <h3 className={team === "red" ? styles.redTeamLabl : styles.blueTeamLabel}>
+      {team + " Team"}
+    </h3>
     <div>
       <h3>Remaining Tiles: {tilesRemaining}</h3>
-      {isTeamsTurn && <h6 className="light-label">Current Turn</h6>}
+      {isTeamsTurn && <h6 className={styles.lightLabel}>Current Turn</h6>}
     </div>
   </div>
 );
@@ -52,10 +54,14 @@ type PlayerTrackerProps = {
 };
 
 const PlayerTracker = ({ playerName, team }: PlayerTrackerProps) => (
-  <div className={"player-tracker " + team}>
-    <h6>{playerName}</h6>
-    <div className={"player-icon " + team}>
-      <PlayerIcon className="player-badge" />
+  <div className={styles.tracker}>
+    <h6 className={team === "red" ? styles.redHeader : styles.blueHeader}>
+      {playerName}
+    </h6>
+    <div
+      className={team === "red" ? styles.redPlayerIcon : styles.bluePlayerIcon}
+    >
+      <PlayerIcon className={styles.badge} />
     </div>
   </div>
 );
@@ -76,19 +82,20 @@ const GameTile = ({
   <div
     onClick={() => handleVoteWord(wordTile.word, wordTile.isRevealed)}
     className={
-      "word-tile " +
-      (wordTile.isRevealed || localPlayer.isSpyMaster ? wordTile.team : "grey")
+      wordTile.isRevealed || localPlayer.isSpyMaster
+        ? styles[wordTile.team]
+        : styles.grey
     }
   >
-    <h6 className="light-label">{wordTile.word}</h6>
+    <h6 className={styles.lightLabel}>{wordTile.word}</h6>
     {turnStatus === "guessing" &&
       !localPlayer.isSpyMaster &&
       !wordTile.isRevealed && (
-        <h6 className="light-label">Votes: {wordTile.votes.length}</h6>
+        <h6 className={styles.lightLabel}>Votes: {wordTile.votes.length}</h6>
       )}
     {localPlayer.isSpyMaster && wordTile.isRevealed && (
-      <div className="light-label">
-        <RevealedIcon className="reveal-icon" />
+      <div className={styles.lightLabel}>
+        <RevealedIcon className={styles.reveal} />
       </div>
     )}
   </div>
@@ -256,7 +263,7 @@ class Game extends React.PureComponent<GameProps, State> {
               </div>
             )}
           </div>
-          <div className="game-board" style={{ marginTop: "10px" }}>
+          <div className={styles.board} style={{ marginTop: "10px" }}>
             {this.props.game.wordTiles &&
               this.props.game.wordTiles.map(tile => (
                 <GameTile
@@ -284,7 +291,7 @@ class Game extends React.PureComponent<GameProps, State> {
               </button>
             </div>
           )}
-          <div className="game-banner">
+          <div className={styles.banner}>
             <TeamTile
               team={this.props.localPlayer.team}
               tilesRemaining={localTeamsTilesRemaining}
@@ -297,7 +304,7 @@ class Game extends React.PureComponent<GameProps, State> {
             />
           </div>
         </div>
-        <div className="game-event-window">
+        <div className={styles.eventWindow}>
           <h6>Game Log</h6>
           {this.props.events &&
             this.props.events.map((event, index) => (
