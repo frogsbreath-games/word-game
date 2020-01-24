@@ -34,6 +34,7 @@ namespace WordGame.API.Domain.Models
 		{
 			GameEventType.PlayerStartedGame => " Started The Game",
 			GameEventType.PlayerApprovedHint => $" Approved Hint Word \"{Data["word"]}\" ({Data["count"]})",
+			GameEventType.PlayerRefusedHint => $" Refused Hint Word \"{Data["word"]}\" ({Data["count"]})",
 			GameEventType.PlayerGaveHint => $" Gave Hint Word \"{Data["word"]}\" ({Data["count"]})",
 			GameEventType.PlayerVotedWord => $" Voted For \"{Data["word"]}\"",
 			GameEventType.PlayerVotedEndTurn => $" Voted To Stop Guessing",
@@ -49,6 +50,14 @@ namespace WordGame.API.Domain.Models
 
 		public static GameEvent PlayerApprovedHint(Player player, DateTime timestamp, string word, int count)
 			=> new GameEvent(player, timestamp, GameEventType.PlayerApprovedHint,
+				new Dictionary<string, object>
+				{
+					["word"] = word,
+					["count"] = count
+				});
+
+		public static GameEvent PlayerRefusedHint(Player player, DateTime timestamp, string word, int count)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerRefusedHint,
 				new Dictionary<string, object>
 				{
 					["word"] = word,
@@ -88,6 +97,7 @@ namespace WordGame.API.Domain.Models
 		//Player Action Events
 		PlayerStartedGame,
 		PlayerApprovedHint,
+		PlayerRefusedHint,
 		PlayerGaveHint,
 		PlayerVotedWord,
 		PlayerVotedEndTurn,
