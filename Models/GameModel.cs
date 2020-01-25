@@ -9,6 +9,9 @@ namespace WordGame.API.Models
 {
 	public class GameModel
 	{
+		public GameModel(Game game, Player localPlayer)
+			: this(game, localPlayer.Id) { }
+
 		public GameModel(Game game, Guid localPlayerId)
 		{
 			if (game is null)

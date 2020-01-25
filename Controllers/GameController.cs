@@ -156,14 +156,12 @@ namespace WordGame.API.Controllers
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
 
-			var playerId = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == playerId);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return BadRequest("Cannot get game player is not in.");
 
-			return Ok(new GameModel(game, playerId));
+			return Ok(new GameModel(game, player));
 		}
 
 		[HttpGet("current"), UserAuthorize]
@@ -182,9 +180,7 @@ namespace WordGame.API.Controllers
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
 
-			var playerId = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == playerId);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return BadRequest("Cannot delete game player is not in.");
@@ -250,9 +246,7 @@ namespace WordGame.API.Controllers
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
 
-			var id = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == id);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return NotFound($"Current user is not a player in game with code: [{code}]");
@@ -277,9 +271,7 @@ namespace WordGame.API.Controllers
 			if (game is null)
 				return NotFound($"Cannot find game with code: [{code}]");
 
-			var id = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == id);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return BadRequest("Cannot quit game player is not in.");
@@ -313,9 +305,7 @@ namespace WordGame.API.Controllers
 			if (!game.GameCanStart())
 				return BadRequest($"Cannot start game!");
 
-			var id = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == id);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return NotFound($"Cannot find player in game with code: [{code}]");
@@ -504,9 +494,7 @@ namespace WordGame.API.Controllers
 			if (game.CurrentTurn.Status != TurnStatus.Planning)
 				return BadRequest($"Cannot give hint outside the planning stage of the current turn.");
 
-			var id = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == id);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return NotFound($"Cannot find player in game with code: [{code}]");
@@ -545,9 +533,7 @@ namespace WordGame.API.Controllers
 			if (game.CurrentTurn.Status != TurnStatus.PendingApproval)
 				return BadRequest($"Cannot approve hint outside the pending approval stage of the current turn.");
 
-			var id = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == id);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return NotFound($"Cannot find player in game with code: [{code}]");
@@ -585,9 +571,7 @@ namespace WordGame.API.Controllers
 			if (game.CurrentTurn.Status != TurnStatus.PendingApproval)
 				return BadRequest($"Cannot refuse hint outside the pending approval stage of the current turn.");
 
-			var id = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == id);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return NotFound($"Cannot find player in game with code: [{code}]");
@@ -627,9 +611,7 @@ namespace WordGame.API.Controllers
 			if (game.CurrentTurn.Status != TurnStatus.Guessing)
 				return BadRequest($"Cannot cast word vote outside the guessing stage of the current turn.");
 
-			var id = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == id);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return NotFound($"Cannot find player in game with code: [{code}]");
@@ -668,9 +650,7 @@ namespace WordGame.API.Controllers
 			if (game.CurrentTurn.Status != TurnStatus.Guessing)
 				return BadRequest($"Cannot vote end turn outside the guessing stage of the current turn.");
 
-			var id = User.GetPlayerId();
-
-			var player = game.Players.SingleOrDefault(x => x.Id == id);
+			var player = User.GetPlayer(game);
 
 			if (player is null)
 				return NotFound($"Cannot find player in game with code: [{code}]");
