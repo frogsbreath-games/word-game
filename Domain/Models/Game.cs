@@ -176,22 +176,7 @@ namespace WordGame.API.Domain.Models
 
 			if (tile.Votes.Count == Agents.Count(p => p.Team == player.Team))
 			{
-				CurrentTurn.Guesses.Add(new Guess(word, CurrentTurn.Guesses.Count, tile.Team));
-				tile.Votes.Clear();
-				tile.IsRevealed = true;
-
-				if (tile.Team == player.Team)
-				{
-					AddPublicEvent(GameEvent.TeamGuessedCorrectly(player.Team, DateTime.Now));
-
-					if (CurrentTurn.GuessesRemaining <= 0)
-						EndCurrentTurn();
-				}
-				else
-				{
-					AddPublicEvent(GameEvent.TeamGuessedIncorrectly(player.Team, DateTime.Now));
-					EndCurrentTurn();
-				}
+				CurrentTurn.SetToTallying();
 			}
 		}
 
@@ -205,8 +190,45 @@ namespace WordGame.API.Domain.Models
 
 			if (CurrentTurn.EndTurnVotes.Count == Agents.Count(p => p.Team == player.Team))
 			{
+				CurrentTurn.SetToTallying();
+			}
+		}
+
+		public void TallyVotes()
+		{
+			if (Status != GameStatus.InProgress)
+				throw new InvalidOperationException();
+
+			if (CurrentTurn?.Status != TurnStatus.Tallying)
+				throw new InvalidOperationException();
+
+			if (CurrentTurn.EndTurnVotes.Count == Agents.Count(p => p.Team == CurrentTurn.Team))
+			{
 				EndCurrentTurn();
 			}
+			else if (WordTiles.SingleOrDefault(t => t.Votes.Count == Agents.Count(p => p.Team == CurrentTurn.Team)) is WordTile tile)
+			{
+				CurrentTurn.Guesses.Add(new Guess(tile.Word, CurrentTurn.Guesses.Count, tile.Team));
+				tile.Votes.Clear();
+				tile.IsRevealed = true;
+
+				if (tile.Team == CurrentTurn.Team)
+				{
+					AddPublicEvent(GameEvent.TeamGuessedCorrectly(CurrentTurn.Team, DateTime.Now));
+
+					if (CurrentTurn.GuessesRemaining <= 0)
+						EndCurrentTurn();
+					else
+						CurrentTurn.GuessAgain();
+				}
+				else
+				{
+					AddPublicEvent(GameEvent.TeamGuessedIncorrectly(CurrentTurn.Team, DateTime.Now));
+					EndCurrentTurn();
+				}
+			}
+			else
+				throw new InvalidOperationException();
 		}
 
 		public void RemovePlayerVote(Player player)

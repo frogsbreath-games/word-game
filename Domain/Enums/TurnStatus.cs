@@ -16,6 +16,9 @@ namespace WordGame.API.Domain.Enums
 		//Agents are guessing words
 		Guessing,
 
+		//Votes are in for a given guess
+		Tallying,
+
 		//Turn is over
 		Over
 	}

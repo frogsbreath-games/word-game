@@ -91,6 +91,16 @@
   display: inline-block;
 }
 
+.blink {
+  animation: blink-animation 0.7s steps(5, start) infinite;
+}
+
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
 .blueVote {
   composes: vote;
   background-color: var(--light-blue);

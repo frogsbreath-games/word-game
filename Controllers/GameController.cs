@@ -736,46 +736,33 @@ namespace WordGame.API.Controllers
 			if (game.Status != GameStatus.InProgress)
 				return;
 
-			if (GetBot(game) != null)
+			if (GetBackgroundGameTask(game) is (_, int delay))
 			{
-				//wait 2 seconds
-				await Task.Delay(2000);
+				await Task.Delay(delay);
 				game = await _repository.GetGameByCode(game.Code);
 
-				if (GetBot(game) is Bot bot)
-					await (bot.Job switch
-					{
-						BotJob.ApprovingSpyMaster => ExecuteApprovingSpyMasterBotJob(game, bot.Player),
-						BotJob.PlanningSpyMaster => ExecutePlanningSpyMasterBotJob(game, bot.Player),
-						BotJob.ConformingAgent => ExecuteConformingAgentBotJob(game, bot.Player),
-						BotJob.GuessingAgent => ExecuteGuessingAgentBotJob(game, bot.Player),
-						_ => Task.CompletedTask
-					});
+				if (GetBackgroundGameTask(game) is (BackgroundGameTask backgroundTask, _))
+					await backgroundTask(game);
 			}
 		}
 
-		protected Bot GetBot(Game game)
+		protected (BackgroundGameTask, int?) GetBackgroundGameTask(Game game)
 		{
+			if (game.CurrentTurn.Status == TurnStatus.Tallying)
+				return (ExecuteTallyVotesJob, 3500);
+
 			if (game.CurrentTurn.Status == TurnStatus.Planning)
 			{
 				if (game.SpyMasters.SingleOrDefault(p => p.IsBot
 					&& p.Team == game.CurrentTurn.Team) is Player p)
-					return new Bot
-					{
-						Job = BotJob.PlanningSpyMaster,
-						Player = p
-					};
+					return ((game) => ExecutePlanningSpyMasterBotJob(game, p), 2000);
 			}
 
 			if (game.CurrentTurn.Status == TurnStatus.PendingApproval)
 			{
 				if (game.SpyMasters.SingleOrDefault(p => p.IsBot
 					&& p.Team != game.CurrentTurn.Team) is Player p)
-					return new Bot
-					{
-						Job = BotJob.ApprovingSpyMaster,
-						Player = p
-					};
+					return ((game) => ExecuteApprovingSpyMasterBotJob(game, p), 2000);
 			}
 
 			if (game.CurrentTurn.Status == TurnStatus.Guessing)
@@ -785,33 +772,30 @@ namespace WordGame.API.Controllers
 
 				if (game.WordTiles.FirstOrDefault(wt => wt.Votes.Any()) is WordTile tile)
 				{
-					if (botPlayers.FirstOrDefault(p => !tile.Votes.Select(x => x.Number).Contains(p.Number)) is Player player)
-						return new Bot
-						{
-							Job = BotJob.ConformingAgent,
-							Player = player
-						};
+					if (botPlayers.FirstOrDefault(p => !tile.Votes.Select(x => x.Number).Contains(p.Number)) is Player p)
+						return ((game) => ExecuteConformingAgentBotJob(game, p), 2000);
 				}
 
 				if (game.CurrentTurn.EndTurnVotes.Any())
 				{
-					if (botPlayers.FirstOrDefault(p => !game.CurrentTurn.EndTurnVotes.Select(x => x.Number).Contains(p.Number)) is Player player)
-						return new Bot
-						{
-							Job = BotJob.ConformingAgent,
-							Player = player
-						};
+					if (botPlayers.FirstOrDefault(p => !game.CurrentTurn.EndTurnVotes.Select(x => x.Number).Contains(p.Number)) is Player p)
+						return ((game) => ExecuteConformingAgentBotJob(game, p), 2000);
 				}
-				
+
 				if (guessingPlayers.All(p => p.IsBot))
-					return new Bot
-					{
-						Job = BotJob.GuessingAgent,
-						Player = guessingPlayers.First()
-					};
+					return ((game) => ExecuteGuessingAgentBotJob(game, guessingPlayers.First()), 2000);
 			}
 
-			return null;
+			return (null, null);
+		}
+
+		protected delegate Task BackgroundGameTask(Game game);
+
+		protected Task ExecuteTallyVotesJob(Game game)
+		{
+			game.TallyVotes();
+
+			return UpdateGame(game);
 		}
 
 		protected async Task ExecutePlanningSpyMasterBotJob(Game game, Player player)
@@ -868,20 +852,5 @@ namespace WordGame.API.Controllers
 
 			return UpdateGame(game);
 		}
-	}
-
-	//TODO Move
-	public class Bot
-	{
-		public BotJob Job { get; set; }
-		public Player Player { get; set; }
-	}
-
-	public enum BotJob
-	{
-		PlanningSpyMaster,
-		ApprovingSpyMaster,
-		ConformingAgent,
-		GuessingAgent
 	}
 }

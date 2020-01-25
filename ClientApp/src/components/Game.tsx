@@ -90,7 +90,7 @@ const GameTile = ({
     <h6 className={styles.lightLabel}>{wordTile.word}</h6>
     {wordTile.votes.map(playerVote => (
       <div
-        className={playerVote.team === "red" ? styles.redVote : styles.blueVote}
+        className={(playerVote.team === "red" ? styles.redVote : styles.blueVote) + " " + (turnStatus === "tallying" ? styles.blink : "")}
       />
     ))}
     {localPlayer.isSpyMaster && wordTile.isRevealed && (
@@ -244,7 +244,7 @@ class Game extends React.PureComponent<GameProps, State> {
                 </button>
               </div>
             )}
-            {currentStatus === "guessing" && (
+            {(currentStatus === "guessing" || currentStatus === "tallying") && (
               <div>
                 <h1>
                   Hint: "{hintWord}" ({wordCount})
