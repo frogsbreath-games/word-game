@@ -32,6 +32,7 @@ export interface Game {
   blueTilesRemaining: number;
   redTilesRemaining: number;
   actions: GameActions;
+  descriptions: Descriptions;
 }
 
 export interface GameActions {
@@ -42,6 +43,12 @@ export interface GameActions {
   canGiveHint: boolean;
   canApproveHint: boolean;
   canVote: boolean;
+}
+
+export interface Descriptions {
+  status: string;
+  statusDescription: string;
+  localPlayerInstruction: string;
 }
 
 export interface Turn {
@@ -687,7 +694,7 @@ export const reducer: Reducer<GameState> = (
         game: state.game,
         connection: state.connection,
         messages: state.messages,
-        events: [...state.events, action.event],
+        events: [...state.events, action.event]
       };
     default:
       return state;

@@ -45,6 +45,7 @@ namespace WordGame.API.Models
 					currentTurn.GuessesRemaining);
 			}
 			Actions = new GameActionsModel(game, LocalPlayer);
+			Descriptions = new DescriptionModel(game, LocalPlayer);
 		}
 
 		public string Code { get; }
@@ -66,5 +67,6 @@ namespace WordGame.API.Models
 		public TurnModel CurrentTurn { get; }
 
 		public GameActionsModel Actions { get; }
+		public DescriptionModel Descriptions { get; }
 	}
 }

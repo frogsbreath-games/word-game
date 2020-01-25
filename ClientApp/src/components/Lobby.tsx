@@ -142,8 +142,17 @@ class Lobby extends React.PureComponent<GameProps, State> {
 
     return (
       <React.Fragment>
-        <h1>Lobby: {this.props.game.code}</h1>
-        {organizerButtons}
+        <div style={{ display: "grid", gridTemplateColumns: "50% 50%" }}>
+          <div>
+            <h1>Lobby: {this.props.game.code}</h1>
+            {organizerButtons}
+          </div>
+          <div>
+            <h3>{this.props.game.descriptions.status}</h3>
+            <h6>{this.props.game.descriptions.statusDescription}</h6>
+            <p>{this.props.game.descriptions.localPlayerInstruction}</p>
+          </div>
+        </div>
         <div className="row">
           <div className="col-sm-6">
             <h1 style={{ color: red }}>Red</h1>

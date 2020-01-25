@@ -90,7 +90,11 @@ const GameTile = ({
     <h6 className={styles.lightLabel}>{wordTile.word}</h6>
     {wordTile.votes.map(playerVote => (
       <div
-        className={(playerVote.team === "red" ? styles.redVote : styles.blueVote) + " " + (turnStatus === "tallying" ? styles.blink : "")}
+        className={
+          (playerVote.team === "red" ? styles.redVote : styles.blueVote) +
+          " " +
+          (turnStatus === "tallying" ? styles.blink : "")
+        }
       />
     ))}
     {localPlayer.isSpyMaster && wordTile.isRevealed && (
@@ -184,14 +188,20 @@ class Game extends React.PureComponent<GameProps, State> {
       <React.Fragment>
         <div>
           {/* not sure where to put status */}
-          <h4 style={{ textAlign: "center" }}>{currentStatus}</h4>
+          <div>
+            <div style={{ textAlign: "center" }}>
+              <h3>{this.props.game.descriptions.status}</h3>
+              <h6>{this.props.game.descriptions.statusDescription}</h6>
+              <p>{this.props.game.descriptions.localPlayerInstruction}</p>
+            </div>
+          </div>
           <div style={{ textAlign: "center" }}>
             {/* this should only be seen by spy master when it is hint phase */}
             {this.props.game.actions.canGiveHint && (
               <div className="input-group mx-auto">
                 <div className="input-group-prepend">
                   <span className="input-group-text" id="">
-                    Enter Hint & Count
+                    Enter Hint & Clue Count
                   </span>
                 </div>
                 <input
