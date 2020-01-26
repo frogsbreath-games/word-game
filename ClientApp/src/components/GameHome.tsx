@@ -25,7 +25,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
   }
 
   private ensureDataFetched() {
-    this.props.requestCurrentPlayer();
+    this.props.requestCurrentGame();
   }
 
   handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -37,7 +37,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
   }
 
   public render() {
-    if (this.props.isLoading === false && this.props.game.status) {
+    if (this.props.isLoading === false && this.props.game && this.props.game.status) {
       switch (this.props.game.status) {
         case "inProgress":
           return <Redirect to="/game" />;

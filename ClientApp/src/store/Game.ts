@@ -25,7 +25,6 @@ export type TileColor = Team | "black" | "neutral" | "unknown";
 
 export interface GameState {
   isLoading: boolean;
-  localPlayer: Player;
   game: Game;
   connection?: signalR.HubConnection;
   messages: Message[];
@@ -44,6 +43,7 @@ export interface GameEvent {
 export interface Game {
   code: string;
   status: string;
+  localPlayer: Player;
   players: Player[];
   wordTiles: WordTile[];
   currentTurn?: Turn;
@@ -143,11 +143,6 @@ interface ReceiveCurrentGameAction {
   game: Game;
 }
 
-interface ReceiveCurrentPlayerAction {
-  type: "RECEIVE_CURRENT_PLAYER";
-  localPlayer: Player;
-}
-
 interface ReceiveJoinedGameAction {
   type: "RECEIVE_JOIN_GAME";
   game: Game;
@@ -181,7 +176,6 @@ type KnownAction =
   | ReceiveJoinedGameAction
   | ReceiveLeaveDeleteAction
   | ReceiveCurrentGameAction
-  | ReceiveCurrentPlayerAction
   | ReceiveUpdateGameAction
   | ReceiveMessage
   | ReceiveGameEvent;
@@ -291,58 +285,6 @@ export const actionCreators = {
           dispatch({
             type: "RECEIVE_CURRENT_GAME",
             game: {} as Game
-          });
-        });
-
-      dispatch({
-        type: "REQUEST_SERVER_ACTION"
-      });
-    }
-  },
-  requestCurrentPlayer: (): AppThunkAction<KnownAction> => (
-    dispatch,
-    getState
-  ) => {
-    // Only load data if it's something we don't already have (and are not already loading)
-    const appState = getState();
-    if (appState && appState.game) {
-      fetch(`api/games/current/players/self`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json"
-        }
-      })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
-          console.log(data);
-          dispatch({
-            type: "RECEIVE_CURRENT_PLAYER",
-            localPlayer: data.data as Player
-          });
-          //if we find a current player we need to get the game they are in
-          fetch(`api/games/current`, { method: "GET" })
-            .then(response => response.json() as Promise<APIResponse>)
-            .then(data => {
-              console.log(data);
-              dispatch({
-                type: "RECEIVE_CURRENT_GAME",
-                game: data.data as Game
-              });
-              dispatch({ type: "REQUEST_SERVER_ACTION" });
-            })
-            .catch(error => {
-              dispatch({
-                type: "RECEIVE_CURRENT_GAME",
-                game: {} as Game
-              });
-            });
-        })
-        .catch(error => {
-          //added this because if user isn't authenticated get 404 response
-          dispatch({
-            type: "RECEIVE_CURRENT_PLAYER",
-            localPlayer: {} as Player
           });
         });
 
@@ -491,6 +433,9 @@ export const actionCreators = {
             type: "RECEIVE_JOIN_GAME",
             game: data.data as Game
           });
+        })
+        .catch(error => {
+          alert(error);
         });
 
       dispatch({
@@ -609,7 +554,6 @@ export const actionCreators = {
 
 const unloadedState: GameState = {
   isLoading: false,
-  localPlayer: {} as Player,
   game: {} as Game,
   messages: [] as Message[],
   events: [] as GameEvent[]
@@ -627,7 +571,6 @@ export const reducer: Reducer<GameState> = (
     case "REQUEST_SERVER_ACTION":
       return {
         isLoading: true,
-        localPlayer: state.localPlayer,
         game: state.game,
         connection: state.connection,
         messages: state.messages,
@@ -636,7 +579,6 @@ export const reducer: Reducer<GameState> = (
     case "CREATE_HUB_CONNECTION":
       return {
         isLoading: false,
-        localPlayer: state.localPlayer,
         game: state.game,
         connection: action.connection,
         messages: state.messages,
@@ -645,7 +587,6 @@ export const reducer: Reducer<GameState> = (
     case "RECEIVE_MESSAGE": {
       return {
         isLoading: false,
-        localPlayer: state.localPlayer,
         game: state.game,
         connection: state.connection,
         messages: [...state.messages, action.message],
@@ -655,17 +596,7 @@ export const reducer: Reducer<GameState> = (
     case "RECEIVE_CURRENT_GAME":
       return {
         isLoading: false,
-        localPlayer: state.localPlayer,
         game: action.game,
-        connection: state.connection,
-        messages: state.messages,
-        events: state.events
-      };
-    case "RECEIVE_CURRENT_PLAYER":
-      return {
-        isLoading: false,
-        localPlayer: action.localPlayer,
-        game: state.game,
         connection: state.connection,
         messages: state.messages,
         events: state.events
@@ -673,7 +604,6 @@ export const reducer: Reducer<GameState> = (
     case "RECEIVE_NEW_GAME":
       return {
         isLoading: false,
-        localPlayer: action.game.players[0],
         game: action.game,
         connection: state.connection,
         messages: state.messages,
@@ -682,7 +612,6 @@ export const reducer: Reducer<GameState> = (
     case "RECEIVE_JOIN_GAME":
       return {
         isLoading: false,
-        localPlayer: action.game.players[action.game.players.length - 1],
         game: action.game,
         connection: state.connection,
         messages: state.messages,
@@ -691,7 +620,6 @@ export const reducer: Reducer<GameState> = (
     case "RECEIVE_DELETE_GAME":
       return {
         isLoading: false,
-        localPlayer: {} as Player,
         game: {} as Game,
         messages: state.messages,
         events: state.events
@@ -699,7 +627,6 @@ export const reducer: Reducer<GameState> = (
     case "RECEIVE_UPDATE_GAME":
       return {
         isLoading: false,
-        localPlayer: state.localPlayer,
         game: action.game,
         connection: state.connection,
         messages: state.messages,
@@ -708,7 +635,6 @@ export const reducer: Reducer<GameState> = (
     case "RECEIVE_GAME_EVENT":
       return {
         isLoading: state.isLoading,
-        localPlayer: state.localPlayer,
         game: state.game,
         connection: state.connection,
         messages: state.messages,

@@ -163,7 +163,7 @@ class Game extends React.PureComponent<GameProps, State> {
     }
     let currentTeam;
 
-    let localTeam = this.props.localPlayer.team;
+    let localTeam = this.props.game.localPlayer.team;
     let opposingTeam = GameStore.GetOpponent(localTeam);
     //probably a better way to do this?
     let localTeamsTilesRemaining = GameStore.GetTilesRemaining(
@@ -271,7 +271,7 @@ class Game extends React.PureComponent<GameProps, State> {
           </div>
           <PlayerTracker
             team={localTeam}
-            playerName={this.props.localPlayer.name}
+            playerName={this.props.game.localPlayer.name}
           />
           <div className={styles.board} style={{ marginTop: "10px" }}>
             {this.props.game.wordTiles &&
@@ -279,7 +279,7 @@ class Game extends React.PureComponent<GameProps, State> {
                 <GameTile
                   wordTile={tile}
                   key={tile.word}
-                  localPlayer={this.props.localPlayer}
+                  localPlayer={this.props.game.localPlayer}
                   handleVoteWord={this.handleVoteWord}
                   turnStatus={currentStatus}
                 />

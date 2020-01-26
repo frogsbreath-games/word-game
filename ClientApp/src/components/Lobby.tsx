@@ -101,7 +101,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
     }
 
     let organizerButtons;
-    if (this.props.localPlayer && this.props.localPlayer.isOrganizer) {
+    if (this.props.game.localPlayer && this.props.game.localPlayer.isOrganizer) {
       organizerButtons = (
         <div className="row mx-auto">
           <button
@@ -168,7 +168,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
                   >
                     <PlayerTile
                       player={player}
-                      localPlayer={this.props.localPlayer}
+                      localPlayer={this.props.game.localPlayer}
                       gameActions={this.props.game.actions}
                       code={this.props.game.code}
                       key={player.number}
@@ -195,7 +195,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
                   >
                     <PlayerTile
                       player={player}
-                      localPlayer={this.props.localPlayer}
+                      localPlayer={this.props.game.localPlayer}
                       gameActions={this.props.game.actions}
                       code={this.props.game.code}
                       key={player.number}
