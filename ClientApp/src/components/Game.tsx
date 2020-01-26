@@ -31,7 +31,7 @@ function getColor(color: string, isRevealed: boolean) {
 }
 
 type TeamTileProps = {
-  team: string;
+  team: GameStore.Team;
   tilesRemaining: number;
   isTeamsTurn: boolean;
 };
@@ -50,7 +50,7 @@ const TeamTile = ({ team, tilesRemaining, isTeamsTurn }: TeamTileProps) => (
 
 type PlayerTrackerProps = {
   playerName: string;
-  team: string;
+  team: GameStore.Team;
 };
 
 const PlayerTracker = ({ playerName, team }: PlayerTrackerProps) => (
@@ -162,16 +162,18 @@ class Game extends React.PureComponent<GameProps, State> {
       return <Redirect to="/game-home" />;
     }
     let currentTeam;
-    let apposingTeam = this.props.localPlayer.team === "red" ? "blue" : "red";
+
+    let localTeam = this.props.localPlayer.team;
+    let opposingTeam = GameStore.GetOpponent(localTeam);
     //probably a better way to do this?
-    let localTeamsTilesRemaining =
-      this.props.localPlayer.team === "red"
-        ? this.props.game.redTilesRemaining
-        : this.props.game.blueTilesRemaining;
-    let apposingTeamTilesRemaining =
-      this.props.localPlayer.team !== "red"
-        ? this.props.game.redTilesRemaining
-        : this.props.game.blueTilesRemaining;
+    let localTeamsTilesRemaining = GameStore.GetTilesRemaining(
+      this.props.game,
+      localTeam);
+
+    let opposingTeamTilesRemaining = GameStore.GetTilesRemaining(
+      this.props.game,
+      opposingTeam);
+
     let currentStatus: string = "";
     let hintWord;
     let wordCount;
@@ -268,7 +270,7 @@ class Game extends React.PureComponent<GameProps, State> {
             )}
           </div>
           <PlayerTracker
-            team={this.props.localPlayer.team}
+            team={localTeam}
             playerName={this.props.localPlayer.name}
           />
           <div className={styles.board} style={{ marginTop: "10px" }}>
@@ -301,14 +303,14 @@ class Game extends React.PureComponent<GameProps, State> {
           )}
           <div className={styles.banner}>
             <TeamTile
-              team={this.props.localPlayer.team}
+              team={localTeam}
               tilesRemaining={localTeamsTilesRemaining}
-              isTeamsTurn={currentTeam === this.props.localPlayer.team}
+              isTeamsTurn={currentTeam === localTeam}
             />
             <TeamTile
-              team={apposingTeam}
-              tilesRemaining={apposingTeamTilesRemaining}
-              isTeamsTurn={currentTeam !== this.props.localPlayer.team}
+              team={opposingTeam}
+              tilesRemaining={opposingTeamTilesRemaining}
+              isTeamsTurn={currentTeam === opposingTeam}
             />
           </div>
         </div>

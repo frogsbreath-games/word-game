@@ -5,6 +5,24 @@ import * as signalr from "@aspnet/signalr";
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
 
+export type Team = "red" | "blue";
+
+export function GetOpponent(team: Team): Team {
+  switch (team) {
+    case "red": return "blue";
+    case "blue": return "red";
+  }
+}
+
+export function GetTilesRemaining(game: Game, team: Team): number {
+  switch (team) {
+    case "red": return game.redTilesRemaining;
+    case "blue": return game.blueTilesRemaining;
+  }
+}
+
+export type TileColor = Team | "black" | "neutral" | "unknown";
+
 export interface GameState {
   isLoading: boolean;
   localPlayer: Player;
@@ -16,7 +34,7 @@ export interface GameState {
 
 export interface GameEvent {
   player?: string;
-  team: string;
+  team: Team;
   timestamp: string;
   type: string;
   message: string;
@@ -53,7 +71,7 @@ export interface Descriptions {
 
 export interface Turn {
   turnNumber: number;
-  team: string;
+  team: Team;
   status: string;
   hintWord?: string;
   wordCount?: number;
@@ -67,12 +85,12 @@ export interface Player {
   isOrganizer: boolean;
   isSpyMaster: boolean;
   isBot: boolean;
-  team: string;
+  team: Team;
 }
 
 export interface WordTile {
   word: string;
-  team: string;
+  team: TileColor;
   isRevealed: boolean;
   votes: PlayerVote[];
 }
@@ -80,7 +98,7 @@ export interface WordTile {
 export interface PlayerVote {
   number: number;
   name: string;
-  team: string;
+  team: Team;
 }
 
 export interface Hint {
