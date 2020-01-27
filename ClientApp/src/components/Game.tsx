@@ -7,6 +7,8 @@ import { red, blue, tan, black, grey } from "../constants/ColorConstants";
 import styles from "./Game.module.css";
 import { ReactComponent as RevealedIcon } from "../assets/RevealedIcon.svg";
 import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
+import { ReactComponent as TileOuter } from "../assets/TileOuter.svg";
+import { ReactComponent as TileInner } from "../assets/TileInner.svg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -80,28 +82,42 @@ const GameTile = ({
   handleVoteWord
 }: GameTileProps) => (
   <div
+    className={styles.wordTile}
     onClick={() => handleVoteWord(wordTile.word, wordTile.isRevealed)}
-    className={
-      wordTile.isRevealed || localPlayer.isSpyMaster
-        ? styles[wordTile.team]
-        : styles.grey
-    }
   >
-    <h6 className={styles.lightLabel}>{wordTile.word}</h6>
-    {wordTile.votes.map(playerVote => (
-      <div
+    <div className={styles.tileContainer}>
+      <TileOuter
         className={
-          (playerVote.team === "red" ? styles.redVote : styles.blueVote) +
-          " " +
-          (turnStatus === "tallying" ? styles.blink : "")
+          wordTile.isRevealed || localPlayer.isSpyMaster
+            ? styles[wordTile.team + "TileOuter"]
+            : styles.greyTileOuter
         }
       />
-    ))}
-    {localPlayer.isSpyMaster && wordTile.isRevealed && (
-      <div className={styles.lightLabel}>
-        <RevealedIcon className={styles.reveal} />
+      <TileInner
+        className={
+          wordTile.isRevealed || localPlayer.isSpyMaster
+            ? styles[wordTile.team + "TileInner"]
+            : styles.greyTileInner
+        }
+      />
+      <div className={styles.absoluteCenter}>
+        <h6>{wordTile.word}</h6>
+        {wordTile.votes.map(playerVote => (
+          <div
+            className={
+              (playerVote.team === "red" ? styles.redVote : styles.blueVote) +
+              " " +
+              (turnStatus === "tallying" ? styles.blink : "")
+            }
+          />
+        ))}
       </div>
-    )}
+      {localPlayer.isSpyMaster && wordTile.isRevealed && (
+        <div className={styles.absoluteCenter}>
+          <RevealedIcon className={styles[wordTile.team + "Reveal"]} />
+        </div>
+      )}
+    </div>
   </div>
 );
 
@@ -168,11 +184,13 @@ class Game extends React.PureComponent<GameProps, State> {
     //probably a better way to do this?
     let localTeamsTilesRemaining = GameStore.GetTilesRemaining(
       this.props.game,
-      localTeam);
+      localTeam
+    );
 
     let opposingTeamTilesRemaining = GameStore.GetTilesRemaining(
       this.props.game,
-      opposingTeam);
+      opposingTeam
+    );
 
     let currentStatus: string = "";
     let hintWord;

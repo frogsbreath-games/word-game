@@ -80,8 +80,8 @@
 }
 
 .vote {
-  height: 25px;
-  width: 25px;
+  height: 20px;
+  width: 20px;
   background-color: #bbb;
   border-radius: 50%;
   border: solid;
@@ -150,10 +150,11 @@
   text-align: center;
   word-wrap: break-word;
 }
+
 .board {
   display: grid;
   grid-template-columns: repeat(5, minmax(20%, 1fr));
-  grid-template-rows: repeat(5, 1fr);
+  grid-template-rows: repeat(5, minmax(10%, 1fr));
   grid-column-gap: 10px;
   grid-row-gap: 10px;
   padding: 10px;
@@ -161,44 +162,7 @@
 }
 
 .wordTile {
-  width: 100%;
-  height: 100%;
-  min-height: 100px;
-  border-radius: 3px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.36);
   transition: transform 1s;
-  text-align: center;
-  padding: 10px;
-  border: solid;
-}
-
-.blue {
-  composes: wordTile;
-  background-color: var(--blue);
-  border-color: var(--dark-blue);
-}
-
-.red {
-  composes: wordTile;
-  background-color: var(--red);
-  border-color: var(--dark-red);
-}
-
-.neutral {
-  composes: wordTile;
-  background-color: var(--tan);
-  border-color: var(--dark-tan);
-}
-
-.grey {
-  composes: wordTile;
-  background-color: var(--grey);
-  border-color: var(--dark-grey);
-}
-
-.black {
-  composes: wordTile;
-  background-color: var(--black);
 }
 
 .wordTile:hover {
@@ -218,6 +182,126 @@
   text-transform: uppercase;
 }
 
+/* Eye icon styles */
+
 .reveal {
-  width: 75px;
+  width: 100%;
+  opacity: 0.5;
+}
+
+.redReveal {
+  text-align: center;
+  composes: reveal;
+  fill: var(--dark-red);
+}
+
+.blueReveal {
+  text-align: center;
+  composes: reveal;
+  fill: var(--dark-blue);
+}
+.neutralReveal {
+  text-align: center;
+  composes: reveal;
+  fill: var(--dark-tan);
+}
+
+.blackReveal {
+  text-align: center;
+  composes: reveal;
+  fill: white;
+}
+
+/* Centering absolute positioned items */
+
+.center {
+  text-align: center;
+  word-wrap: break-word;
+}
+
+.absoluteCenter {
+  composes: center;
+  position: absolute;
+  width: 80%;
+  top: 50%;
+  left: 50%;
+  margin-top: -20%;
+  margin-left: -40%;
+  z-index: 100;
+}
+
+.tileContainer {
+  position: relative;
+}
+
+/* Tile outer styles */
+
+.neutralTileOuter polygon {
+  fill: var(--dark-tan);
+}
+
+.redTileOuter polygon {
+  fill: var(--dark-red);
+}
+
+.blueTileOuter polygon {
+  fill: var(--dark-blue);
+}
+
+.blackTileOuter polygon {
+  fill: var(--black);
+}
+
+.greyTileOuter polygon {
+  fill: var(--dark-grey);
+}
+
+/* Tile inner styles */
+.tileInner {
+  position: absolute;
+  width: 90%;
+  z-index: 10;
+  left: 5%;
+  top: 5%;
+  filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.7));
+}
+
+.redTileInner {
+  composes: tileInner;
+}
+
+.redTileInner polygon {
+  fill: var(--red);
+}
+
+.blueTileInner {
+  composes: tileInner;
+}
+
+.blueTileInner polygon {
+  fill: var(--blue);
+}
+
+.neutralTileInner {
+  composes: tileInner;
+}
+
+.neutralTileInner polygon {
+  fill: var(--tan);
+}
+
+.greyTileInner {
+  composes: tileInner;
+}
+
+.greyTileInner polygon {
+  fill: var(--grey);
+}
+
+.blackTileInner {
+  composes: tileInner;
+}
+
+.blackTileInner polygon {
+  fill: var(--dark-grey);
 }
