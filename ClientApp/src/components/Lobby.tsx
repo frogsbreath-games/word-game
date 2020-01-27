@@ -101,7 +101,10 @@ class Lobby extends React.PureComponent<GameProps, State> {
     }
 
     let organizerButtons;
-    if (this.props.game.localPlayer && this.props.game.localPlayer.isOrganizer) {
+    if (
+      this.props.game.localPlayer &&
+      this.props.game.localPlayer.isOrganizer
+    ) {
       organizerButtons = (
         <div className="row mx-auto">
           <button
@@ -109,6 +112,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
             className="btn btn-primary"
             type="button"
             onClick={() => this.props.startGame(this.props.game.code)}
+            style={{ margin: "5px" }}
           >
             Start Game
           </button>
@@ -117,7 +121,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
             className="btn btn-secondary"
             type="button"
             onClick={() => this.props.addBot()}
-            style={{ marginLeft: "10px" }}
+            style={{ margin: "5px" }}
           >
             Add Bot
           </button>
@@ -125,7 +129,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
             className="btn btn-secondary"
             type="button"
             onClick={() => this.props.requestCurrentGame()}
-            style={{ marginLeft: "10px" }}
+            style={{ margin: "5px" }}
           >
             Refresh
           </button>
@@ -133,7 +137,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
             className="btn btn-danger"
             type="button"
             onClick={() => this.props.deleteGame(this.props.game.code)}
-            style={{ marginLeft: "10px" }}
+            style={{ margin: "5px" }}
           >
             Delete Game
           </button>

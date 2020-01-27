@@ -160,6 +160,10 @@ class Game extends React.PureComponent<GameProps, State> {
       hintWord: this.state.hintWord,
       wordCount: this.state.wordCount
     } as GameStore.Hint);
+    this.setState({
+      hintWord: "",
+      wordCount: 0
+    });
   }
 
   handleVoteWord(word: string, isRevealed: boolean) {
