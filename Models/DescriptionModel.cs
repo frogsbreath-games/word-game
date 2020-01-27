@@ -64,7 +64,7 @@ namespace WordGame.API.Models
 					{
 						if (localPlayer.IsSpyMaster)
 						{
-							LocalPlayerInstruction = "Review the board and wait for the apposing Spy Master to send you a hint for approval!";
+							LocalPlayerInstruction = "Review the board and wait for the opposing Spy Master to send you a hint for approval!";
 						}
 						else
 						{
@@ -111,7 +111,7 @@ namespace WordGame.API.Models
 					}
 					else
 					{
-						LocalPlayerInstruction = "Hold on tight the apposing teams vote will be finalized soon!";
+						LocalPlayerInstruction = "Hold on tight the opposing teams vote will be finalized soon!";
 					}
 				}
 
