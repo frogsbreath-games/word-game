@@ -15,7 +15,7 @@ namespace WordGame.API.Models
 			{
 				CanStart = game.GameCanStart();
 				CanDelete = true;
-				CanAddBot = game.Status == GameStatus.Lobby;
+				CanAddBot = game.Status == GameStatus.Lobby && game.Players.Count < 10;
 				CanDeleteBot = game.Status == GameStatus.Lobby;
 			}
 

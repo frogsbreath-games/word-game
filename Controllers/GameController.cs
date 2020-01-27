@@ -343,6 +343,9 @@ namespace WordGame.API.Controllers
 			if (game.Status != GameStatus.Lobby)
 				return BadRequest($"Cannot join game in status: [{game.Status}]");
 
+			if (game.Players.Count >= 10)
+				return BadRequest("Game cannot have more than 10 players");
+
 			var player = game.AddNewPlayer(_nameGenerator.GetRandomName());
 
 			await UpdateGame(game);
@@ -365,6 +368,9 @@ namespace WordGame.API.Controllers
 
 			if (game.Status != GameStatus.Lobby)
 				return BadRequest($"Cannot add bot to game in status: [{game.Status}]");
+
+			if (game.Players.Count >= 10)
+				return BadRequest("$Game cannot have more than 10 players.");
 
 			game.AddNewPlayer(_nameGenerator.GetRandomName(), isBot: true);
 

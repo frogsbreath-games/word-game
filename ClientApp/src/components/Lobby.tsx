@@ -113,6 +113,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
             Start Game
           </button>
           <button
+            disabled={!this.props.game.actions.canAddBot}
             className="btn btn-secondary"
             type="button"
             onClick={() => this.props.addBot()}
