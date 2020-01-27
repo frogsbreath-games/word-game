@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
+import { ReactComponent as Cthulhu } from "../assets/Cthulhu.svg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -37,7 +38,11 @@ class GameHome extends React.PureComponent<GameProps, State> {
   }
 
   public render() {
-    if (this.props.isLoading === false && this.props.game && this.props.game.status) {
+    if (
+      this.props.isLoading === false &&
+      this.props.game &&
+      this.props.game.status
+    ) {
       switch (this.props.game.status) {
         case "inProgress":
           return <Redirect to="/game" />;
@@ -57,7 +62,8 @@ class GameHome extends React.PureComponent<GameProps, State> {
     return (
       <React.Fragment>
         <div>
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "center", marginTop: "10px" }}>
+            <Cthulhu style={{ width: "400px" }} />
             <h1>Have a code?</h1>
             <div
               className="input-group mx-auto"

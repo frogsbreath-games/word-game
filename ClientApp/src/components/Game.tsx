@@ -40,7 +40,7 @@ type TeamTileProps = {
 
 const TeamTile = ({ team, tilesRemaining, isTeamsTurn }: TeamTileProps) => (
   <div className={team === "red" ? styles.redTile : styles.blueTile}>
-    <h3 className={team === "red" ? styles.redTeamLabl : styles.blueTeamLabel}>
+    <h3 className={team === "red" ? styles.redTeamLabel : styles.blueTeamLabel}>
       {team + " Team"}
     </h3>
     <div>
