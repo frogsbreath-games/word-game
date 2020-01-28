@@ -62,7 +62,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
     return (
       <React.Fragment>
         <div>
-          <div style={{ textAlign: "center", marginTop: "10px" }}>
+          <div style={{ textAlign: "center" }}>
             <Cthulhu style={{ width: "400px" }} />
             <h1>Have a code?</h1>
             <div
