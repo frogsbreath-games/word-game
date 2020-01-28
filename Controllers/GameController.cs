@@ -310,10 +310,11 @@ namespace WordGame.API.Controllers
 			if (player is null)
 				return NotFound($"Cannot find player in game with code: [{code}]");
 
-			//Red always goes first (for now)
-			var board = _gameBoardGenerator.GenerateGameBoard(Team.Red);
+			var startingTeam = _randomAccessor.Random.Next(2) == 0 ? Team.Red : Team.Blue;
 
-			game.StartGame(player, board, Team.Red);
+			var board = _gameBoardGenerator.GenerateGameBoard(startingTeam);
+
+			game.StartGame(player, board, startingTeam);
 
 			await UpdateGame(game);
 
