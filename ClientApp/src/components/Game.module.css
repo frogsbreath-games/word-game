@@ -10,6 +10,78 @@
   --grey: #c4c4c4;
   --dark-grey: #757575;
   --black: #3b3b3b;
+  --green: #58c087;
+  --dark-green: #234d36;
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+
+.button:hover {
+  filter: brightness(110%);
+}
+
+.button:active {
+  transform: translateY(4px);
+}
+
+.submit {
+  composes: button;
+  background-color: var(--blue);
+  box-shadow: 0 6px var(--dark-blue);
+}
+
+.submit:active {
+  box-shadow: 0 3px var(--dark-blue);
+}
+
+.confirm {
+  composes: button;
+  background-color: var(--green);
+  box-shadow: 0 6px var(--dark-green);
+}
+
+.confirm:active {
+  box-shadow: 0 3px var(--dark-green);
+}
+.cancel {
+  composes: button;
+  background-color: var(--red);
+  box-shadow: 0 6px var(--dark-red);
+}
+
+.cancel:active {
+  box-shadow: 0 3px var(--dark-red);
+}
+
+.input {
+  border-radius: 5px;
+  padding: 10px 10px;
+  outline: none;
+  margin: 8px;
+  font: 24px;
+  box-sizing: border-box;
+  border: 2px solid var(--grey);
+  transition: 0.5s;
+}
+
+.input:focus {
+  border: 2px solid var(--black);
+}
+
+.inputs {
+  display: grid;
+  grid-template-columns: 40% 40% 20%;
 }
 
 .banner {

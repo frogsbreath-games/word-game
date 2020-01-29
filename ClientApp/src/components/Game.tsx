@@ -9,6 +9,8 @@ import { ReactComponent as RevealedIcon } from "../assets/RevealedIcon.svg";
 import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
 import { ReactComponent as TileOuter } from "../assets/TileOuter.svg";
 import { ReactComponent as TileInner } from "../assets/TileInner.svg";
+import { ReactComponent as ConfirmIcon } from "../assets/CheckIcon.svg";
+import { ReactComponent as CancelIcon } from "../assets/CancelIcon.svg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -219,82 +221,6 @@ class Game extends React.PureComponent<GameProps, State> {
               <p>{this.props.game.descriptions.localPlayerInstruction}</p>
             </div>
           </div>
-          <div style={{ textAlign: "center" }}>
-            {/* this should only be seen by spy master when it is hint phase */}
-            {this.props.game.actions.canGiveHint && (
-              <div className="input-group mx-auto">
-                <div className="input-group-prepend">
-                  <span className="input-group-text" id="">
-                    Enter Hint & Clue Count
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  value={this.state.hintWord}
-                  onChange={this.handleWordChange}
-                  className="form-control"
-                  placeholder="Enter hint here..."
-                />
-                <input
-                  type="number"
-                  value={this.state.wordCount}
-                  onChange={this.handleCountChange}
-                  className="form-control"
-                  min="0"
-                />
-                <div className="input-group-append">
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    onClick={this.handleSubmitClick}
-                  >
-                    Submit hint
-                  </button>
-                </div>
-              </div>
-            )}
-            {this.props.game.actions.canApproveHint && (
-              <div>
-                <h3>Pending hint: "{hintWord}"</h3>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  style={{ width: 300 }}
-                  onClick={() => {
-                    this.props.approveHint();
-                  }}
-                >
-                  Approve
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  style={{ width: 300, marginLeft: "20px" }}
-                  onClick={() => {
-                    this.props.refuseHint();
-                  }}
-                >
-                  Refuse
-                </button>
-              </div>
-            )}
-            {(currentStatus === "guessing" || currentStatus === "tallying") && (
-              <div>
-                <h1>
-                  Hint: "{hintWord}" ({wordCount})
-                </h1>
-                <h5>
-                  {guessesRemaining
-                    ? guessesRemaining + " guesses remaining"
-                    : "Unlimited guesses remaining"}
-                </h5>
-              </div>
-            )}
-          </div>
-          <PlayerTracker
-            team={localTeam}
-            playerName={this.props.game.localPlayer.name}
-          />
           <div className={styles.board} style={{ marginTop: "10px" }}>
             {this.props.game.wordTiles &&
               this.props.game.wordTiles.map(tile => (
@@ -323,6 +249,79 @@ class Game extends React.PureComponent<GameProps, State> {
               </button>
             </div>
           )}
+          <div style={{ textAlign: "center" }}>
+            {/* this should only be seen by spy master when it is hint phase */}
+            {this.props.game.actions.canGiveHint && (
+              <div className={styles.hintInputs}>
+                <h3>Create Hint & Clue Count</h3>
+                <div className={styles.inputs}>
+                  <input
+                    type="text"
+                    value={this.state.hintWord}
+                    className={styles.input}
+                    onChange={this.handleWordChange}
+                    placeholder="Enter hint here..."
+                  />
+                  <input
+                    type="number"
+                    value={this.state.wordCount}
+                    className={styles.input}
+                    onChange={this.handleCountChange}
+                    min="0"
+                  />
+                  <button
+                    style={{ width: "150px", justifySelf: "center" }}
+                    className={styles.submit}
+                    type="button"
+                    onClick={this.handleSubmitClick}
+                  >
+                    Submit hint
+                  </button>
+                </div>
+              </div>
+            )}
+            {this.props.game.actions.canApproveHint && (
+              <div>
+                <h3>Pending hint: "{hintWord}"</h3>
+                <button
+                  type="button"
+                  className={styles.confirm}
+                  style={{ width: 150 }}
+                  onClick={() => {
+                    this.props.approveHint();
+                  }}
+                >
+                  <ConfirmIcon width={35} style={{ fill: "black" }} />
+                </button>
+                <button
+                  type="button"
+                  className={styles.cancel}
+                  style={{ width: 150, marginLeft: "20px" }}
+                  onClick={() => {
+                    this.props.refuseHint();
+                  }}
+                >
+                  <CancelIcon width={35} style={{ fill: "white" }} />
+                </button>
+              </div>
+            )}
+            {(currentStatus === "guessing" || currentStatus === "tallying") && (
+              <div>
+                <h1>
+                  Hint: "{hintWord}" ({wordCount})
+                </h1>
+                <h5>
+                  {guessesRemaining
+                    ? guessesRemaining + " guesses remaining"
+                    : "Unlimited guesses remaining"}
+                </h5>
+              </div>
+            )}
+          </div>
+          <PlayerTracker
+            team={localTeam}
+            playerName={this.props.game.localPlayer.name}
+          />
           <div className={styles.banner}>
             <TeamTile
               team={localTeam}
@@ -364,7 +363,7 @@ class Game extends React.PureComponent<GameProps, State> {
         {this.props.game.actions.canDelete && (
           <div className="row">
             <button
-              className="btn btn-danger"
+              className={styles.cancel}
               type="button"
               onClick={() => this.props.deleteGame(this.props.game.code)}
               style={{ marginTop: "10px", marginLeft: "20px" }}
