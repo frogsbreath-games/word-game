@@ -34,6 +34,9 @@ class GameHome extends React.PureComponent<GameProps, State> {
   }
 
   handleSubmit(event: React.MouseEvent) {
+    if (this.state.value !== undefined && this.state.value !== "") {
+      this.props.joinGame(this.state.value);
+    }
     event.preventDefault();
   }
 
@@ -80,7 +83,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
                 <button
                   className="btn btn-primary"
                   type="button"
-                  onClick={() => this.props.joinGame(this.state.value)}
+                  onClick={this.handleSubmit}
                 >
                   Join Game
                 </button>
