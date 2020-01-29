@@ -1,4 +1,14 @@
 /* Provide sufficient contrast against white background */
+@import url('https://fonts.googleapis.com/css?family=IM+Fell+Double+Pica|IM+Fell+Double+Pica+SC&display=swap');
+* {
+    font-family: "IM Fell Double Pica";
+}
+
+
+h1,h2,h3 {
+  font-family: "IM Fell Double Pica SC";
+}
+
 a {
   color: #0366d6;
 }
