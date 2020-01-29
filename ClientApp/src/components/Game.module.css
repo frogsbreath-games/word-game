@@ -102,6 +102,25 @@
   }
 }
 
+.glow {
+  animation: glowing 2s infinite;
+}
+
+@keyframes glowing {
+  0% {
+    box-shadow: 0 0 -10px white;
+  }
+  40% {
+    box-shadow: 0 0 20px white;
+  }
+  60% {
+    box-shadow: 0 0 20px white;
+  }
+  100% {
+    box-shadow: 0 0 -10px white;
+  }
+}
+
 .blueVote {
   composes: vote;
   background-color: var(--light-blue);
