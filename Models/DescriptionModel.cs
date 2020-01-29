@@ -53,7 +53,7 @@ namespace WordGame.API.Models
 					{
 						if (localPlayer.IsSpyMaster)
 						{
-							LocalPlayerInstruction = "Create a hint and clue number for your team!";
+							LocalPlayerInstruction = "Wait for the opposing Spy Master to approve your hint!";
 						}
 						else
 						{
@@ -64,7 +64,7 @@ namespace WordGame.API.Models
 					{
 						if (localPlayer.IsSpyMaster)
 						{
-							LocalPlayerInstruction = "Review the board and wait for the opposing Spy Master to send you a hint for approval!";
+							LocalPlayerInstruction = "Review the hint and approve or deny it!";
 						}
 						else
 						{
