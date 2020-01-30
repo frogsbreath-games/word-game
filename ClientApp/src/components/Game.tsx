@@ -103,7 +103,9 @@ const GameTile = ({
         }
       />
       <div className={styles.absoluteCenter}>
-        <h6>{wordTile.word}</h6>
+        {!wordTile.isRevealed && (
+          <h4 className={styles.wordTileWord}>{wordTile.word}</h4>
+        )}
         {wordTile.votes.map(playerVote => (
           <div
             className={
@@ -114,7 +116,7 @@ const GameTile = ({
           />
         ))}
       </div>
-      {localPlayer.isSpyMaster && wordTile.isRevealed && (
+      {wordTile.isRevealed && (
         <div className={styles.absoluteCenter}>
           <RevealedIcon className={styles[wordTile.team + "Reveal"]} />
         </div>

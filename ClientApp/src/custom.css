@@ -1,12 +1,14 @@
 /* Provide sufficient contrast against white background */
-@import url('https://fonts.googleapis.com/css?family=IM+Fell+Double+Pica|IM+Fell+Double+Pica+SC&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Carrois+Gothic|Carrois+Gothic+SC&display=swap');
+
 * {
-    font-family: "IM Fell Double Pica";
+    font-family: "Carrois Gothic", sans-serif;
 }
 
 
 h1,h2,h3 {
-  font-family: "IM Fell Double Pica SC";
+  font-family: "Carrois Gothic SC", sans-serif;
+  font-weight: 700;
 }
 
 a {
