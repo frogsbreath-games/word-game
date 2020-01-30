@@ -263,6 +263,11 @@
   transition: transform 1s;
 }
 
+.wordTileWord {
+  font-weight: bold;
+  text-shadow: 0 0 0.05rem rgba(255,255,255,0.9), 0 0 0.3rem rgba(255, 255, 255, 0.6);
+}
+
 .wordTile:hover {
   filter: brightness(110%);
 }
