@@ -12,6 +12,7 @@ namespace WordGame.API.Hubs
 
 		public Task SendMessage(string message, Team team)
 		{
+			//Way to get player object in hub context instead of passing team from client?
 			return Clients.Group(GroupName).GameEvent(
 				GameEvent.PlayerMessage(Context.User.Identity.Name, team, System.DateTime.Now, message));
 		}

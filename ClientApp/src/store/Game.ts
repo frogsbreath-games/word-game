@@ -590,7 +590,7 @@ export const reducer: Reducer<GameState> = (
       return {
         isLoading: false,
         game: {} as Game,
-        events: state.events
+        events: [] as GameEvent[]
       };
     case "RECEIVE_UPDATE_GAME":
       return {

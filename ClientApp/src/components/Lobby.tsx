@@ -250,10 +250,10 @@ class Lobby extends React.PureComponent<GameProps, State> {
                 </div>
               </div>
               {this.props.events &&
-                this.props.events.map((message, index) => (
+                this.props.events.map((event, index) => (
                   <div key={index}>
                     <div style={{ margin: "2px" }}>
-                      {message.player + ": " + message.message}
+                      {event.player + ": " + event.message}
                     </div>
                   </div>
                 ))}
