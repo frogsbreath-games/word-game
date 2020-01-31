@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WordGame.API.Domain;
 using WordGame.API.Domain.Enums;
 using WordGame.API.Domain.Models;
 
@@ -11,29 +12,13 @@ namespace WordGame.API.Models
 	{
 		public GameActionsModel(Game game, Player localPlayer)
 		{
-			if (localPlayer.IsOrganizer)
-			{
-				CanStart = game.GameCanStart();
-				CanDelete = true;
-				CanAddBot = game.Status == GameStatus.Lobby && game.Players.Count < 10;
-				CanDeleteBot = game.Status == GameStatus.Lobby;
-			}
-
-			if (game.Status == GameStatus.InProgress)
-			{
-				if (localPlayer.IsSpyMaster)
-				{
-					CanGiveHint = game.CurrentTurn.Status == TurnStatus.Planning
-						&& game.CurrentTurn.Team == localPlayer.Team;
-					CanApproveHint = game.CurrentTurn.Status == TurnStatus.PendingApproval
-						&& game.CurrentTurn.Team != localPlayer.Team;
-				}
-				else
-				{
-					CanVote = game.CurrentTurn.Status == TurnStatus.Guessing
-						&& game.CurrentTurn.Team == localPlayer.Team;
-				}
-			}
+			CanStart = game.CanStart(localPlayer);
+			CanDelete = game.CanDelete(localPlayer);
+			CanAddBot = game.CanAddBot(localPlayer);
+			CanDeleteBot = game.CanDeleteBot(localPlayer);
+			CanGiveHint = game.CanGiveHint(localPlayer);
+			CanApproveHint = game.CanReviewHint(localPlayer);
+			CanVote = game.CanVote(localPlayer);
 		}
 
 		public bool CanStart { get; } = false;

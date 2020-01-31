@@ -10,9 +10,11 @@ using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WordGame.API.Application.Authorization;
+using WordGame.API.Application.Exceptions;
 using WordGame.API.Application.Resources;
 using WordGame.API.Application.Services;
 using WordGame.API.Attributes;
+using WordGame.API.Domain;
 using WordGame.API.Domain.Enums;
 using WordGame.API.Domain.Models;
 using WordGame.API.Domain.Repositories;
@@ -45,6 +47,28 @@ namespace WordGame.API.Controllers
 			_gameBoardGenerator = gameBoardGenerator ?? throw new ArgumentNullException(nameof(gameBoardGenerator));
 			_randomAccessor = randomAccessor ?? throw new ArgumentNullException(nameof(randomAccessor));
 			_gameContext = gameContext ?? throw new ArgumentNullException(nameof(gameContext));
+		}
+
+		protected async Task<Game> GetGame(string gameCode)
+		{
+			return await _repository.GetGameByCode(gameCode)
+				?? throw new HttpException(HttpStatusCode.NotFound, $"Cannot find game with code: [{gameCode}]");
+		}
+
+		protected async Task<(Game, Player)> GetGameAndLocalPlayer(string gameCode)
+		{
+			var game = await GetGame(gameCode);
+
+			var player = User.GetPlayer(game)
+				?? throw new HttpException(HttpStatusCode.NotFound, "Cannot get game player is not in.");
+
+			return (game, player);
+		}
+
+		protected async Task<Player> GetLocalPlayer(string gameCode)
+		{
+			(_, var localPlayer) = await GetGameAndLocalPlayer(gameCode);
+			return localPlayer;
 		}
 
 		protected ApiResponse NotFound(string message)
@@ -149,41 +173,25 @@ namespace WordGame.API.Controllers
 		[HttpGet("{code}"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[Returns(typeof(GameModel))]
-		public async Task<ApiResponse<GameModel>> GetGame([FromRoute] string code)
+		public async Task<ApiResponse<GameModel>> GetGameModel([FromRoute] string code)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return BadRequest("Cannot get game player is not in.");
-
-			return Ok(new GameModel(game, player));
+			return Ok(new GameModel(game, localPlayer));
 		}
 
 		[HttpGet("current"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[Returns(typeof(GameModel))]
 		public Task<ApiResponse<GameModel>> GetCurrentGame()
-			=> GetGame(User.GetGameCode());
+			=> GetGameModel(User.GetGameCode());
 
 		[HttpDelete("{code}"), UserAuthorize(UserRole.Organizer)]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ReturnsStatus(HttpStatusCode.Accepted)]
 		public async Task<ApiResponse> DeleteGame([FromRoute] string code)
 		{
-			Game game = await _repository.GetGameByCode(code);
-
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return BadRequest("Cannot delete game player is not in.");
+			var game = await GetGame(code);
 
 			await _repository.DeleteGame(code);
 
@@ -208,10 +216,7 @@ namespace WordGame.API.Controllers
 			[FromQuery] Team? team = null,
 			[FromQuery] bool? isSpyMaster = null)
 		{
-			Game game = await _repository.GetGameByCode(code);
-
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
+			(var game, _) = await GetGameAndLocalPlayer(code);
 
 			IEnumerable<Player> players = game.Players;
 
@@ -241,17 +246,9 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse<Player>> GetSelfGamePlayer(
 			[FromRoute] string code)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			var localPlayer = await GetLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return NotFound($"Current user is not a player in game with code: [{code}]");
-
-			return Ok(player);
+			return Ok(localPlayer);
 		}
 
 		[HttpGet("current/players/self"), UserAuthorize]
@@ -266,17 +263,9 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse> QuitGame(
 			[FromRoute] string code)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return BadRequest("Cannot quit game player is not in.");
-
-			game.Players.Remove(player);
+			game.Players.Remove(localPlayer);
 
 			await UpdateGame(game);
 
@@ -297,24 +286,16 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse> StartGame(
 			[FromRoute] string code)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
-
-			if (!game.GameCanStart())
-				return BadRequest($"Cannot start game!");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return NotFound($"Cannot find player in game with code: [{code}]");
+			if (game.CanStart(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
 
 			var startingTeam = _randomAccessor.Random.Next(2) == 0 ? Team.Red : Team.Blue;
 
 			var board = _gameBoardGenerator.GenerateGameBoard(startingTeam);
 
-			game.StartGame(player, board, startingTeam);
+			game.StartGame(localPlayer, board, startingTeam);
 
 			await UpdateGame(game);
 
@@ -336,10 +317,7 @@ namespace WordGame.API.Controllers
 			if (User.Identity.IsAuthenticated)
 				return BadRequest("User is already in a game.");
 
-			Game game = await _repository.GetGameByCode(code);
-
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
+			var game = await GetGame(code);
 
 			if (game.Status != GameStatus.Lobby)
 				return BadRequest($"Cannot join game in status: [{game.Status}]");
@@ -362,16 +340,10 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse> AddGameBot(
 			[FromRoute] string code)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
-
-			if (game.Status != GameStatus.Lobby)
-				return BadRequest($"Cannot add bot to game in status: [{game.Status}]");
-
-			if (game.Players.Count >= 10)
-				return BadRequest("$Game cannot have more than 10 players.");
+			if (game.CanAddBot(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
 
 			game.AddNewPlayer(_nameGenerator.GetRandomName(), isBot: true);
 
@@ -393,12 +365,9 @@ namespace WordGame.API.Controllers
 			[FromRoute] string code,
 			[FromRoute] int number)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			var game = await GetGame(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
-
-			Player player = game.Players.SingleOrDefault(x => x.Number == number);
+			var player = game.Players.SingleOrDefault(x => x.Number == number);
 
 			if (player is null)
 				return NotFound($"Cannot find player with number: [{number}] in game with code: [{code}]");
@@ -420,15 +389,12 @@ namespace WordGame.API.Controllers
 			[FromRoute] string code,
 			[FromRoute] int number)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
+			if (game.CanDeleteBot(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
 
-			if (game.Status != GameStatus.Lobby)
-				return BadRequest($"Cannot delete bot from game in status: [{game.Status}]");
-
-			Player player = game.Players.SingleOrDefault(x => x.Number == number);
+			var player = game.Players.SingleOrDefault(x => x.Number == number);
 
 			if (player is null || !player.IsBot)
 				return NotFound($"Cannot find bot with number: [{number}] in game with code: [{code}]");
@@ -455,12 +421,9 @@ namespace WordGame.API.Controllers
 			[FromRoute] int number,
 			[FromBody] PlayerModel playerModel)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			var game = await GetGame(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
-
-			Player player = game.Players.SingleOrDefault(x => x.Number == number);
+			var player = game.Players.SingleOrDefault(x => x.Number == number);
 
 			if (player is null)
 				return NotFound($"Cannot find player with number: [{number}] in game with code: [{code}]");
@@ -490,26 +453,12 @@ namespace WordGame.API.Controllers
 			[FromRoute] string code,
 			[FromBody] HintModel hintModel)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
+			if (game.CanGiveHint(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
 
-			if (game.Status != GameStatus.InProgress)
-				return BadRequest($"Cannot give hint in game that isn't in progress.");
-
-			if (game.CurrentTurn.Status != TurnStatus.Planning)
-				return BadRequest($"Cannot give hint outside the planning stage of the current turn.");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return NotFound($"Cannot find player in game with code: [{code}]");
-
-			if (!player.IsSpyMaster || player.Team != game.CurrentTurn.Team)
-				return BadRequest("This player cannot give a hint!");
-
-			game.GiveHint(player, hintModel.HintWord, hintModel.WordCount);
+			game.GiveHint(localPlayer, hintModel.HintWord, hintModel.WordCount);
 
 			await UpdateGame(game);
 
@@ -529,26 +478,12 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse> ApproveHint(
 			[FromRoute] string code)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
+			if (game.CanReviewHint(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
 
-			if (game.Status != GameStatus.InProgress)
-				return BadRequest($"Cannot approve hint in game that isn't in progress.");
-
-			if (game.CurrentTurn.Status != TurnStatus.PendingApproval)
-				return BadRequest($"Cannot approve hint outside the pending approval stage of the current turn.");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return NotFound($"Cannot find player in game with code: [{code}]");
-
-			if (!player.IsSpyMaster || player.Team == game.CurrentTurn.Team)
-				return BadRequest("This player cannot approve a hint!");
-
-			game.ApproveHint(player);
+			game.ApproveHint(localPlayer);
 
 			await UpdateGame(game);
 
@@ -567,24 +502,10 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse> RefuseHint(
 				[FromRoute] string code)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
-
-			if (game.Status != GameStatus.InProgress)
-				return BadRequest($"Cannot refuse hint in game that isn't in progress.");
-
-			if (game.CurrentTurn.Status != TurnStatus.PendingApproval)
-				return BadRequest($"Cannot refuse hint outside the pending approval stage of the current turn.");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return NotFound($"Cannot find player in game with code: [{code}]");
-
-			if (!player.IsSpyMaster || player.Team == game.CurrentTurn.Team)
-				return BadRequest("This player cannot approve a hint!");
+			if (game.CanReviewHint(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
 
 			game.CurrentTurn.RefuseHint();
 
@@ -596,9 +517,8 @@ namespace WordGame.API.Controllers
 		[HttpPost("current/refuseHint"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ReturnsStatus(HttpStatusCode.Accepted)]
-		public Task<ApiResponse> RefustCurrentGameHint()
+		public Task<ApiResponse> RefuseCurrentGameHint()
 			=> RefuseHint(User.GetGameCode());
-
 
 		[HttpPost("{code}/voteWord"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
@@ -607,26 +527,12 @@ namespace WordGame.API.Controllers
 			[FromRoute] string code,
 			[FromBody] VoteModel voteModel)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
+			if (game.CanVote(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
 
-			if (game.Status != GameStatus.InProgress)
-				return BadRequest($"Cannot cast word vote in game that isn't in progress.");
-
-			if (game.CurrentTurn.Status != TurnStatus.Guessing)
-				return BadRequest($"Cannot cast word vote outside the guessing stage of the current turn.");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return NotFound($"Cannot find player in game with code: [{code}]");
-
-			if (player.IsSpyMaster || player.Team != game.CurrentTurn.Team)
-				return BadRequest("This player cannot vote for a word!");
-
-			game.SetPlayerVote(player, voteModel.Word);
+			game.SetPlayerVote(localPlayer, voteModel.Word);
 
 			await UpdateGame(game);
 
@@ -646,26 +552,12 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse> VoteEndTurn(
 			[FromRoute] string code)
 		{
-			Game game = await _repository.GetGameByCode(code);
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
-			if (game is null)
-				return NotFound($"Cannot find game with code: [{code}]");
+			if (game.CanVote(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
 
-			if (game.Status != GameStatus.InProgress)
-				return BadRequest($"Cannot vote end turn in game that isn't in progress.");
-
-			if (game.CurrentTurn.Status != TurnStatus.Guessing)
-				return BadRequest($"Cannot vote end turn outside the guessing stage of the current turn.");
-
-			var player = User.GetPlayer(game);
-
-			if (player is null)
-				return NotFound($"Cannot find player in game with code: [{code}]");
-
-			if (player.IsSpyMaster || player.Team != game.CurrentTurn.Team)
-				return BadRequest("This player cannot vote to end turn!");
-
-			game.VoteEndTurn(player);
+			game.VoteEndTurn(localPlayer);
 
 			await UpdateGame(game);
 

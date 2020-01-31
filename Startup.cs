@@ -15,6 +15,7 @@ using WordGame.API.Data.Repositories;
 using WordGame.API.Domain.Repositories;
 using WordGame.API.Extensions;
 using WordGame.API.Hubs;
+using WordGame.API.Middleware;
 
 namespace WordGame.API
 {
@@ -105,6 +106,8 @@ namespace WordGame.API
 
 			app.UseAuthentication();
 			app.UseAuthorization();
+
+			app.UseMiddleware<HttpExceptionMiddleware>();
 
 			app.UseEndpoints(endpoints =>
 			{
