@@ -216,18 +216,6 @@ class Game extends React.PureComponent<GameProps, State> {
       <React.Fragment>
         <div className={styles.gameBody}>
           <div className={styles.leftSection}>
-            <PlayerTracker
-              team={localTeam}
-              playerName={this.props.game.localPlayer.name}
-            />
-            {/* not sure where to put status */}
-            <div>
-              <div style={{ textAlign: "center" }}>
-                <h3>{this.props.game.descriptions.status}</h3>
-                <h6>{this.props.game.descriptions.statusDescription}</h6>
-                <p>{this.props.game.descriptions.localPlayerInstruction}</p>
-              </div>
-            </div>
             <div className={styles.banner}>
               <TeamTile
                 team={localTeam}
@@ -239,11 +227,115 @@ class Game extends React.PureComponent<GameProps, State> {
                 tilesRemaining={opposingTeamTilesRemaining}
                 isTeamsTurn={currentTeam === opposingTeam}
               />
+              {/* not sure where to put status */}
+              <div className={styles.instructions}>
+                <div style={{ textAlign: "center" }}>
+                  <h3>{this.props.game.descriptions.status}</h3>
+                  <hr/>
+                  <h6>{this.props.game.descriptions.statusDescription}</h6>
+                  <p>{this.props.game.descriptions.localPlayerInstruction}</p>
+                </div>
+              </div>
+              <div className="row">
+              {this.props.game.actions.canDelete && (
+                  <button
+                    className={styles.cancel}
+                    type="button"
+                    onClick={() => this.props.deleteGame(this.props.game.code)}
+                    style={{ marginTop: "10px", marginLeft: "20px" }}
+                  >
+                    Delete Game
+                  </button>
+              )}
+              {this.props.game.actions.canVote && (
+                  <button
+                    className={styles.submit}
+                    type="button"
+                    onClick={() => this.props.voteEndTurn()}
+                    style={{ marginTop: "10px", marginLeft: "20px" }}
+                  >
+                    End Turn (
+                {this.props.game.currentTurn
+                      ? this.props.game.currentTurn.endTurnVotes.length
+                      : 0}
+                    )
+              </button>
+                )}
+              </div>
             </div>
           </div>
           <main className={styles.main}>
             <div>
-          <div className={styles.board} style={{ marginTop: "10px" }}>
+              <div style={{ textAlign: "center", minHeight: "90px" }}>
+                {/* this should only be seen by spy master when it is hint phase */}
+                {this.props.game.actions.canGiveHint && (
+                  <div className={styles.hintInputs}>
+                    <h3>Create Hint & Clue Count</h3>
+                    <div className={styles.inputs}>
+                      <input
+                        type="text"
+                        value={this.state.hintWord}
+                        className={styles.input}
+                        onChange={this.handleWordChange}
+                        placeholder="Enter hint here..."
+                      />
+                      <input
+                        type="number"
+                        value={this.state.wordCount}
+                        className={styles.input}
+                        onChange={this.handleCountChange}
+                        min="0"
+                      />
+                      <button
+                        style={{ width: "150px", justifySelf: "center" }}
+                        className={styles.submit}
+                        type="button"
+                        onClick={this.handleSubmitClick}
+                      >
+                        Submit hint
+                  </button>
+                    </div>
+                  </div>
+                )}
+                {this.props.game.actions.canApproveHint && (
+                  <div>
+                    <h3>Pending hint: "{hintWord}"</h3>
+                    <button
+                      type="button"
+                      className={styles.confirm}
+                      style={{ width: 150 }}
+                      onClick={() => {
+                        this.props.approveHint();
+                      }}
+                    >
+                      <ConfirmIcon width={35} style={{ fill: "black" }} />
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.cancel}
+                      style={{ width: 150, marginLeft: "20px" }}
+                      onClick={() => {
+                        this.props.refuseHint();
+                      }}
+                    >
+                      <CancelIcon width={35} style={{ fill: "white" }} />
+                    </button>
+                  </div>
+                )}
+                {(currentStatus === "guessing" || currentStatus === "tallying") && (
+                  <div>
+                    <h1>
+                      Hint: "{hintWord}" ({wordCount})
+                </h1>
+                    <h5>
+                      {guessesRemaining
+                        ? guessesRemaining + " guesses remaining"
+                        : "Unlimited guesses remaining"}
+                    </h5>
+                  </div>
+                )}
+              </div>
+          <div className={styles.board}>
             {this.props.game.wordTiles &&
               this.props.game.wordTiles.map(tile => (
                 <GameTile
@@ -255,119 +347,27 @@ class Game extends React.PureComponent<GameProps, State> {
                 />
               ))}
           </div>
-          {this.props.game.actions.canVote && (
-            <div className="row">
-              <button
-                className="btn btn-info"
-                type="button"
-                onClick={() => this.props.voteEndTurn()}
-                style={{ marginTop: "10px", marginLeft: "20px" }}
-              >
-                End Turn (
-                {this.props.game.currentTurn
-                  ? this.props.game.currentTurn.endTurnVotes.length
-                  : 0}
-                )
-              </button>
-            </div>
-          )}
-          <div style={{ textAlign: "center" }}>
-            {/* this should only be seen by spy master when it is hint phase */}
-            {this.props.game.actions.canGiveHint && (
-              <div className={styles.hintInputs}>
-                <h3>Create Hint & Clue Count</h3>
-                <div className={styles.inputs}>
-                  <input
-                    type="text"
-                    value={this.state.hintWord}
-                    className={styles.input}
-                    onChange={this.handleWordChange}
-                    placeholder="Enter hint here..."
-                  />
-                  <input
-                    type="number"
-                    value={this.state.wordCount}
-                    className={styles.input}
-                    onChange={this.handleCountChange}
-                    min="0"
-                  />
-                  <button
-                    style={{ width: "150px", justifySelf: "center" }}
-                    className={styles.submit}
-                    type="button"
-                    onClick={this.handleSubmitClick}
-                  >
-                    Submit hint
-                  </button>
-                </div>
-              </div>
-            )}
-            {this.props.game.actions.canApproveHint && (
-              <div>
-                <h3>Pending hint: "{hintWord}"</h3>
-                <button
-                  type="button"
-                  className={styles.confirm}
-                  style={{ width: 150 }}
-                  onClick={() => {
-                    this.props.approveHint();
-                  }}
-                >
-                  <ConfirmIcon width={35} style={{ fill: "black" }} />
-                </button>
-                <button
-                  type="button"
-                  className={styles.cancel}
-                  style={{ width: 150, marginLeft: "20px" }}
-                  onClick={() => {
-                    this.props.refuseHint();
-                  }}
-                >
-                  <CancelIcon width={35} style={{ fill: "white" }} />
-                </button>
-              </div>
-            )}
-            {(currentStatus === "guessing" || currentStatus === "tallying") && (
-              <div>
-                <h1>
-                  Hint: "{hintWord}" ({wordCount})
-                </h1>
-                <h5>
-                  {guessesRemaining
-                    ? guessesRemaining + " guesses remaining"
-                    : "Unlimited guesses remaining"}
-                </h5>
-              </div>
-            )}
-          </div>
         </div>
-            {this.props.game.actions.canDelete && (
-              <div className="row">
-            <button
-              className={styles.cancel}
-              type="button"
-              onClick={() => this.props.deleteGame(this.props.game.code)}
-              style={{ marginTop: "10px", marginLeft: "20px" }}
-            >
-              Delete Game
-            </button>
-          </div>
-              )}
           </main>
           <div className={styles.rightSection}>
+            <PlayerTracker
+              team={localTeam}
+              playerName={this.props.game.localPlayer.name}
+            />
             <div className={styles.eventWindow}>
-              <h6>Game Log</h6>
               {this.props.events &&
                 this.props.events.map((event, index) => (
                   <div key={index}>
                     <div style={{ margin: "2px" }}>
                       <span
                         style={{
-                          color: "#AAA"
+                          fontSize: "10px",
+                          fontFamily: "monospace"
                         }}
                       >
-                        {"[" + event.timestamp + "] "}
+                        {event.timestamp}
                       </span>
+                      <br/>
                       <span
                         style={{
                           color: getColor(event.team, true)

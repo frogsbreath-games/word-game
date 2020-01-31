@@ -27,7 +27,7 @@ export default class NavMenu extends React.PureComponent<
           className="navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3"
           light
         >
-          <Cthulhu style={{ width: "50px", marginRight: "10px" }} />
+          <Cthulhu style={{ width: "40px", marginRight: "10px" }} />
             <NavbarBrand tag={Link} to="/">
               <h3>Necronomicodex</h3>
             </NavbarBrand>

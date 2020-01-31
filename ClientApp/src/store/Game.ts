@@ -638,7 +638,7 @@ export const reducer: Reducer<GameState> = (
         game: state.game,
         connection: state.connection,
         messages: state.messages,
-        events: [...state.events, action.event]
+        events: [action.event, ...state.events]
       };
     default:
       return state;

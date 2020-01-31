@@ -87,27 +87,40 @@
 .banner {
   display: grid;
   grid-template-rows: 1fr 1fr;
-  justify-content: center;
+  justify-content: stretch;
 }
 
 .tile {
-  display: grid;
+  /*display: grid;*/
   grid-template-columns: 40% 60%;
   grid-template-areas: "team info";
   text-transform: capitalize;
   margin: 10px;
   padding: 10px;
   border-radius: 5px;
+  color: white;
+  text-align: center;
+}
+
+.instructions {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: solid 2px white;
+  background: white;
+  box-shadow: 0 6px;
 }
 
 .blueTile {
   composes: tile;
   background-color: var(--light-blue);
+  box-shadow: 0 6px var(--dark-blue);
 }
 
 .redTile {
   composes: tile;
   background-color: var(--light-red);
+  box-shadow: 0 6px var(--dark-red);
 }
 
 .teamLabel {
@@ -134,7 +147,7 @@
   width: 50px;
   background-color: #bbb;
   border-radius: 20%;
-  border: solid;
+  border: solid 2px white;
   position: relative;
   display: grid;
   z-index: 1;
@@ -144,12 +157,10 @@
 .bluePlayerIcon {
   composes: playerIcon;
   background-color: var(--blue);
-  border-color: var(--dark-blue);
 }
 .redPlayerIcon {
   composes: playerIcon;
   background-color: var(--red);
-  border-color: var(--dark-red);
 }
 
 .vote {
@@ -160,7 +171,7 @@
   border: solid;
   position: relative;
   z-index: 1;
-  margin: 5px;
+  margin: 3px;
   display: inline-block;
 }
 
@@ -217,12 +228,14 @@
   display: grid;
   padding-top: 10px;
   grid-template-columns: 0% 100%;
+  margin-right: 10px;
 }
 
 .tracker > h4 {
   padding: 5px;
   text-align: center;
   border-radius: 5px;
+  border: solid 2px white;
 }
 
 .blueHeader {
@@ -234,11 +247,11 @@
 }
 
 .lightLabel {
-  background-color: rgba(255, 255, 255, 0.75);
+  /*background-color: rgba(255, 255, 255, 0.75);*/
   padding: 5px;
   border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.24),
-    0 1px 3px rgba(255, 255, 255, 0.36);
+  /*box-shadow: 0 1px 3px rgba(255, 255, 255, 0.24),
+    0 1px 3px rgba(255, 255, 255, 0.36);*/
   text-align: center;
   word-wrap: break-word;
 }
@@ -274,16 +287,18 @@
 }
 
 .eventWindow {
-  background: #f0f3f6;
+  background: #e4e4e4;
   margin: 10px;
   padding: 15px;
-  border: solid 1px #ddd;
   border-radius: 4px;
   font-family: monospace;
-  font-size: 13px;
-  min-height: calc(100vh - 110px);
-  max-height: calc(100vh - 110px);
-  overflow-y: scroll;
+  font-size: 12px;
+  min-height: calc(100vh - 160px);
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  flex-direction: column-reverse;
+  display: flex;
+  box-shadow: 0 6px;
 }
 
 .eventWindow > h6 {
@@ -415,20 +430,24 @@
 }
 
 .gameBody {
+  border-top: solid 3px var(--black);
   display: grid;
   grid-template-columns: 4fr 9fr 4fr;
 }
 
 .leftSection {
-  border-right: 1px solid #dee2e6;
+  border-right: 4px solid var(--black);
   padding: 10px;
+  background: #4a4a4a;
 }
 
 .rightSection {
-  border-left: 1px solid #dee2e6;
+  border-left: 4px solid var(--black);
   padding: 10px;
+  background: #4a4a4a;
 }
 
 .main {
-  padding: 10px;
+  padding: 10px 30px;
+  background: radial-gradient(var(--grey), var(--dark-grey));
 }
