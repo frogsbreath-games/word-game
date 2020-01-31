@@ -86,7 +86,7 @@
 
 .banner {
   display: grid;
-  grid-template-columns: 45% 45%;
+  grid-template-rows: 1fr 1fr;
   justify-content: center;
 }
 
@@ -280,6 +280,10 @@
   border: solid 1px #ddd;
   border-radius: 4px;
   font-family: monospace;
+  font-size: 13px;
+  min-height: calc(100vh - 110px);
+  max-height: calc(100vh - 110px);
+  overflow-y: scroll;
 }
 
 .eventWindow > h6 {
@@ -408,4 +412,23 @@
 
 .blackTileInner polygon {
   fill: var(--dark-grey);
+}
+
+.gameBody {
+  display: grid;
+  grid-template-columns: 4fr 9fr 4fr;
+}
+
+.leftSection {
+  border-right: 1px solid #dee2e6;
+  padding: 10px;
+}
+
+.rightSection {
+  border-left: 1px solid #dee2e6;
+  padding: 10px;
+}
+
+.main {
+  padding: 10px;
 }

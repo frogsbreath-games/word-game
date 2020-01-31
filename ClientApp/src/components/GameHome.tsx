@@ -4,6 +4,8 @@ import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
 import { ReactComponent as Cthulhu } from "../assets/Cthulhu.svg";
+import { Container } from "reactstrap";
+import LogoFooter from "./LogoFooter";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -64,45 +66,50 @@ class GameHome extends React.PureComponent<GameProps, State> {
 
     return (
       <React.Fragment>
-        <div>
-          <div style={{ textAlign: "center" }}>
-            <Cthulhu style={{ width: "400px" }} />
-            <h1>Have a code?</h1>
-            <div
-              className="input-group mx-auto"
-              style={{ width: 300, marginBottom: 10 }}
-            >
-              <input
-                type="text"
-                value={this.state.value}
-                onChange={this.handleChange}
-                className="form-control"
-                placeholder="XXX69..."
-              />
-              <div className="input-group-append">
-                <button
-                  className="btn btn-primary"
-                  type="button"
-                  onClick={this.handleSubmit}
+        <div style={{ position: "relative", minHeight: "100vh" }}>
+          <div style={{ paddingBottom: "16rem" }}>
+            <Container>
+              <div style={{ textAlign: "center" }}>
+                <Cthulhu style={{ width: "400px" }} />
+                <h1>Have a code?</h1>
+                <div
+                  className="input-group mx-auto"
+                  style={{ width: 300, marginBottom: 10 }}
                 >
-                  Join Game
+                  <input
+                    type="text"
+                    value={this.state.value}
+                    onChange={this.handleChange}
+                    className="form-control"
+                    placeholder="XXX69..."
+                  />
+                  <div className="input-group-append">
+                    <button
+                      className="btn btn-primary"
+                      type="button"
+                      onClick={this.handleSubmit}
+                    >
+                      Join Game
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <h1>Don't have a code?</h1>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ width: 300 }}
+                  onClick={() => {
+                    this.props.requestNewGame();
+                  }}
+                >
+                  {buttonText}
                 </button>
               </div>
-            </div>
+            </Container>
           </div>
-          <div style={{ textAlign: "center" }}>
-            <h1>Don't have a code?</h1>
-            <button
-              type="button"
-              className="btn btn-primary"
-              style={{ width: 300 }}
-              onClick={() => {
-                this.props.requestNewGame();
-              }}
-            >
-              {buttonText}
-            </button>
-          </div>
+          <LogoFooter/>
         </div>
       </React.Fragment>
     );

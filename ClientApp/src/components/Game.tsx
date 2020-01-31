@@ -104,7 +104,7 @@ const GameTile = ({
       />
       <div className={styles.absoluteCenter}>
         {!wordTile.isRevealed && (
-          <h4 className={styles.wordTileWord}>{wordTile.word}</h4>
+          <h5 className={styles.wordTileWord}>{wordTile.word}</h5>
         )}
         {wordTile.votes.map(playerVote => (
           <div
@@ -214,15 +214,35 @@ class Game extends React.PureComponent<GameProps, State> {
 
     return (
       <React.Fragment>
-        <div>
-          {/* not sure where to put status */}
-          <div>
-            <div style={{ textAlign: "center" }}>
-              <h3>{this.props.game.descriptions.status}</h3>
-              <h6>{this.props.game.descriptions.statusDescription}</h6>
-              <p>{this.props.game.descriptions.localPlayerInstruction}</p>
+        <div className={styles.gameBody}>
+          <div className={styles.leftSection}>
+            <PlayerTracker
+              team={localTeam}
+              playerName={this.props.game.localPlayer.name}
+            />
+            {/* not sure where to put status */}
+            <div>
+              <div style={{ textAlign: "center" }}>
+                <h3>{this.props.game.descriptions.status}</h3>
+                <h6>{this.props.game.descriptions.statusDescription}</h6>
+                <p>{this.props.game.descriptions.localPlayerInstruction}</p>
+              </div>
+            </div>
+            <div className={styles.banner}>
+              <TeamTile
+                team={localTeam}
+                tilesRemaining={localTeamsTilesRemaining}
+                isTeamsTurn={currentTeam === localTeam}
+              />
+              <TeamTile
+                team={opposingTeam}
+                tilesRemaining={opposingTeamTilesRemaining}
+                isTeamsTurn={currentTeam === opposingTeam}
+              />
             </div>
           </div>
+          <main className={styles.main}>
+            <div>
           <div className={styles.board} style={{ marginTop: "10px" }}>
             {this.props.game.wordTiles &&
               this.props.game.wordTiles.map(tile => (
@@ -320,50 +340,9 @@ class Game extends React.PureComponent<GameProps, State> {
               </div>
             )}
           </div>
-          <PlayerTracker
-            team={localTeam}
-            playerName={this.props.game.localPlayer.name}
-          />
-          <div className={styles.banner}>
-            <TeamTile
-              team={localTeam}
-              tilesRemaining={localTeamsTilesRemaining}
-              isTeamsTurn={currentTeam === localTeam}
-            />
-            <TeamTile
-              team={opposingTeam}
-              tilesRemaining={opposingTeamTilesRemaining}
-              isTeamsTurn={currentTeam === opposingTeam}
-            />
-          </div>
         </div>
-        <div className={styles.eventWindow}>
-          <h6>Game Log</h6>
-          {this.props.events &&
-            this.props.events.map((event, index) => (
-              <div key={index}>
-                <div style={{ margin: "2px" }}>
-                  <span
-                    style={{
-                      color: "#AAA"
-                    }}
-                  >
-                    {"[" + event.timestamp + "] "}
-                  </span>
-                  <span
-                    style={{
-                      color: getColor(event.team, true)
-                    }}
-                  >
-                    {event.player ? event.player : "Team " + event.team}
-                  </span>
-                  <span>{" " + event.message}</span>
-                </div>
-              </div>
-            ))}
-        </div>
-        {this.props.game.actions.canDelete && (
-          <div className="row">
+            {this.props.game.actions.canDelete && (
+              <div className="row">
             <button
               className={styles.cancel}
               type="button"
@@ -373,7 +352,36 @@ class Game extends React.PureComponent<GameProps, State> {
               Delete Game
             </button>
           </div>
-        )}
+              )}
+          </main>
+          <div className={styles.rightSection}>
+            <div className={styles.eventWindow}>
+              <h6>Game Log</h6>
+              {this.props.events &&
+                this.props.events.map((event, index) => (
+                  <div key={index}>
+                    <div style={{ margin: "2px" }}>
+                      <span
+                        style={{
+                          color: "#AAA"
+                        }}
+                      >
+                        {"[" + event.timestamp + "] "}
+                      </span>
+                      <span
+                        style={{
+                          color: getColor(event.team, true)
+                        }}
+                      >
+                        {event.player ? event.player : "Team " + event.team}
+                      </span>
+                      <span>{" " + event.message}</span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
       </React.Fragment>
     );
   }

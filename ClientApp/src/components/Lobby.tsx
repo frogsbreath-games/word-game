@@ -8,6 +8,8 @@ import { ReactComponent as MessageIcon } from "../assets/MessageIcon.svg";
 import { red, blue } from "../constants/ColorConstants";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import "./Lobby.css";
+import { Container } from "reactstrap";
+import LogoFooter from "./LogoFooter";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -147,6 +149,9 @@ class Lobby extends React.PureComponent<GameProps, State> {
 
     return (
       <React.Fragment>
+        <div style={{ position: "relative", minHeight: "100vh" }}>
+          <div style={{ paddingBottom: "16rem" }}>
+            <Container>
         <div style={{ display: "grid", gridTemplateColumns: "50% 50%" }}>
           <div>
             <h1>Lobby: {this.props.game.code}</h1>
@@ -245,6 +250,10 @@ class Lobby extends React.PureComponent<GameProps, State> {
               </div>
             </div>
           ))}
+            </Container>
+          </div>
+          <LogoFooter/>
+          </div>
       </React.Fragment>
     );
   }
