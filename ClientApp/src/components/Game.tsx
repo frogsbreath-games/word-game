@@ -16,7 +16,7 @@ import { ReactComponent as CancelIcon } from "../assets/CancelIcon.svg";
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
   typeof GameStore.actionCreators;
 
-type State = { hintWord: string; wordCount: number };
+type State = { hintWord: string; wordCount: number; input: string };
 
 function getColor(color: string, isRevealed: boolean) {
   if (!isRevealed) {
@@ -128,10 +128,13 @@ const GameTile = ({
 class Game extends React.PureComponent<GameProps, State> {
   constructor(props: GameProps) {
     super(props);
-    this.state = { hintWord: "", wordCount: 0 };
+    this.state = { hintWord: "", wordCount: 0, input: "" };
 
     this.handleWordChange = this.handleWordChange.bind(this);
     this.handleCountChange = this.handleCountChange.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleSubmitClick = this.handleSubmitClick.bind(this);
     this.handleVoteWord = this.handleVoteWord.bind(this);
@@ -149,6 +152,31 @@ class Game extends React.PureComponent<GameProps, State> {
 
   private ensureConnectionExists() {
     this.props.createConnection();
+  }
+
+  handleKeyPress(event: React.KeyboardEvent) {
+    var keyCode = event.keyCode || event.which;
+    if (keyCode === 13) {
+      console.log(this.state.input);
+      this.sendMessage();
+    }
+  }
+
+  sendMessage() {
+    if (this.props.connection) {
+      this.props.connection
+        .invoke(
+          "SendMessage",
+          this.state.input,
+          this.props.game.localPlayer.team
+        )
+        .catch(err => console.error(err));
+      this.setState({ input: "" });
+    }
+  }
+
+  handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({ input: event.target.value });
   }
 
   handleWordChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -231,13 +259,13 @@ class Game extends React.PureComponent<GameProps, State> {
               <div className={styles.instructions}>
                 <div style={{ textAlign: "center" }}>
                   <h3>{this.props.game.descriptions.status}</h3>
-                  <hr/>
+                  <hr />
                   <h6>{this.props.game.descriptions.statusDescription}</h6>
                   <p>{this.props.game.descriptions.localPlayerInstruction}</p>
                 </div>
               </div>
               <div className="row">
-              {this.props.game.actions.canDelete && (
+                {this.props.game.actions.canDelete && (
                   <button
                     className={styles.cancel}
                     type="button"
@@ -246,8 +274,8 @@ class Game extends React.PureComponent<GameProps, State> {
                   >
                     Delete Game
                   </button>
-              )}
-              {this.props.game.actions.canVote && (
+                )}
+                {this.props.game.actions.canVote && (
                   <button
                     className={styles.submit}
                     type="button"
@@ -255,11 +283,11 @@ class Game extends React.PureComponent<GameProps, State> {
                     style={{ marginTop: "10px", marginLeft: "20px" }}
                   >
                     End Turn (
-                {this.props.game.currentTurn
+                    {this.props.game.currentTurn
                       ? this.props.game.currentTurn.endTurnVotes.length
                       : 0}
                     )
-              </button>
+                  </button>
                 )}
               </div>
             </div>
@@ -293,7 +321,7 @@ class Game extends React.PureComponent<GameProps, State> {
                         onClick={this.handleSubmitClick}
                       >
                         Submit hint
-                  </button>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -322,11 +350,12 @@ class Game extends React.PureComponent<GameProps, State> {
                     </button>
                   </div>
                 )}
-                {(currentStatus === "guessing" || currentStatus === "tallying") && (
+                {(currentStatus === "guessing" ||
+                  currentStatus === "tallying") && (
                   <div>
                     <h1>
                       Hint: "{hintWord}" ({wordCount})
-                </h1>
+                    </h1>
                     <h5>
                       {guessesRemaining
                         ? guessesRemaining + " guesses remaining"
@@ -335,19 +364,19 @@ class Game extends React.PureComponent<GameProps, State> {
                   </div>
                 )}
               </div>
-          <div className={styles.board}>
-            {this.props.game.wordTiles &&
-              this.props.game.wordTiles.map(tile => (
-                <GameTile
-                  wordTile={tile}
-                  key={tile.word}
-                  localPlayer={this.props.game.localPlayer}
-                  handleVoteWord={this.handleVoteWord}
-                  turnStatus={currentStatus}
-                />
-              ))}
-          </div>
-        </div>
+              <div className={styles.board}>
+                {this.props.game.wordTiles &&
+                  this.props.game.wordTiles.map(tile => (
+                    <GameTile
+                      wordTile={tile}
+                      key={tile.word}
+                      localPlayer={this.props.game.localPlayer}
+                      handleVoteWord={this.handleVoteWord}
+                      turnStatus={currentStatus}
+                    />
+                  ))}
+              </div>
+            </div>
           </main>
           <div className={styles.rightSection}>
             <PlayerTracker
@@ -367,7 +396,7 @@ class Game extends React.PureComponent<GameProps, State> {
                       >
                         {event.timestamp}
                       </span>
-                      <br/>
+                      <br />
                       <span
                         style={{
                           color: getColor(event.team, true)
@@ -379,6 +408,16 @@ class Game extends React.PureComponent<GameProps, State> {
                     </div>
                   </div>
                 ))}
+            </div>
+            <div>
+              <input
+                className={styles.chatInput}
+                type="text"
+                placeholder="Message something..."
+                value={this.state.input}
+                onChange={this.handleChange}
+                onKeyPress={this.handleKeyPress}
+              />
             </div>
           </div>
         </div>

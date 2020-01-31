@@ -17,6 +17,15 @@ namespace WordGame.API.Domain.Models
 			Data = data;
 		}
 
+		protected GameEvent(string player, Team team, DateTime timestamp, GameEventType type, IDictionary<string, object> data = null)
+		{
+			Player = player;
+			Team = team;
+			Timestamp = timestamp.ToLongTimeString();
+			Type = type;
+			Data = data;
+		}
+
 		protected GameEvent(Team team, DateTime timestamp, GameEventType type, IDictionary<string, object> data = null)
 		{
 			Team = team;
@@ -38,6 +47,7 @@ namespace WordGame.API.Domain.Models
 			GameEventType.PlayerGaveHint => $" Gave Hint Word \"{Data["word"]}\" ({Data["count"]})",
 			GameEventType.PlayerVotedWord => $" Voted For \"{Data["word"]}\"",
 			GameEventType.PlayerVotedEndTurn => $" Voted To Stop Guessing",
+			GameEventType.PlayerMessage => $" {Data["message"]}",
 
 			GameEventType.TeamGuessedCorrectly => $" Guessed Correctly!",
 			GameEventType.TeamGuessedIncorrectly => $" Guessed Incorrectly :(",
@@ -82,6 +92,13 @@ namespace WordGame.API.Domain.Models
 		public static GameEvent PlayerVotedEndTurn(Player player, DateTime timestamp)
 			=> new GameEvent(player, timestamp, GameEventType.PlayerVotedEndTurn);
 
+		public static GameEvent PlayerMessage(string player, Team team, DateTime timestamp, string message)
+			=> new GameEvent(player, team, timestamp, GameEventType.PlayerMessage,
+			new Dictionary<string, object>
+			{
+				["message"] = message
+			});
+
 		public static GameEvent TeamGuessedCorrectly(Team team, DateTime timestamp)
 			=> new GameEvent(team, timestamp, GameEventType.TeamGuessedCorrectly);
 
@@ -101,6 +118,7 @@ namespace WordGame.API.Domain.Models
 		PlayerGaveHint,
 		PlayerVotedWord,
 		PlayerVotedEndTurn,
+		PlayerMessage,
 
 		//Team Events
 		TeamGuessedCorrectly,

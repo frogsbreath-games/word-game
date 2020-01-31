@@ -62,7 +62,11 @@ class Lobby extends React.PureComponent<GameProps, State> {
   public sendMessage() {
     if (this.props.connection) {
       this.props.connection
-        .invoke("SendMessage", this.state.input)
+        .invoke(
+          "SendMessage",
+          this.state.input,
+          this.props.game.localPlayer.team
+        )
         .catch(err => console.error(err));
       this.setState({ input: "" });
     }
@@ -152,108 +156,111 @@ class Lobby extends React.PureComponent<GameProps, State> {
         <div style={{ position: "relative", minHeight: "100vh" }}>
           <div style={{ paddingBottom: "16rem" }}>
             <Container>
-        <div style={{ display: "grid", gridTemplateColumns: "50% 50%" }}>
-          <div>
-            <h1>Lobby: {this.props.game.code}</h1>
-            {organizerButtons}
-          </div>
-          <div>
-            <h3>{this.props.game.descriptions.status}</h3>
-            <h6>{this.props.game.descriptions.statusDescription}</h6>
-            <p>{this.props.game.descriptions.localPlayerInstruction}</p>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-sm-6">
-            <h1 style={{ color: red }}>Red</h1>
-            <hr />
-            <TransitionGroup>
-              {this.props.game.players
-                .filter(player => player.team === "red")
-                .map(player => (
-                  <CSSTransition
-                    key={player.name}
-                    timeout={500}
-                    classNames="item"
-                  >
-                    <PlayerTile
-                      player={player}
-                      localPlayer={this.props.game.localPlayer}
-                      gameActions={this.props.game.actions}
-                      code={this.props.game.code}
-                      key={player.number}
-                      swapTeams={this.swapTeams}
-                      leaveGame={this.quitGame}
-                      deleteBot={this.deleteBot}
-                      changeRole={this.handleRoleChange}
-                    />
-                  </CSSTransition>
-                ))}
-            </TransitionGroup>
-          </div>
-          <div className="col-sm-6">
-            <h1 style={{ color: blue }}>Blue</h1>
-            <hr />
-            <TransitionGroup>
-              {this.props.game.players
-                .filter(player => player.team === "blue")
-                .map(player => (
-                  <CSSTransition
-                    key={player.name}
-                    timeout={500}
-                    classNames="item"
-                  >
-                    <PlayerTile
-                      player={player}
-                      localPlayer={this.props.game.localPlayer}
-                      gameActions={this.props.game.actions}
-                      code={this.props.game.code}
-                      key={player.number}
-                      swapTeams={this.swapTeams}
-                      leaveGame={this.quitGame}
-                      deleteBot={this.deleteBot}
-                      changeRole={this.handleRoleChange}
-                    />
-                  </CSSTransition>
-                ))}
-            </TransitionGroup>
-          </div>
-        </div>
-        <div className="row" style={{ marginTop: "20px" }}>
-          <div className="input-group mb-3">
-            <div className="input-group-prepend">
-              <span className="input-group-text" id="inputGroup-sizing-default">
-                <MessageIcon
-                  style={{
-                    opacity: 0.5,
-                    height: "24px",
-                    fill: "black"
-                  }}
-                />
-              </span>
-            </div>
-            <input
-              className="form-control"
-              type="text"
-              placeholder="Message something..."
-              value={this.state.input}
-              onChange={this.handleChange}
-              onKeyPress={this.handleKeyPress}
-            />
-          </div>
-        </div>
-        {this.props.messages &&
-          this.props.messages.map((message, index) => (
-            <div key={index}>
-              <div style={{ margin: "2px" }}>
-                {message.name + ": " + message.message}
+              <div style={{ display: "grid", gridTemplateColumns: "50% 50%" }}>
+                <div>
+                  <h1>Lobby: {this.props.game.code}</h1>
+                  {organizerButtons}
+                </div>
+                <div>
+                  <h3>{this.props.game.descriptions.status}</h3>
+                  <h6>{this.props.game.descriptions.statusDescription}</h6>
+                  <p>{this.props.game.descriptions.localPlayerInstruction}</p>
+                </div>
               </div>
-            </div>
-          ))}
+              <div className="row">
+                <div className="col-sm-6">
+                  <h1 style={{ color: red }}>Red</h1>
+                  <hr />
+                  <TransitionGroup>
+                    {this.props.game.players
+                      .filter(player => player.team === "red")
+                      .map(player => (
+                        <CSSTransition
+                          key={player.name}
+                          timeout={500}
+                          classNames="item"
+                        >
+                          <PlayerTile
+                            player={player}
+                            localPlayer={this.props.game.localPlayer}
+                            gameActions={this.props.game.actions}
+                            code={this.props.game.code}
+                            key={player.number}
+                            swapTeams={this.swapTeams}
+                            leaveGame={this.quitGame}
+                            deleteBot={this.deleteBot}
+                            changeRole={this.handleRoleChange}
+                          />
+                        </CSSTransition>
+                      ))}
+                  </TransitionGroup>
+                </div>
+                <div className="col-sm-6">
+                  <h1 style={{ color: blue }}>Blue</h1>
+                  <hr />
+                  <TransitionGroup>
+                    {this.props.game.players
+                      .filter(player => player.team === "blue")
+                      .map(player => (
+                        <CSSTransition
+                          key={player.name}
+                          timeout={500}
+                          classNames="item"
+                        >
+                          <PlayerTile
+                            player={player}
+                            localPlayer={this.props.game.localPlayer}
+                            gameActions={this.props.game.actions}
+                            code={this.props.game.code}
+                            key={player.number}
+                            swapTeams={this.swapTeams}
+                            leaveGame={this.quitGame}
+                            deleteBot={this.deleteBot}
+                            changeRole={this.handleRoleChange}
+                          />
+                        </CSSTransition>
+                      ))}
+                  </TransitionGroup>
+                </div>
+              </div>
+              <div className="row" style={{ marginTop: "20px" }}>
+                <div className="input-group mb-3">
+                  <div className="input-group-prepend">
+                    <span
+                      className="input-group-text"
+                      id="inputGroup-sizing-default"
+                    >
+                      <MessageIcon
+                        style={{
+                          opacity: 0.5,
+                          height: "24px",
+                          fill: "black"
+                        }}
+                      />
+                    </span>
+                  </div>
+                  <input
+                    className="form-control"
+                    type="text"
+                    placeholder="Message something..."
+                    value={this.state.input}
+                    onChange={this.handleChange}
+                    onKeyPress={this.handleKeyPress}
+                  />
+                </div>
+              </div>
+              {this.props.events &&
+                this.props.events.map((message, index) => (
+                  <div key={index}>
+                    <div style={{ margin: "2px" }}>
+                      {message.player + ": " + message.message}
+                    </div>
+                  </div>
+                ))}
             </Container>
           </div>
-          <LogoFooter/>
-          </div>
+          <LogoFooter />
+        </div>
       </React.Fragment>
     );
   }

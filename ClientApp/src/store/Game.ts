@@ -9,15 +9,19 @@ export type Team = "red" | "blue";
 
 export function GetOpponent(team: Team): Team {
   switch (team) {
-    case "red": return "blue";
-    case "blue": return "red";
+    case "red":
+      return "blue";
+    case "blue":
+      return "red";
   }
 }
 
 export function GetTilesRemaining(game: Game, team: Team): number {
   switch (team) {
-    case "red": return game.redTilesRemaining;
-    case "blue": return game.blueTilesRemaining;
+    case "red":
+      return game.redTilesRemaining;
+    case "blue":
+      return game.blueTilesRemaining;
   }
 }
 
@@ -27,7 +31,6 @@ export interface GameState {
   isLoading: boolean;
   game: Game;
   connection?: signalR.HubConnection;
-  messages: Message[];
   events: GameEvent[];
 }
 
@@ -116,11 +119,6 @@ export interface APIResponse {
   errorArray: object[];
 }
 
-export interface Message {
-  name: string;
-  message: Message;
-}
-
 // -----------------
 // ACTIONS - These are serializable (hence replayable) descriptions of state transitions.
 // They do not themselves have any side-effects; they just describe something that is going to happen.
@@ -157,11 +155,6 @@ interface ReceiveUpdateGameAction {
   game: Game;
 }
 
-interface ReceiveMessage {
-  type: "RECEIVE_MESSAGE";
-  message: Message;
-}
-
 interface ReceiveGameEvent {
   type: "RECEIVE_GAME_EVENT";
   event: GameEvent;
@@ -177,7 +170,6 @@ type KnownAction =
   | ReceiveLeaveDeleteAction
   | ReceiveCurrentGameAction
   | ReceiveUpdateGameAction
-  | ReceiveMessage
   | ReceiveGameEvent;
 
 // ----------------
@@ -192,14 +184,6 @@ export const actionCreators = {
       const connection = new signalr.HubConnectionBuilder()
         .withUrl(`hubs/game`)
         .build();
-
-      connection.on("MessageSent", data => {
-        console.log(data.message);
-        dispatch({
-          type: "RECEIVE_MESSAGE",
-          message: data as Message
-        });
-      });
 
       connection.on("GameUpdated", data => {
         console.log("Game Updated!");
@@ -555,7 +539,6 @@ export const actionCreators = {
 const unloadedState: GameState = {
   isLoading: false,
   game: {} as Game,
-  messages: [] as Message[],
   events: [] as GameEvent[]
 };
 
@@ -573,7 +556,6 @@ export const reducer: Reducer<GameState> = (
         isLoading: true,
         game: state.game,
         connection: state.connection,
-        messages: state.messages,
         events: state.events
       };
     case "CREATE_HUB_CONNECTION":
@@ -581,24 +563,13 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         game: state.game,
         connection: action.connection,
-        messages: state.messages,
         events: state.events
       };
-    case "RECEIVE_MESSAGE": {
-      return {
-        isLoading: false,
-        game: state.game,
-        connection: state.connection,
-        messages: [...state.messages, action.message],
-        events: state.events
-      };
-    }
     case "RECEIVE_CURRENT_GAME":
       return {
         isLoading: false,
         game: action.game,
         connection: state.connection,
-        messages: state.messages,
         events: state.events
       };
     case "RECEIVE_NEW_GAME":
@@ -606,7 +577,6 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         game: action.game,
         connection: state.connection,
-        messages: state.messages,
         events: state.events
       };
     case "RECEIVE_JOIN_GAME":
@@ -614,14 +584,12 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         game: action.game,
         connection: state.connection,
-        messages: state.messages,
         events: state.events
       };
     case "RECEIVE_DELETE_GAME":
       return {
         isLoading: false,
         game: {} as Game,
-        messages: state.messages,
         events: state.events
       };
     case "RECEIVE_UPDATE_GAME":
@@ -629,7 +597,6 @@ export const reducer: Reducer<GameState> = (
         isLoading: false,
         game: action.game,
         connection: state.connection,
-        messages: state.messages,
         events: state.events
       };
     case "RECEIVE_GAME_EVENT":
@@ -637,7 +604,6 @@ export const reducer: Reducer<GameState> = (
         isLoading: state.isLoading,
         game: state.game,
         connection: state.connection,
-        messages: state.messages,
         events: [action.event, ...state.events]
       };
     default:

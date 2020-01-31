@@ -2,6 +2,7 @@
 using WordGame.API.Domain.Models;
 using WordGame.API.Extensions;
 using WordGame.API.Models;
+using WordGame.API.Domain.Enums;
 
 namespace WordGame.API.Hubs
 {
@@ -9,17 +10,15 @@ namespace WordGame.API.Hubs
 	{
 		protected override string GroupName => Context.User.GetGameCode();
 
-		public Task SendMessage(string message)
+		public Task SendMessage(string message, Team team)
 		{
-			return Clients.Group(GroupName).MessageSent(
-				new LobbyMessage(Context.User.Identity.Name, message));
+			return Clients.Group(GroupName).GameEvent(
+				GameEvent.PlayerMessage(Context.User.Identity.Name, team, System.DateTime.Now, message));
 		}
 	}
 
 	public interface IGameClient
 	{
-		Task MessageSent(LobbyMessage message);
-
 		Task GameDeleted();
 
 		Task GameUpdated(GameModel gameModel);
