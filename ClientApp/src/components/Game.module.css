@@ -333,6 +333,7 @@
   text-align: center;
   composes: reveal;
   fill: white;
+  width: 50%;
 }
 
 /* Centering absolute positioned items */

@@ -11,6 +11,7 @@ import { ReactComponent as TileOuter } from "../assets/TileOuter.svg";
 import { ReactComponent as TileInner } from "../assets/TileInner.svg";
 import { ReactComponent as ConfirmIcon } from "../assets/CheckIcon.svg";
 import { ReactComponent as CancelIcon } from "../assets/CancelIcon.svg";
+import { ReactComponent as SkullIcon } from "../assets/SkullIcon.svg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -118,7 +119,11 @@ const GameTile = ({
       </div>
       {wordTile.isRevealed && (
         <div className={styles.absoluteCenter}>
-          <RevealedIcon className={styles[wordTile.team + "Reveal"]} />
+          {wordTile.team === "black" ? (
+            <SkullIcon className={styles[wordTile.team + "Reveal"]} />
+          ) : (
+            <RevealedIcon className={styles[wordTile.team + "Reveal"]} />
+          )}
         </div>
       )}
     </div>
