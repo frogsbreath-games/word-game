@@ -1,0 +1,9 @@
+.submit {
+  composes: submit from "../styles/utility.module.css";
+  margin: 8px;
+}
+
+.input {
+  composes: input from "../styles/utility.module.css";
+  margin-bottom: 2px;
+}

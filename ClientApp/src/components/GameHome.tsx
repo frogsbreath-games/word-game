@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
+import styles from "./GameHome.module.css";
 import { ReactComponent as Cthulhu } from "../assets/Cthulhu.svg";
 import { Container } from "reactstrap";
 import LogoFooter from "./LogoFooter";
@@ -80,12 +81,12 @@ class GameHome extends React.PureComponent<GameProps, State> {
                     type="text"
                     value={this.state.value}
                     onChange={this.handleChange}
-                    className="form-control"
+                    className={styles.input}
                     placeholder="XXX69..."
                   />
                   <div className="input-group-append">
                     <button
-                      className="btn btn-primary"
+                      className={styles.submit}
                       type="button"
                       onClick={this.handleSubmit}
                     >
@@ -98,7 +99,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
                 <h1>Don't have a code?</h1>
                 <button
                   type="button"
-                  className="btn btn-primary"
+                  className={styles.submit}
                   style={{ width: 300 }}
                   onClick={() => {
                     this.props.requestNewGame();
@@ -109,7 +110,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
               </div>
             </Container>
           </div>
-          <LogoFooter/>
+          <LogoFooter />
         </div>
       </React.Fragment>
     );

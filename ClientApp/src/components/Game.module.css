@@ -14,69 +14,20 @@
   --dark-green: #234d36;
 }
 
-.button {
-  display: inline-block;
-  padding: 10px 10px;
-  font-size: 16px;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  outline: none;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-}
-
-.button:hover {
-  filter: brightness(110%);
-}
-
-.button:active {
-  transform: translateY(4px);
-}
-
 .submit {
-  composes: button;
-  background-color: var(--blue);
-  box-shadow: 0 6px var(--dark-blue);
-}
-
-.submit:active {
-  box-shadow: 0 3px var(--dark-blue);
+  composes: submit from "../styles/utility.module.css";
 }
 
 .confirm {
-  composes: button;
-  background-color: var(--green);
-  box-shadow: 0 6px var(--dark-green);
+  composes: confirm from "../styles/utility.module.css";
 }
 
-.confirm:active {
-  box-shadow: 0 3px var(--dark-green);
-}
 .cancel {
-  composes: button;
-  background-color: var(--red);
-  box-shadow: 0 6px var(--dark-red);
-}
-
-.cancel:active {
-  box-shadow: 0 3px var(--dark-red);
+  composes: cancel from "../styles/utility.module.css";
 }
 
 .input {
-  border-radius: 5px;
-  padding: 10px 10px;
-  outline: none;
-  margin: 8px;
-  font: 24px;
-  box-sizing: border-box;
-  border: 2px solid var(--grey);
-  transition: 0.5s;
-}
-
-.input:focus {
-  border: 2px solid var(--black);
+  composes: input from "../styles/utility.module.css";
 }
 
 .inputs {
