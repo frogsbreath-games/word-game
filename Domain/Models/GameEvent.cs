@@ -50,7 +50,7 @@ namespace WordGame.API.Domain.Models
 			GameEventType.PlayerMessage => $" {Data["message"]}",
 
 			GameEventType.TeamGuessedCorrectly => $" Guessed Correctly!",
-			GameEventType.TeamGuessedIncorrectly => $" Guessed Incorrectly :(",
+			GameEventType.TeamGuessedIncorrectly => $" Guessed Incorrectly 😥",
 			GameEventType.TeamWon => " WON!",
 			_ => null
 		};

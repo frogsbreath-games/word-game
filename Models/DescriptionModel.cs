@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,7 +30,7 @@ namespace WordGame.API.Models
 			{
 				if (game.CurrentTurn.Status == TurnStatus.Planning)
 				{
-					Status = "Hint Planning Phase";
+					Status = "Hint Planning Phase 🤔";
 					StatusDescription = $"{game.CurrentTurn.Team} Team Spy Master is formulating a hint.";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
@@ -47,13 +47,13 @@ namespace WordGame.API.Models
 
 				if (game.CurrentTurn.Status == TurnStatus.PendingApproval)
 				{
-					Status = "Hint Pending Approval";
+					Status = "Hint Pending Approval 📋";
 					StatusDescription = $"{TeamEx.GetOpposingTeam(game.CurrentTurn.Team)} Team Spy Master is approving a hint.";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
 						if (localPlayer.IsSpyMaster)
 						{
-							LocalPlayerInstruction = "Wait for the opposing Spy Master to approve your hint!";
+							LocalPlayerInstruction = "Wait for the opposing Spy Master to approve your hint! ⏳";
 						}
 						else
 						{
@@ -68,20 +68,20 @@ namespace WordGame.API.Models
 						}
 						else
 						{
-							LocalPlayerInstruction = "Review the board and be polite as you wait for your team's turn :)";
+							LocalPlayerInstruction = "Review the board and be polite as you wait for your team's turn 🙄⏲";
 						}
 					}
 				}
 
 				if (game.CurrentTurn.Status == TurnStatus.Guessing)
 				{
-					Status = "Guessing Phase";
+					Status = "Guessing Phase 😕";
 					StatusDescription = $"{game.CurrentTurn.Team} Team Agents are submitting guesses.";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
 						if (localPlayer.IsSpyMaster)
 						{
-							LocalPlayerInstruction = "Keep a straight face and wait for your agents to submit guesses!";
+							LocalPlayerInstruction = "Keep a straight face and wait for your agents to submit guesses! 😎";
 						}
 						else
 						{
@@ -90,14 +90,14 @@ namespace WordGame.API.Models
 					}
 					else
 					{
-						LocalPlayerInstruction = "Review the board and be polite as you wait for your team's turn :)";
+						LocalPlayerInstruction = "Review the board and be polite as you wait for your team's turn 😇";
 					}
 				}
 
 				if (game.CurrentTurn.Status == TurnStatus.Tallying)
 				{
-					Status = "Robots Calculating Results";
-					StatusDescription = $"{game.CurrentTurn.Team} Team Agents have submitted guesses. Hold for result!";
+					Status = "Robots Calculating Results 🤖";
+					StatusDescription = $"{game.CurrentTurn.Team} Team Agents have submitted guesses. Hold for result! 🥁";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
 						if (localPlayer.IsSpyMaster)
@@ -120,16 +120,16 @@ namespace WordGame.API.Models
 					Team? winningTeam = game.GetWinningTeam();
 					if (winningTeam != null)
 					{
-						Status = $"{winningTeam} Wins!";
+						Status = $"{winningTeam} Wins! 🧨";
 						if (localPlayer.Team == winningTeam)
 						{
-							StatusDescription = "Congratulations! You won!";
-							LocalPlayerInstruction = "Give yourself a pat on the back. :)";
+							StatusDescription = "Congratulations! You won! 🎉🎉🎉🎉";
+							LocalPlayerInstruction = "Give yourself a pat on the back. 😎";
 						}
 						else
 						{
-							StatusDescription = "Unfortunately... you lost.";
-							LocalPlayerInstruction = "Do better next time. :(";
+							StatusDescription = "Unfortunately... you lost. 🎻";
+							LocalPlayerInstruction = "Do better next time. 😟";
 						}
 					}
 				}
