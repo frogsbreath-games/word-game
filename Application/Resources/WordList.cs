@@ -4643,7 +4643,6 @@
 			"TYPE",
 			"TYPEWRITER",
 			"TYPHOON",
-			"TYVEK",
 			"UKULELE",
 			"UMBRELLA",
 			"UMBRELLA",
