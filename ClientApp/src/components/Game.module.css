@@ -136,6 +136,24 @@
   }
 }
 
+.pulse {
+  animation: pulsing 1s 1;
+}
+
+.pulsing {
+  animation: pulsing 1s infinite;
+}
+
+@keyframes pulsing {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+}
+
 .glow {
   animation: glowing 2s infinite;
 }

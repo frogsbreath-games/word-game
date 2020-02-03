@@ -112,7 +112,7 @@ const GameTile = ({
             className={
               (playerVote.team === "red" ? styles.redVote : styles.blueVote) +
               " " +
-              (turnStatus === "tallying" ? styles.blink : "")
+              (turnStatus === "tallying" ? styles.pulsing : styles.pulse)
             }
           />
         ))}
