@@ -69,6 +69,7 @@ namespace WordGame.API
 			services.AddScoped<IGameRepository, GameRepository>();
 			services.AddScoped<INameGenerator, NameGenerator>();
 			services.AddScoped<IGameBoardGenerator, GameBoardGenerator>();
+			services.AddScoped<IGameUpdater, GameUpdater>();
 
 			GlobalHost.DependencyResolver.Register(typeof(IUserIdProvider), () => new PlayerIdProvider());
 
