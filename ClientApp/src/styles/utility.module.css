@@ -14,6 +14,14 @@
   --dark-green: #234d36;
 }
 
+.redColor {
+  color: var(--red);
+}
+
+.blueColor {
+  color: var(--blue);
+}
+
 .button {
   display: inline-block;
   padding: 10px 10px;

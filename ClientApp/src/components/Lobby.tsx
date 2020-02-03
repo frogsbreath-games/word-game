@@ -5,11 +5,11 @@ import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
 import PlayerTile from "./PlayerTile";
 import { ReactComponent as MessageIcon } from "../assets/MessageIcon.svg";
-import { red, blue } from "../constants/ColorConstants";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import "./Lobby.css";
 import { Container } from "reactstrap";
 import LogoFooter from "./LogoFooter";
+import fadeTransition from "../styles/transitions/fade.module.css";
+import styles from "./Lobby.module.css";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -169,7 +169,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
               </div>
               <div className="row">
                 <div className="col-sm-6">
-                  <h1 style={{ color: red }}>Red</h1>
+                  <h1 className={styles.red}>Red</h1>
                   <hr />
                   <TransitionGroup>
                     {this.props.game.players
@@ -178,7 +178,8 @@ class Lobby extends React.PureComponent<GameProps, State> {
                         <CSSTransition
                           key={player.name}
                           timeout={500}
-                          classNames="item"
+                          classNames={fadeTransition}
+                          unmountOnExit
                         >
                           <PlayerTile
                             player={player}
@@ -196,7 +197,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
                   </TransitionGroup>
                 </div>
                 <div className="col-sm-6">
-                  <h1 style={{ color: blue }}>Blue</h1>
+                  <h1 className={styles.blue}>Blue</h1>
                   <hr />
                   <TransitionGroup>
                     {this.props.game.players
@@ -205,7 +206,8 @@ class Lobby extends React.PureComponent<GameProps, State> {
                         <CSSTransition
                           key={player.name}
                           timeout={500}
-                          classNames="item"
+                          classNames={fadeTransition}
+                          unmountOnExit
                         >
                           <PlayerTile
                             player={player}

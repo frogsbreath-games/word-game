@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import * as GameStore from "../store/Game";
 import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
-import { red, blue, tan, black, grey } from "../constants/ColorConstants";
 import styles from "./Game.module.css";
 import { ReactComponent as RevealedIcon } from "../assets/RevealedIcon.svg";
 import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
@@ -18,22 +17,6 @@ type GameProps = GameStore.GameState & // ... state we've requested from the Red
   typeof GameStore.actionCreators;
 
 type State = { hintWord: string; wordCount: number; input: string };
-
-function getColor(color: string, isRevealed: boolean) {
-  if (!isRevealed) {
-    return grey;
-  }
-  switch (color) {
-    case "red":
-      return red;
-    case "blue":
-      return blue;
-    case "neutral":
-      return tan;
-    default:
-      return black;
-  }
-}
 
 type TeamTileProps = {
   team: GameStore.Team;
@@ -402,11 +385,7 @@ class Game extends React.PureComponent<GameProps, State> {
                         {event.timestamp}
                       </span>
                       <br />
-                      <span
-                        style={{
-                          color: getColor(event.team, true)
-                        }}
-                      >
+                      <span className={styles[event.team]}>
                         {event.player ? event.player : "Team " + event.team}
                       </span>
                       <span>{" " + event.message}</span>

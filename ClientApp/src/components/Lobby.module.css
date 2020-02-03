@@ -1,0 +1,7 @@
+.red {
+  composes: redColor from "../styles/utility.module.css";
+}
+
+.blue {
+  composes: blueColor from "../styles/utility.module.css";
+}

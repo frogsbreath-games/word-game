@@ -3,7 +3,6 @@ import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
 import { ReactComponent as SwapIcon } from "../assets/SwapIcon.svg";
 import { ReactComponent as TrashIcon } from "../assets/TrashIcon.svg";
 import * as GameStore from "../store/Game";
-import { red, blue } from "../constants/ColorConstants";
 import styles from "./PlayerTile.module.css";
 
 type PlayerTileProps = {
