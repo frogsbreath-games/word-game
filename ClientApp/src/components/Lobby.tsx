@@ -115,7 +115,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
         <div className="row mx-auto">
           <button
             disabled={!this.props.game.actions.canStart}
-            className="btn btn-primary"
+            className={styles.submit}
             type="button"
             onClick={() => this.props.startGame(this.props.game.code)}
             style={{ margin: "5px" }}
@@ -124,7 +124,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
           </button>
           <button
             disabled={!this.props.game.actions.canAddBot}
-            className="btn btn-secondary"
+            className={styles.button}
             type="button"
             onClick={() => this.props.addBot()}
             style={{ margin: "5px" }}
@@ -132,7 +132,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
             Add Bot
           </button>
           <button
-            className="btn btn-secondary"
+            className={styles.button}
             type="button"
             onClick={() => this.props.requestCurrentGame()}
             style={{ margin: "5px" }}
@@ -140,7 +140,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
             Refresh
           </button>
           <button
-            className="btn btn-danger"
+            className={styles.delete}
             type="button"
             onClick={() => this.props.deleteGame(this.props.game.code)}
             style={{ margin: "5px" }}

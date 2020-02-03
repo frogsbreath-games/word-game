@@ -12,23 +12,6 @@
   --black: #3b3b3b;
 }
 
-.container {
-  border-radius: 3px;
-  margin: 15px;
-  padding: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 3px rgba(0, 0, 0, 0.36);
-}
-
-.containerBlue {
-  composes: container;
-  background-color: var(--blue);
-}
-
-.containerRed {
-  composes: container;
-  background-color: var(--red);
-}
-
 .tileLabel {
   background-color: rgba(255, 255, 255, 0.75);
   padding: 15px;
@@ -52,4 +35,30 @@
 .blueIcon {
   composes: icon;
   fill: var(--blue);
+}
+
+.button {
+  composes: button from "../styles/utility.module.css";
+}
+
+.leave {
+  composes: cancel from "../styles/utility.module.css";
+}
+
+.container {
+  border-radius: 3px;
+  margin: 15px;
+  padding: 10px;
+}
+
+.blueTile {
+  composes: container;
+  background-color: var(--blue);
+  box-shadow: 0 6px var(--dark-blue);
+}
+
+.redTile {
+  composes: container;
+  background-color: var(--red);
+  box-shadow: 0 6px var(--dark-red);
 }

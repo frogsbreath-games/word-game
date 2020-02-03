@@ -28,11 +28,7 @@ const PlayerTile = ({
   code
 }: PlayerTileProps) => (
   <div>
-    <div
-      className={
-        player.team === "red" ? styles.containerRed : styles.containerBlue
-      }
-    >
+    <div className={styles[player.team + "Tile"]}>
       <div className={styles.tileLabel}>
         <h5>{player.name}</h5>
         {player.number === localPlayer.number && (
@@ -54,7 +50,7 @@ const PlayerTile = ({
       </div>
       {(localPlayer.isOrganizer || player.number === localPlayer.number) && (
         <button
-          className="btn btn-secondary"
+          className={styles.button}
           type="button"
           onClick={() => swapTeams(player)}
           style={{ marginTop: "10px" }}
@@ -64,7 +60,7 @@ const PlayerTile = ({
       )}
       {gameActions.canDeleteBot && player.isBot && (
         <button
-          className="btn btn-secondary"
+          className={styles.button}
           type="button"
           onClick={() => deleteBot(player.number)}
           style={{ marginTop: "10px", marginLeft: "5px" }}
@@ -74,7 +70,7 @@ const PlayerTile = ({
       )}
       {player.number === localPlayer.number && !localPlayer.isOrganizer && (
         <button
-          className="btn btn-danger"
+          className={styles.button}
           type="button"
           onClick={() => leaveGame()}
           style={{ marginLeft: "10px", marginTop: "10px" }}

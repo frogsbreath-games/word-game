@@ -5,3 +5,15 @@
 .blue {
   composes: blueColor from "../styles/utility.module.css";
 }
+
+.button {
+  composes: button from "../styles/utility.module.css";
+}
+
+.submit {
+  composes: submit from "../styles/utility.module.css";
+}
+
+.delete {
+  composes: cancel from "../styles/utility.module.css";
+}

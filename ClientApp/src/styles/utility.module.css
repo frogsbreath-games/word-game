@@ -33,6 +33,8 @@
   color: #fff;
   border: none;
   border-radius: 5px;
+  background-color: var(--dark-grey);
+  box-shadow: 0 6px var(--black);
 }
 
 .button:hover {
