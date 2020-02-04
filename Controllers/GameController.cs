@@ -306,6 +306,30 @@ namespace WordGame.API.Controllers
 		public Task<ApiResponse> StartCurrentGame()
 			=> StartGame(User.GetGameCode());
 
+		[HttpPost("{code}/backToLobby"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public async Task<ApiResponse> BackToLobby(
+			[FromRoute] string code)
+		{
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
+
+			if (game.CanRestart(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
+
+			game.BackToLobby(localPlayer);
+
+			await _gameUpdater.UpdateGame(game);
+
+			return Accepted("Back to lobby");
+		}
+
+		[HttpPost("current/backToLobby"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> CurrentGameBackToLobby()
+			=> BackToLobby(User.GetGameCode());
+
 		[HttpPost("{code}/join")]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ProducesResponseType(typeof(ApiResponse<GameModel>), (int)HttpStatusCode.OK)]

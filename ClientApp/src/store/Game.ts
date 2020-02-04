@@ -58,6 +58,7 @@ export interface Game {
 
 export interface GameActions {
   canStart: boolean;
+  canRestart: boolean;
   canDelete: boolean;
   canAddBot: boolean;
   canDeleteBot: boolean;
@@ -435,6 +436,26 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/${code}/start`, {
+        method: "POST"
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+        });
+
+      dispatch({
+        type: "REQUEST_SERVER_ACTION"
+      });
+    }
+  },
+  backToLobby: (code: string): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${code}/backToLobby`, {
         method: "POST"
       })
         .then(response => response.json() as Promise<APIResponse>)

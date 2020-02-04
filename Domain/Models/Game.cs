@@ -27,9 +27,9 @@ namespace WordGame.API.Domain.Models
 
 		public List<WordTile> WordTiles { get; protected set; } = new List<WordTile>();
 
-		public int BlueTilesRemaining => WordTiles.Count(x => !x.IsRevealed && x.Team == Team.Blue);
+		public int BlueTilesRemaining => GetTilesRemaining(Team.Blue);
 
-		public int RedTilesRemaining => WordTiles.Count(x => !x.IsRevealed && x.Team == Team.Red);
+		public int RedTilesRemaining => GetTilesRemaining(Team.Red);
 
 		public int GetTilesRemaining(Team team)
 			=> WordTiles.Count(x => !x.IsRevealed && x.Team == team);
@@ -133,6 +133,18 @@ namespace WordGame.API.Domain.Models
 			};
 
 			AddPublicEvent(GameEvent.PlayerStartedGame(player, DateTime.Now));
+		}
+
+		public void BackToLobby(Player player)
+		{
+			if (!this.CanRestart(player))
+				throw new InvalidOperationException();
+
+			Turns.Clear();
+			WordTiles.Clear();
+			Status = GameStatus.Lobby;
+
+			AddPublicEvent(GameEvent.PlayerRestartedGameInLobby(player, DateTime.Now));
 		}
 
 		private void AddPublicEvent(GameEvent @event)
