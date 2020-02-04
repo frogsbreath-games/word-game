@@ -263,6 +263,16 @@ class Game extends React.PureComponent<GameProps, State> {
                     Delete Game
                   </button>
                 )}
+                {this.props.game.actions.canRestart && (
+                  <button
+                    className={styles.submit}
+                    type="button"
+                    onClick={() => this.props.backToLobby(this.props.game.code)}
+                    style={{ marginTop: "10px", marginLeft: "20px" }}
+                  >
+                    Back To Lobby
+                  </button>
+                )}
                 {this.props.game.actions.canVote && (
                   <button
                     className={styles.submit}

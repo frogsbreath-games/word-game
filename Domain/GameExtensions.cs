@@ -15,7 +15,21 @@ namespace WordGame.API.Domain
 				return Try.Failure("Game cannot start");
 
 			if (!player.IsOrganizer)
-				return Try.Failure("Only the organizer start game");
+				return Try.Failure("Only the organizer start the game");
+
+			return Try.Success;
+		}
+
+		public static Try CanRestart(this Game game, Player player)
+		{
+			if (!game.GetWinningTeam().HasValue)
+				return Try.Failure("Cannot restart the game until it is over");
+
+			if (game.Status != GameStatus.InProgress)
+				return Try.Failure("Cannot restart game that has been archived");
+
+			if (!player.IsOrganizer)
+				return Try.Failure("Only the organizer restart the game");
 
 			return Try.Success;
 		}

@@ -13,6 +13,7 @@ namespace WordGame.API.Models
 		public GameActionsModel(Game game, Player localPlayer)
 		{
 			CanStart = game.CanStart(localPlayer);
+			CanRestart = game.CanRestart(localPlayer);
 			CanDelete = game.CanDelete(localPlayer);
 			CanAddBot = game.CanAddBot(localPlayer);
 			CanDeleteBot = game.CanDeleteBot(localPlayer);
@@ -22,6 +23,7 @@ namespace WordGame.API.Models
 		}
 
 		public bool CanStart { get; } = false;
+		public bool CanRestart { get; } = false;
 		public bool CanDelete { get; } = false;
 		public bool CanAddBot { get; } = false;
 		public bool CanDeleteBot { get; } = false;
