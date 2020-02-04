@@ -155,111 +155,113 @@ class Lobby extends React.PureComponent<GameProps, State> {
       <React.Fragment>
         <div style={{ position: "relative", minHeight: "100vh" }}>
           <div style={{ paddingBottom: "16rem" }}>
-            <Container>
-              <div style={{ display: "grid", gridTemplateColumns: "50% 50%" }}>
-                <div>
-                  <h1>Lobby: {this.props.game.code}</h1>
-                  {organizerButtons}
-                </div>
-                <div>
-                  <h3>{this.props.game.descriptions.status}</h3>
-                  <h6>{this.props.game.descriptions.statusDescription}</h6>
-                  <p>{this.props.game.descriptions.localPlayerInstruction}</p>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-sm-6">
-                  <h1 className={styles.red}>Red</h1>
-                  <hr />
-                  <TransitionGroup>
-                    {this.props.game.players
-                      .filter(player => player.team === "red")
-                      .map(player => (
-                        <CSSTransition
-                          key={player.name}
-                          timeout={500}
-                          classNames={fadeTransition}
-                          unmountOnExit
-                        >
-                          <PlayerTile
-                            player={player}
-                            localPlayer={this.props.game.localPlayer}
-                            gameActions={this.props.game.actions}
-                            code={this.props.game.code}
-                            key={player.number}
-                            swapTeams={this.swapTeams}
-                            leaveGame={this.quitGame}
-                            deleteBot={this.deleteBot}
-                            changeRole={this.handleRoleChange}
-                          />
-                        </CSSTransition>
-                      ))}
-                  </TransitionGroup>
-                </div>
-                <div className="col-sm-6">
-                  <h1 className={styles.blue}>Blue</h1>
-                  <hr />
-                  <TransitionGroup>
-                    {this.props.game.players
-                      .filter(player => player.team === "blue")
-                      .map(player => (
-                        <CSSTransition
-                          key={player.name}
-                          timeout={500}
-                          classNames={fadeTransition}
-                          unmountOnExit
-                        >
-                          <PlayerTile
-                            player={player}
-                            localPlayer={this.props.game.localPlayer}
-                            gameActions={this.props.game.actions}
-                            code={this.props.game.code}
-                            key={player.number}
-                            swapTeams={this.swapTeams}
-                            leaveGame={this.quitGame}
-                            deleteBot={this.deleteBot}
-                            changeRole={this.handleRoleChange}
-                          />
-                        </CSSTransition>
-                      ))}
-                  </TransitionGroup>
-                </div>
-              </div>
-              <div className="row" style={{ marginTop: "20px" }}>
-                <div className="input-group mb-3">
-                  <div className="input-group-prepend">
-                    <span
-                      className="input-group-text"
-                      id="inputGroup-sizing-default"
-                    >
-                      <MessageIcon
-                        style={{
-                          opacity: 0.5,
-                          height: "24px",
-                          fill: "black"
-                        }}
-                      />
-                    </span>
+            <div className={styles.lobbyBody}>
+              <div>
+                <div
+                  style={{ display: "grid", gridTemplateColumns: "50% 50%" }}
+                >
+                  <div>
+                    <h1>Lobby: {this.props.game.code}</h1>
+                    {organizerButtons}
                   </div>
-                  <input
-                    className="form-control"
-                    type="text"
-                    placeholder="Message something..."
-                    value={this.state.input}
-                    onChange={this.handleChange}
-                    onKeyPress={this.handleKeyPress}
-                  />
+                  <div>
+                    <h3>{this.props.game.descriptions.status}</h3>
+                    <h6>{this.props.game.descriptions.statusDescription}</h6>
+                    <p>{this.props.game.descriptions.localPlayerInstruction}</p>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-sm-6">
+                    <h1 className={styles.red}>Red</h1>
+                    <hr />
+                    <TransitionGroup>
+                      {this.props.game.players
+                        .filter(player => player.team === "red")
+                        .map(player => (
+                          <CSSTransition
+                            key={player.name}
+                            timeout={500}
+                            classNames={fadeTransition}
+                            unmountOnExit
+                          >
+                            <PlayerTile
+                              player={player}
+                              localPlayer={this.props.game.localPlayer}
+                              gameActions={this.props.game.actions}
+                              code={this.props.game.code}
+                              key={player.number}
+                              swapTeams={this.swapTeams}
+                              leaveGame={this.quitGame}
+                              deleteBot={this.deleteBot}
+                              changeRole={this.handleRoleChange}
+                            />
+                          </CSSTransition>
+                        ))}
+                    </TransitionGroup>
+                  </div>
+                  <div className="col-sm-6">
+                    <h1 className={styles.blue}>Blue</h1>
+                    <hr />
+                    <TransitionGroup>
+                      {this.props.game.players
+                        .filter(player => player.team === "blue")
+                        .map(player => (
+                          <CSSTransition
+                            key={player.name}
+                            timeout={500}
+                            classNames={fadeTransition}
+                            unmountOnExit
+                          >
+                            <PlayerTile
+                              player={player}
+                              localPlayer={this.props.game.localPlayer}
+                              gameActions={this.props.game.actions}
+                              code={this.props.game.code}
+                              key={player.number}
+                              swapTeams={this.swapTeams}
+                              leaveGame={this.quitGame}
+                              deleteBot={this.deleteBot}
+                              changeRole={this.handleRoleChange}
+                            />
+                          </CSSTransition>
+                        ))}
+                    </TransitionGroup>
+                  </div>
                 </div>
               </div>
-              {this.props.events &&
-                this.props.events.map((event, index) => (
-                  <div key={index}>
-                    <div style={{ margin: "2px" }}>
-                      {event.player + ": " + event.message}
-                    </div>
-                  </div>
-                ))}
-            </Container>
+              <div>
+                <div className={styles.eventWindow}>
+                  {this.props.events &&
+                    this.props.events.map((event, index) => (
+                      <div key={index}>
+                        <div style={{ margin: "2px" }}>
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              fontFamily: "monospace"
+                            }}
+                          >
+                            {event.timestamp}
+                          </span>
+                          <br />
+                          <span className={styles[event.team]}>
+                            {event.player ? event.player : "Team " + event.team}
+                          </span>
+                          <span>{" " + event.message}</span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+                <input
+                  className={styles.input}
+                  type="text"
+                  placeholder="Message something..."
+                  value={this.state.input}
+                  onChange={this.handleChange}
+                  onKeyPress={this.handleKeyPress}
+                />
+              </div>
+            </div>
           </div>
           <LogoFooter />
         </div>

@@ -17,3 +17,19 @@
 .delete {
   composes: cancel from "../styles/utility.module.css";
 }
+
+.input {
+  composes: input from "../styles/utility.module.css";
+  width: 97%;
+}
+
+.lobbyBody {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.eventWindow {
+  composes: eventWindow from "./Game.module.css";
+}
