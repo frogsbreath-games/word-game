@@ -14,27 +14,16 @@
 
 .tileLabel {
   background-color: rgba(255, 255, 255, 0.75);
-  padding: 15px;
+  padding: 3px;
   border-radius: 5px;
   box-shadow: 0 1px 3px rgba(255, 255, 255, 0.24),
     0 1px 3px rgba(255, 255, 255, 0.36);
 }
 
 .icon {
-  opacity: 0.5;
-  width: 50px;
-  float: right;
-  margin-top: -25px;
-}
-
-.redIcon {
-  composes: icon;
-  fill: var(--red);
-}
-
-.blueIcon {
-  composes: icon;
-  fill: var(--blue);
+  opacity: 0.8;
+  fill: white;
+  width: 20px;
 }
 
 .button {
@@ -47,8 +36,16 @@
 
 .container {
   border-radius: 3px;
-  margin: 15px;
+  margin: 15px 5px 15px 5px;
   padding: 10px;
+  min-height: 150px;
+  display: grid;
+  grid-template-columns: 25% 25% minmax(100px, 50%);
+  grid-template-rows: repeat(3);
+  grid-template-areas:
+    "name name character "
+    "select select character"
+    "buttons buttons character";
 }
 
 .blueTile {
@@ -61,4 +58,24 @@
   composes: container;
   background-color: var(--red);
   box-shadow: 0 6px var(--dark-red);
+}
+
+.character {
+  grid-area: character;
+  display: grid;
+  width: 100%;
+  justify-items: end;
+}
+
+.name {
+  grid-area: name;
+  width: 100%;
+}
+
+.select {
+  grid-area: select;
+}
+
+.buttons {
+  grid-area: buttons;
 }

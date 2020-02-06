@@ -43,7 +43,10 @@ class Lobby extends React.PureComponent<GameProps, State> {
     this.props.createConnection();
   }
 
-  public handleRoleChange(player: GameStore.Player, type: GameStore.PlayerType) {
+  public handleRoleChange(
+    player: GameStore.Player,
+    type: GameStore.PlayerType
+  ) {
     player.type = type;
     this.props.updatePlayer(player);
   }
@@ -152,7 +155,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
         <div style={{ position: "relative", minHeight: "100vh" }}>
           <div style={{ paddingBottom: "16rem" }}>
             <div className={styles.lobbyBody}>
-              <div>
+              <div className={styles.main}>
                 <div
                   style={{ display: "grid", gridTemplateColumns: "50% 50%" }}
                 >
@@ -166,66 +169,70 @@ class Lobby extends React.PureComponent<GameProps, State> {
                     <p>{this.props.game.descriptions.localPlayerInstruction}</p>
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-sm-6">
+                <div className={styles.playerLists}>
+                  <div>
                     <h1 className={styles.red}>Red</h1>
                     <hr />
-                    <TransitionGroup>
-                      {this.props.game.players
-                        .filter(player => player.team === "red")
-                        .map(player => (
-                          <CSSTransition
-                            key={player.name}
-                            timeout={500}
-                            classNames={fadeTransition}
-                            unmountOnExit
-                          >
-                            <PlayerTile
-                              player={player}
-                              localPlayer={this.props.game.localPlayer}
-                              gameActions={this.props.game.actions}
-                              code={this.props.game.code}
-                              key={player.number}
-                              swapTeams={this.swapTeams}
-                              leaveGame={this.quitGame}
-                              deleteBot={this.deleteBot}
-                              changeRole={this.handleRoleChange}
-                            />
-                          </CSSTransition>
-                        ))}
-                    </TransitionGroup>
+                    <div className={styles.list}>
+                      <TransitionGroup>
+                        {this.props.game.players
+                          .filter(player => player.team === "red")
+                          .map(player => (
+                            <CSSTransition
+                              key={player.name}
+                              timeout={500}
+                              classNames={fadeTransition}
+                              unmountOnExit
+                            >
+                              <PlayerTile
+                                player={player}
+                                localPlayer={this.props.game.localPlayer}
+                                gameActions={this.props.game.actions}
+                                code={this.props.game.code}
+                                key={player.number}
+                                swapTeams={this.swapTeams}
+                                leaveGame={this.quitGame}
+                                deleteBot={this.deleteBot}
+                                changeRole={this.handleRoleChange}
+                              />
+                            </CSSTransition>
+                          ))}
+                      </TransitionGroup>
+                    </div>
                   </div>
-                  <div className="col-sm-6">
+                  <div>
                     <h1 className={styles.blue}>Blue</h1>
                     <hr />
-                    <TransitionGroup>
-                      {this.props.game.players
-                        .filter(player => player.team === "blue")
-                        .map(player => (
-                          <CSSTransition
-                            key={player.name}
-                            timeout={500}
-                            classNames={fadeTransition}
-                            unmountOnExit
-                          >
-                            <PlayerTile
-                              player={player}
-                              localPlayer={this.props.game.localPlayer}
-                              gameActions={this.props.game.actions}
-                              code={this.props.game.code}
-                              key={player.number}
-                              swapTeams={this.swapTeams}
-                              leaveGame={this.quitGame}
-                              deleteBot={this.deleteBot}
-                              changeRole={this.handleRoleChange}
-                            />
-                          </CSSTransition>
-                        ))}
-                    </TransitionGroup>
+                    <div className={styles.list}>
+                      <TransitionGroup>
+                        {this.props.game.players
+                          .filter(player => player.team === "blue")
+                          .map(player => (
+                            <CSSTransition
+                              key={player.name}
+                              timeout={500}
+                              classNames={fadeTransition}
+                              unmountOnExit
+                            >
+                              <PlayerTile
+                                player={player}
+                                localPlayer={this.props.game.localPlayer}
+                                gameActions={this.props.game.actions}
+                                code={this.props.game.code}
+                                key={player.number}
+                                swapTeams={this.swapTeams}
+                                leaveGame={this.quitGame}
+                                deleteBot={this.deleteBot}
+                                changeRole={this.handleRoleChange}
+                              />
+                            </CSSTransition>
+                          ))}
+                      </TransitionGroup>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div>
+              <div className={styles.chat}>
                 <div className={styles.eventWindow}>
                   {this.props.events &&
                     this.props.events.map((event, index) => (

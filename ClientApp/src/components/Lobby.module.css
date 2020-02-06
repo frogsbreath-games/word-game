@@ -23,13 +23,41 @@
   width: 97%;
 }
 
+.eventWindow {
+  composes: eventWindow from "./Game.module.css";
+}
+
+.playerLists {
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+
+.list {
+  width: 100%;
+}
+
 .lobbyBody {
   display: grid;
   grid-template-columns: 60% 40%;
   margin-left: 10%;
   margin-right: 10%;
+  grid-template-areas: "main chat";
 }
 
-.eventWindow {
-  composes: eventWindow from "./Game.module.css";
+.main {
+  grid-area: main;
+}
+
+.chat {
+  grid-area: chat;
+}
+
+@media (max-width: 960px) {
+  .lobbyBody {
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-areas:
+      "main"
+      "chat";
+  }
 }
