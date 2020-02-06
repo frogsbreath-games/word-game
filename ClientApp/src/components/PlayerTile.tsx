@@ -14,7 +14,7 @@ type PlayerTileProps = {
   swapTeams: (player: GameStore.Player) => void;
   leaveGame: () => void;
   deleteBot: (playerNumber: number) => void;
-  changeRole: (player: GameStore.Player) => void;
+  changeRole: (player: GameStore.Player, type: GameStore.PlayerType) => void;
 };
 
 const PlayerTile = ({
@@ -37,18 +37,12 @@ const PlayerTile = ({
             className={player.team === "red" ? styles.redIcon : styles.blueIcon}
           />
         )}
-        <div className="form-check">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            checked={player.isSpyMaster}
-            onClick={() => changeRole(player)}
-          />
-          <label className="form-check-label">Is Spy Master?</label>
-        </div>
-        {/* <p>{player.isSpyMaster ? "Spy Master" : "Agent"}</p> */}
+          <select value={player.type} onChange={(event) => changeRole(player, event.target.value === "researcher" ? "researcher" : "cultist")}>
+            <option value="researcher">Researcher</option>
+            <option value="cultist">Cultist</option>
+          </select>
       </div>
-      {(localPlayer.isOrganizer || player.number === localPlayer.number) && (
+      {(localPlayer.role === "organizer" || player.number === localPlayer.number) && (
         <button
           className={styles.button}
           type="button"
@@ -58,7 +52,7 @@ const PlayerTile = ({
           <SwapIcon width={25} style={{ opacity: 0.5, fill: "white" }} />
         </button>
       )}
-      {gameActions.canDeleteBot && player.isBot && (
+      {gameActions.canDeleteBot && player.role === "bot" && (
         <button
           className={styles.button}
           type="button"
@@ -68,7 +62,7 @@ const PlayerTile = ({
           <TrashIcon width={25} style={{ opacity: 0.5, fill: "white" }} />
         </button>
       )}
-      {player.number === localPlayer.number && !localPlayer.isOrganizer && (
+      {player.number === localPlayer.number && localPlayer.role !== "organizer" && (
         <button
           className={styles.button}
           type="button"

@@ -16,9 +16,9 @@ namespace WordGame.API.Models
 				Status = "Organizing Lobby";
 				StatusDescription = "The game will start when there are enough players on both teams and the organizer starts the game.";
 
-				if (localPlayer.IsOrganizer)
+				if (localPlayer.Role == UserRole.Organizer)
 				{
-					LocalPlayerInstruction = "The game cannot be started until both teams are even and there is a Spy Master for each. When you have all your players please ensure the teams are set up correctly and start the game!";
+					LocalPlayerInstruction = "The game cannot be started until both teams are even and there is a Cultist for each. When you have all your players please ensure the teams are set up correctly and start the game!";
 				}
 				else
 				{
@@ -31,16 +31,16 @@ namespace WordGame.API.Models
 				if (game.CurrentTurn.Status == TurnStatus.Planning)
 				{
 					Status = "Hint Planning Phase 🤔";
-					StatusDescription = $"{game.CurrentTurn.Team} Team Spy Master is formulating a hint.";
+					StatusDescription = $"{game.CurrentTurn.Team} Team Cultist is formulating a hint.";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
-						if (localPlayer.IsSpyMaster)
+						if (localPlayer.Type == PlayerType.Cultist)
 						{
 							LocalPlayerInstruction = "Create a hint and clue number for your team!";
 						}
 						else
 						{
-							LocalPlayerInstruction = "Review the board and wait for the Spy Master to give you a hint.";
+							LocalPlayerInstruction = "Review the board and wait for the Cultist to give you a hint.";
 						}
 					}
 				}
@@ -48,21 +48,21 @@ namespace WordGame.API.Models
 				if (game.CurrentTurn.Status == TurnStatus.PendingApproval)
 				{
 					Status = "Hint Pending Approval 📋";
-					StatusDescription = $"{TeamEx.GetOpposingTeam(game.CurrentTurn.Team)} Team Spy Master is approving a hint.";
+					StatusDescription = $"{TeamEx.GetOpposingTeam(game.CurrentTurn.Team)} Team Cultist is approving a hint.";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
-						if (localPlayer.IsSpyMaster)
+						if (localPlayer.Type == PlayerType.Cultist)
 						{
-							LocalPlayerInstruction = "Wait for the opposing Spy Master to approve your hint! ⏳";
+							LocalPlayerInstruction = "Wait for the opposing Cultist to approve your hint! ⏳";
 						}
 						else
 						{
-							LocalPlayerInstruction = "Review the board and wait for the Spy Master to give you a hint.";
+							LocalPlayerInstruction = "Review the board and wait for the Cultist to give you a hint.";
 						}
 					}
 					else
 					{
-						if (localPlayer.IsSpyMaster)
+						if (localPlayer.Type == PlayerType.Cultist)
 						{
 							LocalPlayerInstruction = "Review the hint and approve or deny it!";
 						}
@@ -76,12 +76,12 @@ namespace WordGame.API.Models
 				if (game.CurrentTurn.Status == TurnStatus.Guessing)
 				{
 					Status = "Guessing Phase 😕";
-					StatusDescription = $"{game.CurrentTurn.Team} Team Agents are submitting guesses.";
+					StatusDescription = $"{game.CurrentTurn.Team} Team Researchers are submitting guesses.";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
-						if (localPlayer.IsSpyMaster)
+						if (localPlayer.Type == PlayerType.Cultist)
 						{
-							LocalPlayerInstruction = "Keep a straight face and wait for your agents to submit guesses! 😎";
+							LocalPlayerInstruction = "Keep a straight face and wait for your researchers to submit guesses! 😎";
 						}
 						else
 						{
@@ -97,10 +97,10 @@ namespace WordGame.API.Models
 				if (game.CurrentTurn.Status == TurnStatus.Tallying)
 				{
 					Status = "Robots Calculating Results 🤖";
-					StatusDescription = $"{game.CurrentTurn.Team} Team Agents have submitted guesses. Hold for result! 🥁";
+					StatusDescription = $"{game.CurrentTurn.Team} Team Researchers have submitted guesses. Hold for result! 🥁";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
-						if (localPlayer.IsSpyMaster)
+						if (localPlayer.Type == PlayerType.Cultist)
 						{
 							LocalPlayerInstruction = "Nothing you can do now your team has spoken!";
 						}

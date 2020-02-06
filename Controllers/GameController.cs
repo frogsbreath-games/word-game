@@ -150,7 +150,7 @@ namespace WordGame.API.Controllers
 				Guid.NewGuid().ToString().Substring(0, 6).ToUpper(),
 				_nameGenerator.GetRandomName(),
 				Team.Red,
-				true);
+				PlayerType.Cultist);
 
 			await _repository.AddGame(game);
 
@@ -208,11 +208,11 @@ namespace WordGame.API.Controllers
 
 		[HttpGet("{code}/players"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
-		[Returns(typeof(List<Player>))]
-		public async Task<ApiResponse<List<Player>>> GetGamePlayers(
+		[Returns(typeof(List<PlayerModel>))]
+		public async Task<ApiResponse<List<PlayerModel>>> GetGamePlayers(
 			[FromRoute] string code,
 			[FromQuery] Team? team = null,
-			[FromQuery] bool? isSpyMaster = null)
+			[FromQuery] PlayerType? type = null)
 		{
 			(var game, _) = await GetGameAndLocalPlayer(code);
 
@@ -221,38 +221,38 @@ namespace WordGame.API.Controllers
 			if (team.HasValue)
 				players = players.Where(p => p.Team == team.Value);
 
-			if (isSpyMaster.HasValue)
-				players = players.Where(p => p.IsSpyMaster == isSpyMaster.Value);
+			if (type.HasValue)
+				players = players.FilterByType(type.Value);
 
-			return Ok(players.ToList());
+			return Ok(players.Select(p => new PlayerModel(p)).ToList());
 		}
 
 		[HttpGet("current/players"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
-		[Returns(typeof(List<Player>))]
-		public Task<ApiResponse<List<Player>>> GetCurrentGamePlayers(
+		[Returns(typeof(List<PlayerModel>))]
+		public Task<ApiResponse<List<PlayerModel>>> GetCurrentGamePlayers(
 			[FromQuery] Team? team = null,
-			[FromQuery] bool? isSpyMaster = null)
+			[FromQuery] PlayerType? type = null)
 			=> GetGamePlayers(
 				User.GetGameCode(),
 				team,
-				isSpyMaster);
+				type);
 
 		[HttpGet("{code}/players/self"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
-		[Returns(typeof(Player))]
-		public async Task<ApiResponse<Player>> GetSelfGamePlayer(
+		[Returns(typeof(PlayerModel))]
+		public async Task<ApiResponse<PlayerModel>> GetSelfGamePlayer(
 			[FromRoute] string code)
 		{
 			var localPlayer = await GetLocalPlayer(code);
 
-			return Ok(localPlayer);
+			return Ok(new PlayerModel(localPlayer));
 		}
 
 		[HttpGet("current/players/self"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
-		[Returns(typeof(Player))]
-		public Task<ApiResponse<Player>> GetCurrentGameSelf()
+		[Returns(typeof(PlayerModel))]
+		public Task<ApiResponse<PlayerModel>> GetCurrentGameSelf()
 			=> GetSelfGamePlayer(User.GetGameCode());
 
 		[HttpPost("{code}/quit"), UserAuthorize(UserRole.Player)]
@@ -367,7 +367,7 @@ namespace WordGame.API.Controllers
 			if (game.CanAddBot(localPlayer).IsFailure(out string message))
 				return BadRequest(message);
 
-			game.AddNewPlayer(_nameGenerator.GetRandomName(), isBot: true);
+			game.AddNewPlayer(_nameGenerator.GetRandomName(), UserRole.Bot);
 
 			await _gameUpdater.UpdateGame(game);
 
@@ -382,8 +382,8 @@ namespace WordGame.API.Controllers
 
 		[HttpGet("{code}/players/{number}"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
-		[Returns(typeof(Player))]
-		public async Task<ApiResponse<Player>> GetGamePlayer(
+		[Returns(typeof(PlayerModel))]
+		public async Task<ApiResponse<PlayerModel>> GetGamePlayer(
 			[FromRoute] string code,
 			[FromRoute] int number)
 		{
@@ -394,13 +394,13 @@ namespace WordGame.API.Controllers
 			if (player is null)
 				return NotFound($"Cannot find player with number: [{number}] in game with code: [{code}]");
 
-			return Ok(player);
+			return Ok(new PlayerModel(player));
 		}
 
 		[HttpGet("current/players/{number}"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
-		[Returns(typeof(Player))]
-		public Task<ApiResponse<Player>> GetCurrentGamePlayer(
+		[Returns(typeof(PlayerModel))]
+		public Task<ApiResponse<PlayerModel>> GetCurrentGamePlayer(
 			[FromRoute] int number)
 			=> GetGamePlayer(User.GetGameCode(), number);
 
@@ -418,7 +418,7 @@ namespace WordGame.API.Controllers
 
 			var player = game.Players.SingleOrDefault(x => x.Number == number);
 
-			if (player is null || !player.IsBot)
+			if (player is null || player.Role != UserRole.Bot)
 				return NotFound($"Cannot find bot with number: [{number}] in game with code: [{code}]");
 
 			game.Players.Remove(player);
@@ -441,7 +441,7 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse> UpdatePlayer(
 			[FromRoute] string code,
 			[FromRoute] int number,
-			[FromBody] PlayerModel playerModel)
+			[FromBody] UpdatePlayerModel playerModel)
 		{
 			var game = await GetGame(code);
 
@@ -453,7 +453,7 @@ namespace WordGame.API.Controllers
 			player.UpdatePlayer(
 				playerModel.Team,
 				playerModel.Name,
-				playerModel.IsSpyMaster);
+				playerModel.Type);
 
 			await _gameUpdater.UpdateGame(game);
 
@@ -465,7 +465,7 @@ namespace WordGame.API.Controllers
 		[ReturnsStatus(HttpStatusCode.Accepted)]
 		public Task<ApiResponse> UpdatePlayerInCurrentGame(
 			[FromRoute] int number,
-			[FromBody] PlayerModel playerModel)
+			[FromBody] UpdatePlayerModel playerModel)
 			=> UpdatePlayer(User.GetGameCode(), number, playerModel);
 
 		[HttpPost("{code}/giveHint"), UserAuthorize]
@@ -597,7 +597,7 @@ namespace WordGame.API.Controllers
 			var claims = new List<Claim>
 			{
 				new Claim(ClaimTypes.NameIdentifier, player.Id.ToString()),
-				new Claim(ClaimTypes.Role, player.IsOrganizer ? nameof(UserRole.Organizer) : nameof(UserRole.Player)),
+				new Claim(ClaimTypes.Role, player.Role.ToString()),
 				new Claim(ClaimTypes.Name, player.Name),
 				new Claim("Game", code)
 			};

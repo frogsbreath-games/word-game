@@ -74,14 +74,14 @@ const GameTile = ({
     <div className={styles.tileContainer}>
       <TileOuter
         className={
-          wordTile.isRevealed || localPlayer.isSpyMaster
+          wordTile.isRevealed || localPlayer.type === "cultist"
             ? styles[wordTile.team + "TileOuter"]
             : styles.greyTileOuter
         }
       />
       <TileInner
         className={
-          wordTile.isRevealed || localPlayer.isSpyMaster
+          wordTile.isRevealed || localPlayer.type === "cultist"
             ? styles[wordTile.team + "TileInner"]
             : styles.greyTileInner
         }
@@ -293,7 +293,7 @@ class Game extends React.PureComponent<GameProps, State> {
           <main className={styles.main}>
             <div>
               <div style={{ textAlign: "center", minHeight: "90px" }}>
-                {/* this should only be seen by spy master when it is hint phase */}
+                {/* this should only be seen by cultist when it is hint phase */}
                 {this.props.game.actions.canGiveHint && (
                   <div className={styles.hintInputs}>
                     <h3>Create Hint & Clue Count</h3>

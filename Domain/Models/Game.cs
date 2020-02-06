@@ -11,7 +11,7 @@ namespace WordGame.API.Domain.Models
 	public class Game
 	{
 		private List<GameEvent> _publicEvents = new List<GameEvent>();
-		private List<GameEvent> _spyMasterEvents = new List<GameEvent>();
+		private List<GameEvent> _cultistEvents = new List<GameEvent>();
 
 		[JsonIgnore]
 		public ObjectId Id { get; protected set; }
@@ -56,7 +56,7 @@ namespace WordGame.API.Domain.Models
 			string code,
 			string adminName,
 			Team adminTeam,
-			bool adminIsSpyMaster,
+			PlayerType adminType,
 			DateTime? createdDate = null,
 			ObjectId? id = null)
 		{
@@ -66,8 +66,8 @@ namespace WordGame.API.Domain.Models
 			Status = GameStatus.Lobby;
 			AddPlayer(new Player(
 				adminName,
-				true,
-				adminIsSpyMaster,
+				adminType,
+				UserRole.Organizer,
 				0,
 				adminTeam,
 				createdDate: CreatedDate));
@@ -80,9 +80,9 @@ namespace WordGame.API.Domain.Models
 
 		public Player AddNewPlayer(
 			string name,
-			bool isBot = false,
+			UserRole role = UserRole.Player,
 			Team? team = null,
-			bool? isSpyMaster = null,
+			PlayerType? type = null,
 			int? number = null)
 		{
 			if (!number.HasValue)
@@ -97,20 +97,19 @@ namespace WordGame.API.Domain.Models
 					: Team.Red;
 			}
 
-			if (!isSpyMaster.HasValue)
+			if (!type.HasValue)
 			{
-				isSpyMaster = team == Team.Red
-					? !RedPlayers.Any(x => x.IsSpyMaster)
-					: !BluePlayers.Any(x => x.IsSpyMaster);
+				type = Players.FilterByTeam(team.Value).FilterByType(PlayerType.Cultist).Any()
+					? PlayerType.Researcher
+					: PlayerType.Cultist;
 			}
 
 			var player = new Player(
 				name,
-				false,
-				isSpyMaster.Value,
+				type.Value,
+				role,
 				number.Value,
-				team.Value,
-				isBot);
+				team.Value);
 
 			AddPlayer(player);
 
@@ -153,10 +152,10 @@ namespace WordGame.API.Domain.Models
 			_publicEvents.Add(@event);
 		}
 
-		private void AddSpyMasterEvent(GameEvent @event)
+		private void AddCultistEvent(GameEvent @event)
 		{
-			_spyMasterEvents ??= new List<GameEvent>();
-			_spyMasterEvents.Add(@event);
+			_cultistEvents ??= new List<GameEvent>();
+			_cultistEvents.Add(@event);
 		}
 
 		private void EndCurrentTurn()
@@ -186,7 +185,7 @@ namespace WordGame.API.Domain.Models
 
 			AddPublicEvent(GameEvent.PlayerVotedWord(player, DateTime.Now, word));
 
-			if (tile.Votes.Count == Agents.Count(p => p.Team == player.Team))
+			if (tile.Votes.Count == Researchers.Count(p => p.Team == player.Team))
 			{
 				CurrentTurn.SetToTallying();
 			}
@@ -200,7 +199,7 @@ namespace WordGame.API.Domain.Models
 
 			AddPublicEvent(GameEvent.PlayerVotedEndTurn(player, DateTime.Now));
 
-			if (CurrentTurn.EndTurnVotes.Count == Agents.Count(p => p.Team == player.Team))
+			if (CurrentTurn.EndTurnVotes.Count == Researchers.Count(p => p.Team == player.Team))
 			{
 				CurrentTurn.SetToTallying();
 			}
@@ -214,11 +213,11 @@ namespace WordGame.API.Domain.Models
 			if (CurrentTurn?.Status != TurnStatus.Tallying)
 				throw new InvalidOperationException();
 
-			if (CurrentTurn.EndTurnVotes.Count == Agents.Count(p => p.Team == CurrentTurn.Team))
+			if (CurrentTurn.EndTurnVotes.Count == Researchers.Count(p => p.Team == CurrentTurn.Team))
 			{
 				EndCurrentTurn();
 			}
-			else if (WordTiles.SingleOrDefault(t => t.Votes.Count == Agents.Count(p => p.Team == CurrentTurn.Team)) is WordTile tile)
+			else if (WordTiles.SingleOrDefault(t => t.Votes.Count == Researchers.Count(p => p.Team == CurrentTurn.Team)) is WordTile tile)
 			{
 				CurrentTurn.Guesses.Add(new Guess(tile.Word, CurrentTurn.Guesses.Count, tile.Team));
 				tile.Votes.Clear();
@@ -268,7 +267,7 @@ namespace WordGame.API.Domain.Models
 		{
 			CurrentTurn.GiveHint(hintWord, wordCount);
 
-			AddSpyMasterEvent(GameEvent.PlayerGaveHint(player, DateTime.Now, hintWord, wordCount));
+			AddCultistEvent(GameEvent.PlayerGaveHint(player, DateTime.Now, hintWord, wordCount));
 		}
 
 		public void ApproveHint(Player player)
@@ -284,20 +283,20 @@ namespace WordGame.API.Domain.Models
 			int count = CurrentTurn.WordCount.Value;
 			CurrentTurn.RefuseHint();
 
-			AddSpyMasterEvent(GameEvent.PlayerRefusedHint(player, DateTime.Now, word, count));
+			AddCultistEvent(GameEvent.PlayerRefusedHint(player, DateTime.Now, word, count));
 		}
 
 		[JsonIgnore]
-		public IEnumerable<Player> BluePlayers => Players.Where(x => x.Team == Team.Blue);
+		public IEnumerable<Player> BluePlayers => Players.FilterByTeam(Team.Blue);
 
 		[JsonIgnore]
-		public IEnumerable<Player> RedPlayers => Players.Where(x => x.Team == Team.Red);
+		public IEnumerable<Player> RedPlayers => Players.FilterByTeam(Team.Red);
 
 		[JsonIgnore]
-		public IEnumerable<Player> SpyMasters => Players.Where(x => x.IsSpyMaster);
+		public IEnumerable<Player> Cultists => Players.FilterByType(PlayerType.Cultist);
 
 		[JsonIgnore]
-		public IEnumerable<Player> Agents => Players.Where(x => !x.IsSpyMaster);
+		public IEnumerable<Player> Researchers => Players.FilterByType(PlayerType.Researcher);
 
 		//This is sort of inefficient but whatever
 		public bool GameCanStart()
@@ -305,10 +304,10 @@ namespace WordGame.API.Domain.Models
 			if (Status != GameStatus.Lobby)
 				return false;
 
-			if (RedPlayers.Count(x => x.IsSpyMaster) != 1)
+			if (RedPlayers.FilterByType(PlayerType.Cultist).Count() != 1)
 				return false;
 
-			if (BluePlayers.Count(x => x.IsSpyMaster) != 1)
+			if (BluePlayers.FilterByType(PlayerType.Cultist).Count() != 1)
 				return false;
 
 			if (RedPlayers.Count() < 2)
@@ -334,11 +333,11 @@ namespace WordGame.API.Domain.Models
 			return events;
 		}
 
-		public List<GameEvent> DispatchSpyMasterEvents()
+		public List<GameEvent> DispatchCultistEvents()
 		{
-			_spyMasterEvents ??= new List<GameEvent>();
-			var events = new List<GameEvent>(_spyMasterEvents);
-			_spyMasterEvents.Clear();
+			_cultistEvents ??= new List<GameEvent>();
+			var events = new List<GameEvent>(_cultistEvents);
+			_cultistEvents.Clear();
 			return events;
 		}
 	}

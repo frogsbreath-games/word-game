@@ -11,20 +11,18 @@ namespace WordGame.API.Domain.Models
 	{
 		public Player(
 			string name,
-			bool isOrganizer,
-			bool isSpyMaster,
+			PlayerType type,
+			UserRole role,
 			int number,
 			Team team,
-			bool isBot = false,
 			Guid? id = null,
 			DateTime? createdDate = null)
 		{
 			Id = id ?? Guid.NewGuid();
 			CreatedDate = createdDate ?? DateTime.Now;
 			Name = name ?? throw new ArgumentNullException(nameof(name));
-			IsOrganizer = isOrganizer;
-			IsSpyMaster = isSpyMaster;
-			IsBot = isBot;
+			Type = type;
+			Role = role;
 			Team = team;
 			Number = number;
 		}
@@ -39,18 +37,16 @@ namespace WordGame.API.Domain.Models
 
 		public string Name { get; protected set; }
 
-		public bool IsOrganizer { get; protected set; }
+		public PlayerType Type { get; protected set; }
 
-		public bool IsSpyMaster { get; protected set; }
-
-		public bool IsBot { get; protected set; } = false;
+		public UserRole Role { get; protected set; }
 
 		public Team Team { get; protected set; }
 
 		public void UpdatePlayer(
 			Team? team = null,
 			string name = null,
-			bool? isSpyMaster = null)
+			PlayerType? type = null)
 		{
 			if (team.HasValue)
 				Team = team.Value;
@@ -58,8 +54,8 @@ namespace WordGame.API.Domain.Models
 			if (name != null)
 				Name = name;
 
-			if (isSpyMaster.HasValue)
-				IsSpyMaster = isSpyMaster.Value;
+			if (type.HasValue)
+				Type = type.Value;
 		}
 	}
 }

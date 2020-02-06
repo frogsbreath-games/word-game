@@ -17,13 +17,15 @@ namespace WordGame.API.Models
 			if (game is null)
 				throw new ArgumentNullException(nameof(game));
 
+			var localPlayer = game.Players.Single(p => p.Id == localPlayerId);
+
 			Code = game.Code;
 			Status = game.Status;
-			LocalPlayer = game.Players.Single(p => p.Id == localPlayerId);
-			Players = game.Players;
+			LocalPlayer = new PlayerModel(localPlayer);
+			Players = game.Players.Select(p => new PlayerModel(p)).ToList();
 			WordTiles = game.WordTiles.Select(wt => new WordTileModel(
 				wt.Word,
-				LocalPlayer.IsSpyMaster || wt.IsRevealed
+				localPlayer.Type == PlayerType.Cultist || wt.IsRevealed
 					? wt.Team
 					: Team.Unknown,
 				wt.IsRevealed,
@@ -38,26 +40,26 @@ namespace WordGame.API.Models
 					currentTurn.Team,
 					currentTurn.TurnNumber,
 					currentTurn.Status,
-					LocalPlayer.IsSpyMaster || currentTurn.Status != TurnStatus.PendingApproval
+					localPlayer.Type == PlayerType.Cultist || currentTurn.Status != TurnStatus.PendingApproval
 						? currentTurn.HintWord
 						: null,
-					LocalPlayer.IsSpyMaster || currentTurn.Status != TurnStatus.PendingApproval
+					localPlayer.Type == PlayerType.Cultist || currentTurn.Status != TurnStatus.PendingApproval
 						? currentTurn.WordCount
 						: null,
 					currentTurn.EndTurnVotes,
 					currentTurn.GuessesRemaining);
 			}
-			Actions = new GameActionsModel(game, LocalPlayer);
-			Descriptions = new DescriptionModel(game, LocalPlayer);
+			Actions = new GameActionsModel(game, localPlayer);
+			Descriptions = new DescriptionModel(game, localPlayer);
 		}
 
 		public string Code { get; }
 
 		public GameStatus Status { get; }
 
-		public Player LocalPlayer { get; }
+		public PlayerModel LocalPlayer { get; }
 
-		public List<Player> Players { get; }
+		public List<PlayerModel> Players { get; }
 
 		public List<WordTileModel> WordTiles { get; }
 
@@ -70,6 +72,7 @@ namespace WordGame.API.Models
 		public TurnModel CurrentTurn { get; }
 
 		public GameActionsModel Actions { get; }
+
 		public DescriptionModel Descriptions { get; }
 	}
 }

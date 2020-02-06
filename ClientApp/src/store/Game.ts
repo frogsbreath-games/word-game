@@ -86,11 +86,14 @@ export interface Turn {
 export interface Player {
   number: number;
   name: string;
-  isOrganizer: boolean;
-  isSpyMaster: boolean;
-  isBot: boolean;
+  type: PlayerType;
+  role: UserRole;
   team: Team;
 }
+
+export type PlayerType = "cultist" | "researcher";
+
+export type UserRole = "organizer" | "player" | "bot";
 
 export interface WordTile {
   word: string;

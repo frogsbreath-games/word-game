@@ -60,8 +60,8 @@ namespace WordGame.API.Application.Services
 			foreach (var @event in game.DispatchPublicEvents())
 				tasks.Add(_gameContext.Clients.Players(game.Players).GameEvent(@event));
 
-			foreach (var @event in game.DispatchSpyMasterEvents())
-				tasks.Add(_gameContext.Clients.Players(game.SpyMasters).GameEvent(@event));
+			foreach (var @event in game.DispatchCultistEvents())
+				tasks.Add(_gameContext.Clients.Players(game.Cultists).GameEvent(@event));
 
 			Task.Run(() => BotTask(game));
 
@@ -90,37 +90,39 @@ namespace WordGame.API.Application.Services
 
 			if (game.CurrentTurn.Status == TurnStatus.Planning)
 			{
-				if (game.SpyMasters.SingleOrDefault(p => p.IsBot
-					&& p.Team == game.CurrentTurn.Team) is Player p)
-					return ((game) => ExecutePlanningSpyMasterBotJob(game, p), 2000);
+				if (game.Cultists.FilterByRole(UserRole.Bot)
+					.FilterByTeam(game.CurrentTurn.Team)
+					.SingleOrDefault() is Player p)
+					return ((game) => ExecutePlanningCultistBotJob(game, p), 2000);
 			}
 
 			if (game.CurrentTurn.Status == TurnStatus.PendingApproval)
 			{
-				if (game.SpyMasters.SingleOrDefault(p => p.IsBot
-					&& p.Team != game.CurrentTurn.Team) is Player p)
-					return ((game) => ExecuteApprovingSpyMasterBotJob(game, p), 2000);
+				if (game.Cultists.FilterByRole(UserRole.Bot)
+					.FilterByTeam(game.CurrentTurn.Team.GetOpposingTeam())
+					.SingleOrDefault() is Player p)
+					return ((game) => ExecuteApprovingCultistBotJob(game, p), 2000);
 			}
 
 			if (game.CurrentTurn.Status == TurnStatus.Guessing)
 			{
-				var guessingPlayers = game.Agents.Where(p => p.Team == game.CurrentTurn.Team);
-				var botPlayers = guessingPlayers.Where(p => p.IsBot);
+				var guessingPlayers = game.Researchers.Where(p => p.Team == game.CurrentTurn.Team);
+				var botPlayers = guessingPlayers.FilterByRole(UserRole.Bot);
 
 				if (game.WordTiles.FirstOrDefault(wt => wt.Votes.Any()) is WordTile tile)
 				{
 					if (botPlayers.FirstOrDefault(p => !tile.Votes.Select(x => x.Number).Contains(p.Number)) is Player p)
-						return ((game) => ExecuteConformingAgentBotJob(game, p), 2000);
+						return ((game) => ExecuteConformingResearcherBotJob(game, p), 2000);
 				}
 
 				if (game.CurrentTurn.EndTurnVotes.Any())
 				{
 					if (botPlayers.FirstOrDefault(p => !game.CurrentTurn.EndTurnVotes.Select(x => x.Number).Contains(p.Number)) is Player p)
-						return ((game) => ExecuteConformingAgentBotJob(game, p), 2000);
+						return ((game) => ExecuteConformingResearcherBotJob(game, p), 2000);
 				}
 
-				if (guessingPlayers.All(p => p.IsBot))
-					return ((game) => ExecuteGuessingAgentBotJob(game, guessingPlayers.First()), 2000);
+				if (guessingPlayers.All(p => p.Role == UserRole.Bot))
+					return ((game) => ExecuteGuessingResearcherBotJob(game, guessingPlayers.First()), 2000);
 			}
 
 			return (null, null);
@@ -135,7 +137,7 @@ namespace WordGame.API.Application.Services
 			return UpdateGame(game);
 		}
 
-		protected async Task ExecutePlanningSpyMasterBotJob(Game game, Player player)
+		protected async Task ExecutePlanningCultistBotJob(Game game, Player player)
 		{
 			string word = WordList.Words[_randomAccessor.Random.Next(0, WordList.Words.Length)];
 			int number = _randomAccessor.Random.Next(1, 4);
@@ -145,7 +147,7 @@ namespace WordGame.API.Application.Services
 			await UpdateGame(game);
 		}
 
-		protected Task ExecuteApprovingSpyMasterBotJob(Game game, Player player)
+		protected Task ExecuteApprovingCultistBotJob(Game game, Player player)
 		{
 			if (game.WordTiles.Any(x => x.Word.Contains(game.CurrentTurn.HintWord, StringComparison.OrdinalIgnoreCase)))
 				game.RefuseHint(player);
@@ -155,7 +157,7 @@ namespace WordGame.API.Application.Services
 			return UpdateGame(game);
 		}
 
-		protected Task ExecuteConformingAgentBotJob(Game game, Player player)
+		protected Task ExecuteConformingResearcherBotJob(Game game, Player player)
 		{
 			var availableTiles = game.WordTiles.Where(x => !x.IsRevealed).ToList();
 
@@ -171,7 +173,7 @@ namespace WordGame.API.Application.Services
 			return UpdateGame(game);
 		}
 
-		protected Task ExecuteGuessingAgentBotJob(Game game, Player player)
+		protected Task ExecuteGuessingResearcherBotJob(Game game, Player player)
 		{
 			var availableTiles = game.WordTiles.Where(x => !x.IsRevealed).ToList();
 

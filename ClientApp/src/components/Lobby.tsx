@@ -43,12 +43,8 @@ class Lobby extends React.PureComponent<GameProps, State> {
     this.props.createConnection();
   }
 
-  public handleRoleChange(player: GameStore.Player) {
-    if (player.isSpyMaster) {
-      player.isSpyMaster = false;
-    } else {
-      player.isSpyMaster = true;
-    }
+  public handleRoleChange(player: GameStore.Player, type: GameStore.PlayerType) {
+    player.type = type;
     this.props.updatePlayer(player);
   }
 
@@ -109,7 +105,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
     let organizerButtons;
     if (
       this.props.game.localPlayer &&
-      this.props.game.localPlayer.isOrganizer
+      this.props.game.localPlayer.role === "organizer"
     ) {
       organizerButtons = (
         <div className="row mx-auto">
