@@ -255,14 +255,16 @@ class Lobby extends React.PureComponent<GameProps, State> {
                       </div>
                     ))}
                 </div>
-                <input
-                  className={styles.input}
-                  type="text"
-                  placeholder="Message something..."
-                  value={this.state.input}
-                  onChange={this.handleChange}
-                  onKeyPress={this.handleKeyPress}
-                />
+                <div className={styles.chatInput}>
+                  <input
+                    className={styles.input}
+                    type="text"
+                    placeholder="Message something..."
+                    value={this.state.input}
+                    onChange={this.handleChange}
+                    onKeyPress={this.handleKeyPress}
+                  />
+                </div>
               </div>
             </div>
           </div>

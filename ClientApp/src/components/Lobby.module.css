@@ -23,10 +23,6 @@
   width: 97%;
 }
 
-.eventWindow {
-  composes: eventWindow from "./Game.module.css";
-}
-
 .playerLists {
   display: grid;
   grid-template-columns: 50% 50%;
@@ -50,6 +46,19 @@
 
 .chat {
   grid-area: chat;
+  display: grid;
+  grid-template-areas:
+    "messages"
+    "chatInput";
+}
+
+.eventWindow {
+  composes: eventWindow from "./Game.module.css";
+  grid-area: messages;
+}
+
+.chatInput {
+  grid-area: chatInput;
 }
 
 @media (max-width: 960px) {
@@ -59,5 +68,15 @@
     grid-template-areas:
       "main"
       "chat";
+  }
+
+  .chat {
+    grid-template-areas:
+      "chatInput"
+      "messages";
+  }
+
+  .eventWindow {
+    flex-direction: column;
   }
 }
