@@ -41,6 +41,7 @@ namespace WordGame.API.Domain.Models
 		public IDictionary<string, object> Data { get; protected set; }
 		public string Message => Type switch
 		{
+			GameEventType.PlayerJoinedGame => " Joined The Game",
 			GameEventType.PlayerStartedGame => " Started The Game",
 			GameEventType.PlayerRestartedGameInLobby => " Returned Game To Lobby",
 			GameEventType.PlayerApprovedHint => $" Approved Hint Word \"{Data["word"]}\" ({Data["count"]})",
@@ -55,6 +56,9 @@ namespace WordGame.API.Domain.Models
 			GameEventType.TeamWon => " WON!",
 			_ => null
 		};
+
+		public static GameEvent PlayerJoinedGame(Player player, DateTime timestamp)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerJoinedGame);
 
 		public static GameEvent PlayerStartedGame(Player player, DateTime timestamp)
 			=> new GameEvent(player, timestamp, GameEventType.PlayerStartedGame);
@@ -116,6 +120,7 @@ namespace WordGame.API.Domain.Models
 	public enum GameEventType
 	{
 		//Player Action Events
+		PlayerJoinedGame,
 		PlayerStartedGame,
 		PlayerRestartedGameInLobby,
 		PlayerApprovedHint,
