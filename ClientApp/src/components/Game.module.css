@@ -91,9 +91,16 @@
   background-color: var(--red);
 }
 
-.playerIcon {
+.character {
   height: 50px;
   width: 50px;
+  z-index: 1;
+  margin-top: -5px;
+}
+
+.playerIcon {
+  height: 75px;
+  width: 75px;
   background-color: #bbb;
   border-radius: 20%;
   border: solid 2px white;

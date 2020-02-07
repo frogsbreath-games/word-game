@@ -11,6 +11,8 @@ import { ReactComponent as TileInner } from "../assets/TileInner.svg";
 import { ReactComponent as ConfirmIcon } from "../assets/CheckIcon.svg";
 import { ReactComponent as CancelIcon } from "../assets/CancelIcon.svg";
 import { ReactComponent as SkullIcon } from "../assets/SkullIcon.svg";
+import researcher from "../assets/Researcher.png";
+import cultist from "../assets/Cultist.png";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -37,19 +39,27 @@ const TeamTile = ({ team, tilesRemaining, isTeamsTurn }: TeamTileProps) => (
 );
 
 type PlayerTrackerProps = {
-  playerName: string;
+  player: GameStore.Player;
   team: GameStore.Team;
 };
 
-const PlayerTracker = ({ playerName, team }: PlayerTrackerProps) => (
+const PlayerTracker = ({ player, team }: PlayerTrackerProps) => (
   <div className={styles.tracker}>
-    <div
-      className={team === "red" ? styles.redPlayerIcon : styles.bluePlayerIcon}
-    >
-      <PlayerIcon className={styles.badge} />
+    <div className={styles.character}>
+      {player.type === "researcher" ? (
+        <img
+          src={researcher}
+          style={{ height: "100%", maxWidth: "100%", zIndex: 100 }}
+        />
+      ) : (
+        <img
+          src={cultist}
+          style={{ height: "100%", maxWidth: "100%", zIndex: 100 }}
+        />
+      )}
     </div>
     <h4 className={team === "red" ? styles.redHeader : styles.blueHeader}>
-      {playerName}
+      {player.name}
     </h4>
   </div>
 );
@@ -379,7 +389,7 @@ class Game extends React.PureComponent<GameProps, State> {
           <div className={styles.rightSection}>
             <PlayerTracker
               team={localTeam}
-              playerName={this.props.game.localPlayer.name}
+              player={this.props.game.localPlayer}
             />
             <div className={styles.eventWindow}>
               {this.props.events &&
