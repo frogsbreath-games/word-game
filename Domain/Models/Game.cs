@@ -113,6 +113,8 @@ namespace WordGame.API.Domain.Models
 
 			AddPlayer(player);
 
+			AddPublicEvent(GameEvent.PlayerJoinedGame(player, DateTime.Now));
+
 			return player;
 		}
 
