@@ -10,7 +10,7 @@ namespace WordGame.API.Models
 	{
 		public Team? Team { get; set; } = null;
 
-		public string Name { get; set; } = null;
+		public string? Name { get; set; } = null;
 
 		public PlayerType? Type { get; set; } = null;
 	}

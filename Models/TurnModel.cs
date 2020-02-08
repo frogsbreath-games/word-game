@@ -13,7 +13,7 @@ namespace WordGame.API.Models
 			Team team,
 			int turnNumber,
 			TurnStatus status,
-			string hintWord,
+			string? hintWord,
 			int? wordCount,
 			List<PlayerVote> endTurnVotes,
 			int? guessesRemaining)
@@ -33,7 +33,7 @@ namespace WordGame.API.Models
 
 		public TurnStatus Status { get; }
 
-		public string HintWord { get; }
+		public string? HintWord { get; }
 
 		public int? WordCount { get; }
 

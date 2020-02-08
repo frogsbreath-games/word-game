@@ -1,9 +1,18 @@
-﻿namespace WordGame.API.Models
+﻿using Newtonsoft.Json;
+
+namespace WordGame.API.Models
 {
 	public class HintModel
 	{
-		public string HintWord { get; set; }
+		[JsonConstructor]
+		public HintModel(string hintWord, int wordCount)
+		{
+			HintWord = hintWord;
+			WordCount = wordCount;
+		}
 
-		public int WordCount { get; set; }
+		public string HintWord { get; }
+
+		public int WordCount { get; }
 	}
 }

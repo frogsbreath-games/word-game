@@ -69,7 +69,7 @@ namespace WordGame.API.Models
 
 		public Team? WinningTeam { get; }
 
-		public TurnModel CurrentTurn { get; }
+		public TurnModel? CurrentTurn { get; }
 
 		public GameActionsModel Actions { get; }
 

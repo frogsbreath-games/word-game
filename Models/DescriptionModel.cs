@@ -136,9 +136,9 @@ namespace WordGame.API.Models
 			}
 		}
 
-		public string LocalPlayerInstruction { get; set; }
-		public string StatusDescription { get; set; }
-		public string Status { get; set; }
+		public string LocalPlayerInstruction { get; } = string.Empty;
+		public string StatusDescription { get; } = string.Empty;
+		public string Status { get; } = string.Empty;
 
 	}
 }

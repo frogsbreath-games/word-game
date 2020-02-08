@@ -5,7 +5,7 @@ namespace WordGame.API.Extensions
 {
 	public static class ListExtensions
 	{
-		public static void Shuffle<T>(this IList<T> list, Random random = null)
+		public static void Shuffle<T>(this IList<T> list, Random? random = null)
 		{
 			random ??= new Random();
 

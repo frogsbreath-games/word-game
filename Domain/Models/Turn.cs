@@ -20,7 +20,7 @@ namespace WordGame.API.Domain.Models
 
 		public TurnStatus Status { get; protected set; }
 
-		public string HintWord { get; protected set; }
+		public string? HintWord { get; protected set; }
 
 		public int? WordCount { get; protected set; }
 

@@ -10,10 +10,10 @@
 
 		public bool IsFailure(out string message)
 		{
-			message = null;
+			message = string.Empty;
 			if (this is TryFailure failure)
 			{
-				message = failure?.Message;
+				message = failure.Message;
 				return true;
 			}
 			return false;

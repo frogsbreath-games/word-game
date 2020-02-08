@@ -45,7 +45,7 @@ namespace WordGame.API.Domain.Models
 
 		public void UpdatePlayer(
 			Team? team = null,
-			string name = null,
+			string? name = null,
 			PlayerType? type = null)
 		{
 			if (team.HasValue)

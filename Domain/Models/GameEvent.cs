@@ -8,34 +8,34 @@ namespace WordGame.API.Domain.Models
 {
 	public class GameEvent
 	{
-		protected GameEvent(Player player, DateTime timestamp, GameEventType type, IDictionary<string, object> data = null)
+		protected GameEvent(Player player, DateTime timestamp, GameEventType type, IDictionary<string, object>? data = null)
 		{
 			Player = player?.Name ?? throw new ArgumentNullException(nameof(player));
 			Team = player.Team;
 			Timestamp = timestamp.ToLongTimeString();
 			Type = type;
-			Data = data;
+			Data = data ?? new Dictionary<string, object>();
 		}
 
-		protected GameEvent(string player, Team team, DateTime timestamp, GameEventType type, IDictionary<string, object> data = null)
+		protected GameEvent(string player, Team team, DateTime timestamp, GameEventType type, IDictionary<string, object>? data = null)
 		{
 			Player = player;
 			Team = team;
 			Timestamp = timestamp.ToLongTimeString();
 			Type = type;
-			Data = data;
+			Data = data ?? new Dictionary<string, object>();
 		}
 
-		protected GameEvent(Team team, DateTime timestamp, GameEventType type, IDictionary<string, object> data = null)
+		protected GameEvent(Team team, DateTime timestamp, GameEventType type, IDictionary<string, object>? data = null)
 		{
 			Team = team;
 			Timestamp = timestamp.ToLongTimeString();
 			Type = type;
-			Data = data;
+			Data = data ?? new Dictionary<string, object>();
 		}
 
 		public Team Team { get; protected set; }
-		public string Player { get; protected set; }
+		public string? Player { get; protected set; }
 		public string Timestamp { get; protected set; }
 		public GameEventType Type { get; protected set; }
 		public IDictionary<string, object> Data { get; protected set; }
@@ -54,7 +54,7 @@ namespace WordGame.API.Domain.Models
 			GameEventType.TeamGuessedCorrectly => $" Guessed Correctly!",
 			GameEventType.TeamGuessedIncorrectly => $" Guessed Incorrectly 😥",
 			GameEventType.TeamWon => " WON!",
-			_ => null
+			_ => string.Empty
 		};
 
 		public static GameEvent PlayerJoinedGame(Player player, DateTime timestamp)

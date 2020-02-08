@@ -276,13 +276,13 @@ namespace WordGame.API.Domain.Models
 		{
 			CurrentTurn.ApproveHint();
 
-			AddPublicEvent(GameEvent.PlayerApprovedHint(player, DateTime.Now, CurrentTurn.HintWord, CurrentTurn.WordCount.Value));
+			AddPublicEvent(GameEvent.PlayerApprovedHint(player, DateTime.Now, CurrentTurn.HintWord!, CurrentTurn.WordCount!.Value));
 		}
 
 		public void RefuseHint(Player player)
 		{
-			string word = CurrentTurn.HintWord;
-			int count = CurrentTurn.WordCount.Value;
+			string word = CurrentTurn.HintWord!;
+			int count = CurrentTurn.WordCount!.Value;
 			CurrentTurn.RefuseHint();
 
 			AddCultistEvent(GameEvent.PlayerRefusedHint(player, DateTime.Now, word, count));

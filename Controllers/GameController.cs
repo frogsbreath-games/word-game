@@ -100,6 +100,7 @@ namespace WordGame.API.Controllers
 		}
 
 		protected ApiResponse<T> Created<T>(string pathPart, T obj)
+			where T : class
 		{
 			Response.StatusCode = (int)HttpStatusCode.Created;
 			Response.Headers["Location"] = $"{Request.Path}/{pathPart}";
@@ -108,6 +109,7 @@ namespace WordGame.API.Controllers
 		}
 
 		protected ApiResponse<T> Ok<T>(T obj)
+			where T : class
 		{
 			Response.StatusCode = (int)HttpStatusCode.OK;
 

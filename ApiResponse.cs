@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace WordGame.API
 {
-	public class ApiResponse<TData>
+	public class ApiResponse<TData> where TData : class
 	{
-		public TData Data { get; protected set; }
+		public TData? Data { get; protected set; }
 
-		public string Message { get; protected set; }
+		public string? Message { get; protected set; }
 
 		public IEnumerable<ApiError> Errors { get; protected set; } = new List<ApiError>();
 
@@ -17,8 +17,8 @@ namespace WordGame.API
 			=> Data = data;
 
 		public ApiResponse(
-			string message,
-			IEnumerable<ApiError> errors = null)
+			string? message,
+			IEnumerable<ApiError>? errors = null)
 		{
 			Message = message;
 			Errors = errors ?? new List<ApiError>();
@@ -37,14 +37,14 @@ namespace WordGame.API
 			: base(data)
 		{ }
 
-		public ApiResponse(string message, IEnumerable<ApiError> errors = null)
+		public ApiResponse(string message, IEnumerable<ApiError>? errors = null)
 			: base(message, errors)
 		{ }
 	}
 
 	public class ApiError
 	{
-		public string Code { get; protected set; }
-		public string Message { get; protected set; }
+		public string Code { get; protected set; } = string.Empty;
+		public string Message { get; protected set; } = string.Empty;
 	}
 }

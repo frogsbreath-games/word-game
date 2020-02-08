@@ -83,7 +83,7 @@ namespace WordGame.API.Application.Services
 			}
 		}
 
-		protected (BackgroundGameTask, int?) GetBackgroundGameTask(Game game)
+		protected (BackgroundGameTask?, int?) GetBackgroundGameTask(Game game)
 		{
 			if (game.CurrentTurn.Status == TurnStatus.Tallying)
 				return (ExecuteTallyVotesJob, 3500);
@@ -149,7 +149,7 @@ namespace WordGame.API.Application.Services
 
 		protected Task ExecuteApprovingCultistBotJob(Game game, Player player)
 		{
-			if (game.WordTiles.Any(x => x.Word.Contains(game.CurrentTurn.HintWord, StringComparison.OrdinalIgnoreCase)))
+			if (game.WordTiles.Any(x => x.Word.Contains(game.CurrentTurn.HintWord!, StringComparison.OrdinalIgnoreCase)))
 				game.RefuseHint(player);
 			else
 				game.ApproveHint(player);
