@@ -4,6 +4,7 @@ import { ReactComponent as SwapIcon } from "../assets/SwapIcon.svg";
 import { ReactComponent as TrashIcon } from "../assets/TrashIcon.svg";
 import { ReactComponent as QuitIcon } from "../assets/CancelIcon.svg";
 import researcher from "../assets/Researcher.png";
+import priest from "../assets/Researcher2.png";
 import cultist from "../assets/Cultist.png";
 import * as GameStore from "../store/Game";
 import styles from "./PlayerTile.module.css";
@@ -42,7 +43,7 @@ const PlayerTile = ({
         )}
         {player.type === "researcher" ? (
           <img
-            src={researcher}
+            src={player.number % 2 == 0 ? researcher : priest}
             style={{ maxHeight: "100%", maxWidth: "100%" }}
           />
         ) : (
