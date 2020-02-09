@@ -3971,6 +3971,6 @@
 			"ZOOLOGIST",
 			"ZOOLOGY",
 			"ZUCCHINI",
-		}
+		};
 	}
 }
