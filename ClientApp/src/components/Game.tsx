@@ -5,7 +5,6 @@ import { ApplicationState } from "../store";
 import { Redirect } from "react-router";
 import styles from "./Game.module.css";
 import { ReactComponent as RevealedIcon } from "../assets/RevealedIcon.svg";
-import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
 import { ReactComponent as TileOuter } from "../assets/TileOuter.svg";
 import { ReactComponent as TileInner } from "../assets/TileInner.svg";
 import { ReactComponent as ConfirmIcon } from "../assets/CheckIcon.svg";
@@ -50,11 +49,13 @@ const PlayerTracker = ({ player, team }: PlayerTrackerProps) => (
         <img
           src={researcher}
           style={{ height: "100%", maxWidth: "100%", zIndex: 100 }}
+          alt="Researcher"
         />
       ) : (
         <img
           src={cultist}
           style={{ height: "100%", maxWidth: "100%", zIndex: 100 }}
+          alt="Cultist"
         />
       )}
     </div>
@@ -102,6 +103,7 @@ const GameTile = ({
         )}
         {wordTile.votes.map(playerVote => (
           <div
+            key={playerVote.number}
             className={
               (playerVote.team === "red" ? styles.redVote : styles.blueVote) +
               " " +
@@ -324,7 +326,9 @@ class Game extends React.PureComponent<GameProps, State> {
                           { length: localTeamsTilesRemaining + 1 },
                           (v, i) => i
                         ).map(number => (
-                          <option value={number}>{number}</option>
+                          <option key={number} value={number}>
+                            {number}
+                          </option>
                         ))}
                       </select>
                       <button

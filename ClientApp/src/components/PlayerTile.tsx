@@ -43,11 +43,16 @@ const PlayerTile = ({
         )}
         {player.type === "researcher" ? (
           <img
-            src={player.number % 2 == 0 ? researcher : priest}
+            src={player.number % 2 === 0 ? researcher : priest}
             style={{ maxHeight: "100%", maxWidth: "100%" }}
+            alt="Researcher"
           />
         ) : (
-          <img src={cultist} style={{ maxHeight: "100%", maxWidth: "100%" }} />
+          <img
+            src={cultist}
+            style={{ maxHeight: "100%", maxWidth: "100%" }}
+            alt="Cultist"
+          />
         )}
       </div>
       <div className={styles.select}>
