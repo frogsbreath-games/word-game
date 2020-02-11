@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WordGame.API.Data.Mongo;
+using WordGame.API.Application.Configuration;
 
 namespace WordGame.API.Extensions
 {

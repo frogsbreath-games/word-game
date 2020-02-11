@@ -10,6 +10,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System.Net;
 using System.Threading.Tasks;
+using WordGame.API.Application.Configuration;
 using WordGame.API.Application.Services;
 using WordGame.API.Data.Repositories;
 using WordGame.API.Domain.Repositories;
@@ -64,6 +65,7 @@ namespace WordGame.API
 					};
 				});
 
+			services.Configure<BotSettings>(Configuration.GetSection(nameof(BotSettings)));
 			services.AddMongo(Configuration);
 			services.AddScoped<IRandomAccessor, RandomAccessor>();
 			services.AddScoped<IGameRepository, GameRepository>();

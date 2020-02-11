@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
+using WordGame.API.Application.Configuration;
 using WordGame.API.Application.Resources;
 using WordGame.API.Domain;
 using WordGame.API.Domain.Enums;
@@ -22,24 +24,27 @@ namespace WordGame.API.Application.Services
 
 	public class GameUpdater : IGameUpdater
 	{
-		protected IGameRepository _repository;
-		protected INameGenerator _nameGenerator;
-		protected IGameBoardGenerator _gameBoardGenerator;
-		protected IRandomAccessor _randomAccessor;
-		protected IHubContext<GameHub, IGameClient> _gameContext;
+		protected readonly IGameRepository _repository;
+		protected readonly INameGenerator _nameGenerator;
+		protected readonly IGameBoardGenerator _gameBoardGenerator;
+		protected readonly IRandomAccessor _randomAccessor;
+		protected readonly IHubContext<GameHub, IGameClient> _gameContext;
+		protected readonly int _botDelay;
 
 		public GameUpdater(
 			IGameRepository repository,
 			INameGenerator nameGenerator,
 			IGameBoardGenerator gameBoardGenerator,
 			IRandomAccessor randomAccessor,
-			IHubContext<GameHub, IGameClient> gameContext)
+			IHubContext<GameHub, IGameClient> gameContext,
+			IOptions<BotSettings> botSettings)
 		{
 			_repository = repository ?? throw new ArgumentNullException(nameof(repository));
 			_nameGenerator = nameGenerator ?? throw new ArgumentNullException(nameof(nameGenerator));
 			_gameBoardGenerator = gameBoardGenerator ?? throw new ArgumentNullException(nameof(gameBoardGenerator));
 			_randomAccessor = randomAccessor ?? throw new ArgumentNullException(nameof(randomAccessor));
 			_gameContext = gameContext ?? throw new ArgumentNullException(nameof(gameContext));
+			_botDelay = botSettings.Value.BotDelay;
 		}
 
 		public async Task DeleteGame(Game game)
@@ -93,7 +98,7 @@ namespace WordGame.API.Application.Services
 				if (game.Cultists.FilterByRole(UserRole.Bot)
 					.FilterByTeam(game.CurrentTurn.Team)
 					.SingleOrDefault() is Player p)
-					return ((game) => ExecutePlanningCultistBotJob(game, p), 2000);
+					return ((game) => ExecutePlanningCultistBotJob(game, p), _botDelay);
 			}
 
 			if (game.CurrentTurn.Status == TurnStatus.PendingApproval)
@@ -101,7 +106,7 @@ namespace WordGame.API.Application.Services
 				if (game.Cultists.FilterByRole(UserRole.Bot)
 					.FilterByTeam(game.CurrentTurn.Team.GetOpposingTeam())
 					.SingleOrDefault() is Player p)
-					return ((game) => ExecuteApprovingCultistBotJob(game, p), 2000);
+					return ((game) => ExecuteApprovingCultistBotJob(game, p), _botDelay);
 			}
 
 			if (game.CurrentTurn.Status == TurnStatus.Guessing)
@@ -112,17 +117,17 @@ namespace WordGame.API.Application.Services
 				if (game.WordTiles.FirstOrDefault(wt => wt.Votes.Any()) is WordTile tile)
 				{
 					if (botPlayers.FirstOrDefault(p => !tile.Votes.Select(x => x.Number).Contains(p.Number)) is Player p)
-						return ((game) => ExecuteConformingResearcherBotJob(game, p), 2000);
+						return ((game) => ExecuteConformingResearcherBotJob(game, p), _botDelay);
 				}
 
 				if (game.CurrentTurn.EndTurnVotes.Any())
 				{
 					if (botPlayers.FirstOrDefault(p => !game.CurrentTurn.EndTurnVotes.Select(x => x.Number).Contains(p.Number)) is Player p)
-						return ((game) => ExecuteConformingResearcherBotJob(game, p), 2000);
+						return ((game) => ExecuteConformingResearcherBotJob(game, p), _botDelay);
 				}
 
 				if (guessingPlayers.All(p => p.Role == UserRole.Bot))
-					return ((game) => ExecuteGuessingResearcherBotJob(game, guessingPlayers.First()), 2000);
+					return ((game) => ExecuteGuessingResearcherBotJob(game, guessingPlayers.First()), _botDelay);
 			}
 
 			return (null, null);

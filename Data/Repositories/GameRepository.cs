@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WordGame.API.Data.Mongo;
+using WordGame.API.Application.Configuration;
 using WordGame.API.Domain.Enums;
 using WordGame.API.Domain.Models;
 using WordGame.API.Domain.Repositories;
@@ -18,7 +18,7 @@ namespace WordGame.API.Data.Repositories
 
 		protected IMongoCollection<Game> Games
 			=> _mongoClient
-				.GetDatabase(_settings.Value.DatabaseName)
+				.GetDatabase(_settings.Value.GameDatabaseName)
 				.GetCollection<Game>("game");
 
 		public GameRepository(IMongoClient mongoClient, IOptions<MongoDbSettings> settings)
