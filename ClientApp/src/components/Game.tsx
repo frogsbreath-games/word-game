@@ -181,7 +181,7 @@ class Game extends React.PureComponent<GameProps, State> {
     this.setState({ hintWord: event.target.value });
   }
 
-  handleCountChange(event: React.ChangeEvent<HTMLInputElement>) {
+  handleCountChange(event: React.ChangeEvent<HTMLSelectElement>) {
     this.setState({ wordCount: parseInt(event.target.value) });
   }
 
@@ -315,13 +315,18 @@ class Game extends React.PureComponent<GameProps, State> {
                         onChange={this.handleWordChange}
                         placeholder="Enter hint here..."
                       />
-                      <input
-                        type="number"
+                      <select
                         value={this.state.wordCount}
                         className={styles.input}
                         onChange={this.handleCountChange}
-                        min="0"
-                      />
+                      >
+                        {Array.from(
+                          { length: localTeamsTilesRemaining + 1 },
+                          (v, i) => i
+                        ).map(number => (
+                          <option value={number}>{number}</option>
+                        ))}
+                      </select>
                       <button
                         style={{ width: "150px", justifySelf: "center" }}
                         className={styles.submit}
