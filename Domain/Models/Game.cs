@@ -118,6 +118,25 @@ namespace WordGame.API.Domain.Models
 			return player;
 		}
 
+		public void UpdatePlayer(Player player, Team? team, string? name, PlayerType? type)
+		{
+			var postUpdateEvents = new List<Action<Player>>();
+
+			if (team.HasValue && player.Team != team)
+				postUpdateEvents.Add(p => AddPublicEvent(GameEvent.PlayerChangedTeam(p, team.Value, DateTime.Now)));
+
+			if (type.HasValue && player.Type != type)
+				postUpdateEvents.Add(p => AddPublicEvent(GameEvent.PlayerChangedType(p, type.Value, DateTime.Now)));
+
+			player.UpdatePlayer(
+				team,
+				name,
+				type);
+
+			foreach (var @event in postUpdateEvents)
+				@event(player);
+		}
+
 		public void StartGame(Player player, List<WordTile> tiles, Team startingTeam)
 		{
 			if (!GameCanStart())

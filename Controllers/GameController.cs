@@ -452,7 +452,8 @@ namespace WordGame.API.Controllers
 			if (player is null)
 				return NotFound($"Cannot find player with number: [{number}] in game with code: [{code}]");
 
-			player.UpdatePlayer(
+			game.UpdatePlayer(
+				player,
 				playerModel.Team,
 				playerModel.Name,
 				playerModel.Type);

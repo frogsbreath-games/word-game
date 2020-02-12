@@ -42,6 +42,8 @@ namespace WordGame.API.Domain.Models
 		public string Message => Type switch
 		{
 			GameEventType.PlayerJoinedGame => " Joined The Game",
+			GameEventType.PlayerChangedTeam => $" Switched to Team {Data["team"]}",
+			GameEventType.PlayerChangedType => $" Switched to {Data["type"]}",
 			GameEventType.PlayerStartedGame => " Started The Game",
 			GameEventType.PlayerRestartedGameInLobby => " Returned Game To Lobby",
 			GameEventType.PlayerApprovedHint => $" Approved Hint Word \"{Data["word"]}\" ({Data["count"]})",
@@ -59,6 +61,20 @@ namespace WordGame.API.Domain.Models
 
 		public static GameEvent PlayerJoinedGame(Player player, DateTime timestamp)
 			=> new GameEvent(player, timestamp, GameEventType.PlayerJoinedGame);
+
+		public static GameEvent PlayerChangedTeam(Player player, Team team, DateTime timestamp)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerChangedTeam,
+				new Dictionary<string, object>
+				{
+					["team"] = team
+				});
+
+		public static GameEvent PlayerChangedType(Player player, PlayerType type, DateTime timestamp)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerChangedType,
+				new Dictionary<string, object>
+				{
+					["type"] = type
+				});
 
 		public static GameEvent PlayerStartedGame(Player player, DateTime timestamp)
 			=> new GameEvent(player, timestamp, GameEventType.PlayerStartedGame);
@@ -121,6 +137,8 @@ namespace WordGame.API.Domain.Models
 	{
 		//Player Action Events
 		PlayerJoinedGame,
+		PlayerChangedTeam,
+		PlayerChangedType,
 		PlayerStartedGame,
 		PlayerRestartedGameInLobby,
 		PlayerApprovedHint,
