@@ -147,6 +147,8 @@ namespace WordGame.API.Application.Services
 			string word = WordList.Words[_randomAccessor.Random.Next(0, WordList.Words.Length)];
 			int number = _randomAccessor.Random.Next(1, 4);
 
+			number = Math.Min(number, game.GetTilesRemaining(player.Team));
+
 			game.GiveHint(player, word, number);
 
 			await UpdateGame(game);
