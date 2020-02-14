@@ -120,23 +120,29 @@ namespace WordGame.API.Controllers
 		[HttpPost("forceSignOut"), UserAuthorize]
 		public async Task<ApiResponse> ForceSignOut()
 		{
-			var currentGame = await GetCurrentGame();
-			if (currentGame.Data is GameModel game)
+			try
 			{
-				if (User.IsInRole("Organizer"))
+				var currentGame = await GetCurrentGame();
+				if (currentGame.Data is GameModel game)
 				{
-					await DeleteGame(game.Code);
+					if (User.IsInRole("Organizer"))
+					{
+						await DeleteGame(game.Code);
+					}
+					else
+					{
+						await QuitGame(game.Code);
+					}
 				}
 				else
 				{
-					await QuitGame(game.Code);
+					await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 				}
 			}
-			else
+			catch (HttpException)
 			{
 				await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 			}
-
 			Response.StatusCode = (int)HttpStatusCode.OK;
 			return new ApiResponse("logged out.");
 		}

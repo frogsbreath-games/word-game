@@ -118,7 +118,7 @@ export interface Vote {
 }
 
 export interface APIResponse {
-  message: string;
+  Message: string;
   data: object;
   errorArray: object[];
 }
@@ -263,10 +263,25 @@ export const actionCreators = {
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
           console.log(data);
-          dispatch({
-            type: "RECEIVE_CURRENT_GAME",
-            game: data.data as Game
-          });
+          //This message property is being capitalized
+          if (data.Message.includes("Cannot find game with code:")) {
+            fetch(`api/games/forceSignOut`, {
+              method: "POST"
+            })
+              .then(response => response.json() as Promise<APIResponse>)
+              .then(data => {
+                console.log(data);
+                dispatch({
+                  type: "RECEIVE_CURRENT_GAME",
+                  game: {} as Game
+                });
+              });
+          } else {
+            dispatch({
+              type: "RECEIVE_CURRENT_GAME",
+              game: data.data as Game
+            });
+          }
         })
         .catch(error => {
           //added this because if user isn't authenticated get 404 response
