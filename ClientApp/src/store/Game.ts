@@ -262,7 +262,6 @@ export const actionCreators = {
       })
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
-          debugger;
           console.log(data);
           //This message property is being capitalized
           if (
