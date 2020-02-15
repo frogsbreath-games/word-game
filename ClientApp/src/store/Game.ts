@@ -118,7 +118,7 @@ export interface Vote {
 }
 
 export interface APIResponse {
-  Message: string;
+  message: string;
   data: object;
   errorArray: object[];
 }
@@ -264,7 +264,7 @@ export const actionCreators = {
         .then(data => {
           console.log(data);
           //This message property is being capitalized
-          if (data.Message.includes("Cannot find game with code:")) {
+          if (data.message.includes("Cannot find game with code:")) {
             fetch(`api/games/forceSignOut`, {
               method: "POST"
             })

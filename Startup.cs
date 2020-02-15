@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using System.Net;
@@ -37,6 +38,8 @@ namespace WordGame.API
 				{
 					options.SerializerSettings.Converters.Add(
 						new StringEnumConverter(new CamelCaseNamingStrategy(false, true)));
+
+					JsonConvert.DefaultSettings = () => options.SerializerSettings;
 				});
 
 			services.AddOpenApiDocument();
