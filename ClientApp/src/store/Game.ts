@@ -262,9 +262,13 @@ export const actionCreators = {
       })
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {
+          debugger;
           console.log(data);
           //This message property is being capitalized
-          if (data.message.includes("Cannot find game with code:")) {
+          if (
+            data.message !== null &&
+            data.message.includes("Cannot find game with code:")
+          ) {
             fetch(`api/games/forceSignOut`, {
               method: "POST"
             })
