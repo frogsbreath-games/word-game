@@ -25,7 +25,7 @@ namespace WordGame.API.Models
 			Players = game.Players.Select(p => new PlayerModel(p)).ToList();
 			WordTiles = game.WordTiles.Select(wt => new WordTileModel(
 				wt.Word,
-				localPlayer.Type == PlayerType.Cultist || wt.IsRevealed
+				Status == GameStatus.InProgress && (localPlayer.Type == PlayerType.Cultist || wt.IsRevealed)
 					? wt.Team
 					: Team.Unknown,
 				wt.IsRevealed,

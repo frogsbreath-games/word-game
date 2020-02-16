@@ -51,6 +51,7 @@ class GameHome extends React.PureComponent<GameProps, State> {
     ) {
       switch (this.props.game.status) {
         case "inProgress":
+        case "boardReview":
           return <Redirect to="/game" />;
         case "lobby":
           return <Redirect to="/lobby" />;

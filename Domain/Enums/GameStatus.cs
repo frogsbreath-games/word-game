@@ -8,6 +8,7 @@ namespace WordGame.API.Domain.Enums
 	public enum GameStatus
 	{
 		Lobby,
+		BoardReview,
 		InProgress,
 		PostGame,
 		Archived

@@ -69,33 +69,25 @@ type GameTileProps = {
   wordTile: GameStore.WordTile;
   localPlayer: GameStore.Player;
   turnStatus: string;
-  handleVoteWord: (word: string, isRevealed: boolean) => void;
+  handleClickWord: (word: string, isRevealed: boolean) => void;
 };
 
 const GameTile = ({
   wordTile,
   localPlayer,
   turnStatus,
-  handleVoteWord
+  handleClickWord
 }: GameTileProps) => (
   <div
     className={styles.wordTile}
-    onClick={() => handleVoteWord(wordTile.word, wordTile.isRevealed)}
+    onClick={() => handleClickWord(wordTile.word, wordTile.isRevealed)}
   >
     <div className={styles.tileContainer}>
       <TileOuter
-        className={
-          wordTile.isRevealed || localPlayer.type === "cultist"
-            ? styles[wordTile.team + "TileOuter"]
-            : styles.greyTileOuter
-        }
+        className={styles[wordTile.team + "TileOuter"]}
       />
       <TileInner
-        className={
-          wordTile.isRevealed || localPlayer.type === "cultist"
-            ? styles[wordTile.team + "TileInner"]
-            : styles.greyTileInner
-        }
+        className={styles[wordTile.team + "TileInner"]}
       />
       <div className={styles.absoluteCenter}>
         {!wordTile.isRevealed && (
@@ -111,6 +103,9 @@ const GameTile = ({
             }
           />
         ))}
+        {turnStatus === "boardReview" && localPlayer.role === "organizer" && (
+          <h3 title="Replace Word">&#8635;</h3>
+        )}
       </div>
       {wordTile.isRevealed && (
         <div className={styles.absoluteCenter}>
@@ -137,7 +132,7 @@ class Game extends React.PureComponent<GameProps, State> {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleSubmitClick = this.handleSubmitClick.bind(this);
-    this.handleVoteWord = this.handleVoteWord.bind(this);
+    this.handleClickWord = this.handleClickWord.bind(this);
   }
 
   public componentDidMount() {
@@ -198,7 +193,10 @@ class Game extends React.PureComponent<GameProps, State> {
     });
   }
 
-  handleVoteWord(word: string, isRevealed: boolean) {
+  handleClickWord(word: string, isRevealed: boolean) {
+    if (this.props.game.actions.canReplaceWord) {
+      this.props.replaceWord({ word: word });
+    }
     //ensure user is allowed to vote and not casting vote for revealed tile
     if (this.props.game.actions.canVote && !isRevealed) {
       this.props.voteWord({ word: word });
@@ -210,7 +208,7 @@ class Game extends React.PureComponent<GameProps, State> {
   }
 
   public render() {
-    if (!this.props.game.status || this.props.game.status !== "inProgress") {
+    if (!this.props.game.status || (this.props.game.status !== "inProgress" && this.props.game.status !== "boardReview")) {
       return <Redirect to="/game-home" />;
     }
     let currentTeam;
@@ -228,7 +226,7 @@ class Game extends React.PureComponent<GameProps, State> {
       opposingTeam
     );
 
-    let currentStatus: string = "";
+    let currentStatus: string = "boardReview"; //this is a bit of a hack
     let hintWord;
     let wordCount;
     let guessesRemaining;
@@ -283,6 +281,16 @@ class Game extends React.PureComponent<GameProps, State> {
                     style={{ marginTop: "10px", marginLeft: "20px" }}
                   >
                     Back To Lobby
+                  </button>
+                )}
+                {this.props.game.actions.canStart && (
+                  <button
+                    className={styles.submit}
+                    type="button"
+                    onClick={() => this.props.startGame(this.props.game.code)}
+                    style={{ marginTop: "10px", marginLeft: "20px" }}
+                  >
+                    Start Game
                   </button>
                 )}
                 {this.props.game.actions.canVote && (
@@ -388,7 +396,7 @@ class Game extends React.PureComponent<GameProps, State> {
                       wordTile={tile}
                       key={tile.word}
                       localPlayer={this.props.game.localPlayer}
-                      handleVoteWord={this.handleVoteWord}
+                      handleClickWord={this.handleClickWord}
                       turnStatus={currentStatus}
                     />
                   ))}

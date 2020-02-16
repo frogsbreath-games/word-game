@@ -57,6 +57,8 @@ export interface Game {
 }
 
 export interface GameActions {
+  canGenerateBoard: boolean;
+  canReplaceWord: boolean;
   canStart: boolean;
   canRestart: boolean;
   canDelete: boolean;
@@ -113,7 +115,7 @@ export interface Hint {
   wordCount: number;
 }
 
-export interface Vote {
+export interface Word {
   word: string;
 }
 
@@ -323,7 +325,7 @@ export const actionCreators = {
       });
     }
   },
-  voteWord: (guess: Vote): AppThunkAction<KnownAction> => (
+  voteWord: (guess: Word): AppThunkAction<KnownAction> => (
     dispatch,
     getState
   ) => {
@@ -442,6 +444,50 @@ export const actionCreators = {
         })
         .catch(error => {
           alert(error);
+        });
+
+      dispatch({
+        type: "REQUEST_SERVER_ACTION"
+      });
+    }
+  },
+  generateBoard: (): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/current/generateBoard`, {
+        method: "POST"
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
+        });
+
+      dispatch({
+        type: "REQUEST_SERVER_ACTION"
+      });
+    }
+  },
+  replaceWord: (word: Word): AppThunkAction<KnownAction> => (
+    dispatch,
+    getState
+  ) => {
+    // Only load data if it's something we don't already have (and are not already loading)
+    const appState = getState();
+    if (appState && appState.game) {
+      fetch(`api/games/${appState.game.game.code}/replaceWord`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(word)
+      })
+        .then(response => response.json() as Promise<APIResponse>)
+        .then(data => {
+          console.log(data);
         });
 
       dispatch({

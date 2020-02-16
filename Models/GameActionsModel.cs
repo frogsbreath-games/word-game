@@ -12,6 +12,8 @@ namespace WordGame.API.Models
 	{
 		public GameActionsModel(Game game, Player localPlayer)
 		{
+			CanGenerateBoard = game.CanGenerateBoard(localPlayer);
+			CanReplaceWord = game.CanReplaceWord(localPlayer);
 			CanStart = game.CanStart(localPlayer);
 			CanRestart = game.CanRestart(localPlayer);
 			CanDelete = game.CanDelete(localPlayer);
@@ -22,13 +24,15 @@ namespace WordGame.API.Models
 			CanVote = game.CanVote(localPlayer);
 		}
 
-		public bool CanStart { get; } = false;
-		public bool CanRestart { get; } = false;
-		public bool CanDelete { get; } = false;
-		public bool CanAddBot { get; } = false;
-		public bool CanDeleteBot { get; } = false;
-		public bool CanGiveHint { get; } = false;
-		public bool CanApproveHint { get; } = false;
-		public bool CanVote { get; } = false;
+		public bool CanGenerateBoard { get; }
+		public bool CanReplaceWord { get; }
+		public bool CanStart { get; }
+		public bool CanRestart { get; }
+		public bool CanDelete { get; }
+		public bool CanAddBot { get; }
+		public bool CanDeleteBot { get; }
+		public bool CanGiveHint { get; }
+		public bool CanApproveHint { get; }
+		public bool CanVote { get; }
 	}
 }

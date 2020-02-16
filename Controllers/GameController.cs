@@ -286,6 +286,70 @@ namespace WordGame.API.Controllers
 		public Task<ApiResponse> QuitCurrentGame()
 			=> QuitGame(User.GetGameCode());
 
+		[HttpPost("{code}/generateBoard"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public async Task<ApiResponse> GenerateGameBoard(
+			[FromRoute] string code)
+		{
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
+
+			if (game.CanGenerateBoard(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
+
+			var startingTeam = _randomAccessor.Random.Next(2) == 0 ? Team.Red : Team.Blue;
+
+			var board = _gameBoardGenerator.GenerateGameBoard(startingTeam);
+
+			game.GenerateBoard(localPlayer, board);
+
+			await _gameUpdater.UpdateGame(game);
+
+			return Accepted("Board Generated");
+		}
+
+		[HttpPost("current/generateBoard"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> GenerateCurrentGameBoard()
+			=> GenerateGameBoard(User.GetGameCode());
+
+		[HttpPost("{code}/replaceWord"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public async Task<ApiResponse> ReplaceWord(
+			[FromRoute] string code,
+			[FromBody] ReplaceWordModel replaceWordModel)
+		{
+			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
+
+			if (game.CanReplaceWord(localPlayer).IsFailure(out string message))
+				return BadRequest(message);
+
+			if (!(game.WordTiles.SingleOrDefault(t => t.Word == replaceWordModel.Word) is WordTile tile))
+				return NotFound($"{replaceWordModel.Word} is not on the game board.");
+
+			string word = string.Empty;
+			do
+			{
+				word = WordList.Words[_randomAccessor.Random.Next(0, WordList.Words.Length)];
+			}
+			while (game.WordTiles.Any(wt => wt.Word == word));
+
+			game.ReplaceWord(localPlayer, tile, word);
+
+			await _gameUpdater.UpdateGame(game);
+
+			return Accepted("Organizer Replaced Word.");
+		}
+
+		[HttpPost("current/replaceWord"), UserAuthorize(UserRole.Organizer)]
+		[ReturnsStatus(HttpStatusCode.NotFound)]
+		[ReturnsStatus(HttpStatusCode.Accepted)]
+		public Task<ApiResponse> CurrentGameReplaceWord(
+			[FromBody] ReplaceWordModel replaceWordModel)
+			=> ReplaceWord(User.GetGameCode(), replaceWordModel);
+
 		[HttpPost("{code}/start"), UserAuthorize(UserRole.Organizer)]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ReturnsStatus(HttpStatusCode.Accepted)]
@@ -297,11 +361,7 @@ namespace WordGame.API.Controllers
 			if (game.CanStart(localPlayer).IsFailure(out string message))
 				return BadRequest(message);
 
-			var startingTeam = _randomAccessor.Random.Next(2) == 0 ? Team.Red : Team.Blue;
-
-			var board = _gameBoardGenerator.GenerateGameBoard(startingTeam);
-
-			game.StartGame(localPlayer, board, startingTeam);
+			game.StartGame(localPlayer);
 
 			await _gameUpdater.UpdateGame(game);
 
@@ -563,7 +623,13 @@ namespace WordGame.API.Controllers
 			if (game.CanVote(localPlayer).IsFailure(out string message))
 				return BadRequest(message);
 
-			game.SetPlayerVote(localPlayer, voteModel.Word);
+			if (!(game.WordTiles.SingleOrDefault(t => t.Word == voteModel.Word) is WordTile tile))
+				return NotFound($"{voteModel.Word} is not on the game board.");
+
+			if (tile.IsRevealed)
+				return BadRequest($"{voteModel.Word} is already revealed.");
+
+			game.SetPlayerVote(localPlayer, tile);
 
 			await _gameUpdater.UpdateGame(game);
 

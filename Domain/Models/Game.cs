@@ -137,34 +137,58 @@ namespace WordGame.API.Domain.Models
 				@event(player);
 		}
 
-		public void StartGame(Player player, List<WordTile> tiles, Team startingTeam)
+		public void GenerateBoard(Player player, List<WordTile> tiles)
 		{
-			if (!GameCanStart())
-				throw new InvalidOperationException("Cannot start game!");
+			if (this.CanGenerateBoard(player).IsFailure(out var message))
+				throw new InvalidOperationException(message);
 
 			if (tiles.Count != 25)
-				throw new InvalidOperationException("Must start game with 25 words!");
+				throw new InvalidOperationException("Must generate board with 25 words!");
+
+			Status = GameStatus.BoardReview;
+			WordTiles = tiles;
+
+			AddPublicEvent(GameEvent.OrganizerGeneratedBoard(DateTime.Now));
+		}
+
+		public void ReplaceWord(Player player, WordTile tile, string newWord)
+		{
+			if (this.CanReplaceWord(player).IsFailure(out var message))
+				throw new InvalidOperationException(message);
+
+			AddPublicEvent(GameEvent.OrganizerReplacedWord(DateTime.Now, tile.Word, newWord));
+
+			tile.ReplaceWord(newWord);
+		}
+
+		public void StartGame(Player player)
+		{
+			if (this.CanStart(player).IsFailure(out var message))
+				throw new InvalidOperationException(message);
+
+			var startingTeam = BlueTilesRemaining > RedTilesRemaining
+				? Team.Blue
+				: Team.Red;
 
 			Status = GameStatus.InProgress;
-			WordTiles = tiles;
 			Turns = new List<Turn>
 			{
 				new Turn(startingTeam, 1)
 			};
 
-			AddPublicEvent(GameEvent.PlayerStartedGame(player, DateTime.Now));
+			AddPublicEvent(GameEvent.OrganizerStartedGame(DateTime.Now));
 		}
 
 		public void BackToLobby(Player player)
 		{
-			if (!this.CanRestart(player))
-				throw new InvalidOperationException();
+			if (this.CanRestart(player).IsFailure(out var message))
+				throw new InvalidOperationException(message);
 
 			Turns.Clear();
 			WordTiles.Clear();
 			Status = GameStatus.Lobby;
 
-			AddPublicEvent(GameEvent.PlayerRestartedGameInLobby(player, DateTime.Now));
+			AddPublicEvent(GameEvent.OrganizerRestartedGameInLobby(DateTime.Now));
 		}
 
 		private void AddPublicEvent(GameEvent @event)
@@ -192,19 +216,16 @@ namespace WordGame.API.Domain.Models
 				Turns.Add(new Turn(CurrentTurn.Team.GetOpposingTeam(), CurrentTurn.TurnNumber + 1));
 		}
 
-		public void SetPlayerVote(Player player, string word)
+		public void SetPlayerVote(Player player, WordTile tile)
 		{
 			RemovePlayerVote(player);
-
-			if (!(WordTiles.SingleOrDefault(t => t.Word == word) is WordTile tile))
-				throw new InvalidOperationException();
 
 			if (tile.IsRevealed)
 				throw new InvalidOperationException();
 
 			tile.Votes.Add(new PlayerVote(player.Team, player.Number, player.Name));
 
-			AddPublicEvent(GameEvent.PlayerVotedWord(player, DateTime.Now, word));
+			AddPublicEvent(GameEvent.PlayerVotedWord(player, DateTime.Now, tile.Word));
 
 			if (tile.Votes.Count == Researchers.Count(p => p.Team == player.Team))
 			{
@@ -320,7 +341,7 @@ namespace WordGame.API.Domain.Models
 		public IEnumerable<Player> Researchers => Players.FilterByType(PlayerType.Researcher);
 
 		//This is sort of inefficient but whatever
-		public bool GameCanStart()
+		public bool BoardCanBeGenerated()
 		{
 			if (Status != GameStatus.Lobby)
 				return false;

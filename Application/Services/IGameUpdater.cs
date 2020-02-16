@@ -170,7 +170,7 @@ namespace WordGame.API.Application.Services
 
 			if (game.WordTiles.FirstOrDefault(wt => wt.Votes.Any()) is WordTile tile)
 			{
-				game.SetPlayerVote(player, tile.Word);
+				game.SetPlayerVote(player, tile);
 			}
 			else
 			{
@@ -187,7 +187,7 @@ namespace WordGame.API.Application.Services
 			if (_randomAccessor.Random.Next(0, 100) > 10)
 			{
 				//Random Guess
-				string word = availableTiles[_randomAccessor.Random.Next(0, availableTiles.Count)].Word;
+				var word = availableTiles[_randomAccessor.Random.Next(0, availableTiles.Count)];
 
 				game.SetPlayerVote(player, word);
 			}

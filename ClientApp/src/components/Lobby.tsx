@@ -111,13 +111,13 @@ class Lobby extends React.PureComponent<GameProps, State> {
       organizerButtons = (
         <div className="row mx-auto">
           <button
-            disabled={!this.props.game.actions.canStart}
+            disabled={!this.props.game.actions.canGenerateBoard}
             className={styles.submit}
             type="button"
-            onClick={() => this.props.startGame(this.props.game.code)}
+            onClick={() => this.props.generateBoard()}
             style={{ margin: "5px" }}
           >
-            Start Game
+            Generate Board
           </button>
           <button
             disabled={!this.props.game.actions.canAddBot}

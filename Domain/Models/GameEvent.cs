@@ -41,11 +41,14 @@ namespace WordGame.API.Domain.Models
 		public IDictionary<string, object> Data { get; protected set; }
 		public string Message => Type switch
 		{
+			GameEventType.OrganizerStartedGame => " Started The Game",
+			GameEventType.OrganizerGeneratedBoard => " Generated The Game Board",
+			GameEventType.OrganizerRestartedGameInLobby => " Returned Game To Lobby",
+			GameEventType.OrganizerReplacedWord => $" Replaced \"{Data["oldWord"]}\" with \"{Data["newWord"]}\"",
+
 			GameEventType.PlayerJoinedGame => " Joined The Game",
 			GameEventType.PlayerChangedTeam => $" Switched to Team {Data["team"]}",
 			GameEventType.PlayerChangedType => $" Switched to {Data["type"]}",
-			GameEventType.PlayerStartedGame => " Started The Game",
-			GameEventType.PlayerRestartedGameInLobby => " Returned Game To Lobby",
 			GameEventType.PlayerApprovedHint => $" Approved Hint Word \"{Data["word"]}\" ({Data["count"]})",
 			GameEventType.PlayerRefusedHint => $" Refused Hint Word \"{Data["word"]}\" ({Data["count"]})",
 			GameEventType.PlayerGaveHint => $" Gave Hint Word \"{Data["word"]}\" ({Data["count"]})",
@@ -58,6 +61,23 @@ namespace WordGame.API.Domain.Models
 			GameEventType.TeamWon => " WON!",
 			_ => string.Empty
 		};
+
+		public static GameEvent OrganizerGeneratedBoard(DateTime timestamp)
+			=> new GameEvent("The Organizer", Team.Neutral, timestamp, GameEventType.OrganizerGeneratedBoard);
+
+		public static GameEvent OrganizerStartedGame(DateTime timestamp)
+			=> new GameEvent("The Organizer", Team.Neutral, timestamp, GameEventType.OrganizerStartedGame);
+
+		public static GameEvent OrganizerRestartedGameInLobby(DateTime timestamp)
+			=> new GameEvent("The Organizer", Team.Neutral, timestamp, GameEventType.OrganizerRestartedGameInLobby);
+
+		public static GameEvent OrganizerReplacedWord(DateTime timestamp, string oldWord, string newWord)
+			=> new GameEvent("The Organizer", Team.Neutral, timestamp, GameEventType.OrganizerReplacedWord,
+				new Dictionary<string, object>
+				{
+					["oldWord"] = oldWord,
+					["newWord"] = newWord
+				});
 
 		public static GameEvent PlayerJoinedGame(Player player, DateTime timestamp)
 			=> new GameEvent(player, timestamp, GameEventType.PlayerJoinedGame);
@@ -75,12 +95,6 @@ namespace WordGame.API.Domain.Models
 				{
 					["type"] = type
 				});
-
-		public static GameEvent PlayerStartedGame(Player player, DateTime timestamp)
-			=> new GameEvent(player, timestamp, GameEventType.PlayerStartedGame);
-
-		public static GameEvent PlayerRestartedGameInLobby(Player player, DateTime timestamp)
-			=> new GameEvent(player, timestamp, GameEventType.PlayerRestartedGameInLobby);
 
 		public static GameEvent PlayerApprovedHint(Player player, DateTime timestamp, string word, int count)
 			=> new GameEvent(player, timestamp, GameEventType.PlayerApprovedHint,
@@ -135,12 +149,16 @@ namespace WordGame.API.Domain.Models
 
 	public enum GameEventType
 	{
+		//Organizer Events
+		OrganizerGeneratedBoard,
+		OrganizerStartedGame,
+		OrganizerRestartedGameInLobby,
+		OrganizerReplacedWord,
+
 		//Player Action Events
 		PlayerJoinedGame,
 		PlayerChangedTeam,
 		PlayerChangedType,
-		PlayerStartedGame,
-		PlayerRestartedGameInLobby,
 		PlayerApprovedHint,
 		PlayerRefusedHint,
 		PlayerGaveHint,

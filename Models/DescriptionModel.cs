@@ -26,6 +26,12 @@ namespace WordGame.API.Models
 				}
 			}
 
+			if (game.Status == GameStatus.BoardReview)
+			{
+				Status = "Game Board Review 🕵️‍♂️";
+				StatusDescription = "The game board is being reviewed.";
+			}
+
 			if (game.Status == GameStatus.InProgress)
 			{
 				if (game.CurrentTurn.Status == TurnStatus.Planning)

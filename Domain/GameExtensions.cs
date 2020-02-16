@@ -10,9 +10,31 @@ namespace WordGame.API.Domain
 {
 	public static class GameExtensions
 	{
+		public static Try CanGenerateBoard(this Game game, Player player)
+		{
+			if (!game.BoardCanBeGenerated())
+				return Try.Failure("Cannot generated board.");
+
+			if (player.Role != UserRole.Organizer)
+				return Try.Failure("Only the organizer can generate the board.");
+
+			return Try.Success;
+		}
+
+		public static Try CanReplaceWord(this Game game, Player player)
+		{
+			if (game.Status != GameStatus.BoardReview)
+				return Try.Failure("Words cannot be replaced.");
+
+			if (player.Role != UserRole.Organizer)
+				return Try.Failure("Only the organizer can replace words.");
+
+			return Try.Success;
+		}
+
 		public static Try CanStart(this Game game, Player player)
 		{
-			if (!game.GameCanStart())
+			if (game.Status != GameStatus.BoardReview)
 				return Try.Failure("Game cannot start");
 
 			if (player.Role != UserRole.Organizer)

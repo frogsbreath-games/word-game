@@ -350,7 +350,7 @@
   fill: var(--black);
 }
 
-.greyTileOuter polygon {
+.unknownTileOuter polygon {
   fill: var(--dark-grey);
 }
 
@@ -388,11 +388,11 @@
   fill: var(--tan);
 }
 
-.greyTileInner {
+.unknownTileInner {
   composes: tileInner;
 }
 
-.greyTileInner polygon {
+.unknownTileInner polygon {
   fill: var(--grey);
 }
 

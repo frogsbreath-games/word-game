@@ -19,5 +19,10 @@ namespace WordGame.API.Domain.Models
 		public Team Team { get; set; }
 		public bool IsRevealed { get; set; }
 		public List<PlayerVote> Votes { get; set; } = new List<PlayerVote>();
+
+		public void ReplaceWord(string word)
+		{
+			Word = word;
+		}
 	}
 }
