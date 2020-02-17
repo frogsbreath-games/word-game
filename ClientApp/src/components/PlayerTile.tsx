@@ -3,9 +3,10 @@ import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
 import { ReactComponent as SwapIcon } from "../assets/SwapIcon.svg";
 import { ReactComponent as TrashIcon } from "../assets/TrashIcon.svg";
 import { ReactComponent as QuitIcon } from "../assets/CancelIcon.svg";
-import researcher from "../assets/Researcher.png";
-import priest from "../assets/Researcher2.png";
-import researcher3 from "../assets/Researcher3.png";
+import researcher from "../assets/researcher.png";
+import researcher2 from "../assets/researcher2.png";
+import researcher3 from "../assets/researcher3.png";
+import researcher4 from "../assets/researcher4.png";
 import cultist from "../assets/Cultist.png";
 import sorceress from "../assets/Cultist2.png";
 import * as GameStore from "../store/Game";
@@ -45,7 +46,7 @@ const PlayerTile = ({
         )}
         {player.type === "researcher" ? (
           <img
-            src={player.number % 2 === 0 ? researcher : researcher3}
+            src={player.number % 2 === 0 ? researcher4 : researcher3}
             style={{ maxHeight: "100%", maxWidth: "100%" }}
             alt="Researcher"
           />
