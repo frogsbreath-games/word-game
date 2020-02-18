@@ -269,7 +269,8 @@ namespace WordGame.API.Domain.Models
 				{
 					AddPublicEvent(GameEvent.TeamGuessedCorrectly(CurrentTurn.Team, DateTime.Now));
 
-					if (CurrentTurn.GuessesRemaining <= 0)
+					if (CurrentTurn.GuessesRemaining <= 0
+						|| GetTilesRemaining(CurrentTurn.Team) <= 0)
 						EndCurrentTurn();
 					else
 						CurrentTurn.GuessAgain();
