@@ -82,7 +82,7 @@ const PlayerTile = ({
             onClick={() => swapTeams(player)}
             style={{ marginTop: "10px" }}
           >
-            <SwapIcon width={25} style={{ opacity: 0.5, fill: "white" }} />
+            <SwapIcon height={25} style={{ opacity: 0.5, fill: "white" }} />
           </button>
         )}
         {gameActions.canDeleteBot && player.role === "bot" && (
@@ -92,7 +92,7 @@ const PlayerTile = ({
             onClick={() => deleteBot(player.number)}
             style={{ marginTop: "10px", marginLeft: "5px" }}
           >
-            <TrashIcon width={25} style={{ opacity: 0.5, fill: "white" }} />
+            <TrashIcon height={25} style={{ opacity: 0.5, fill: "white" }} />
           </button>
         )}
         {player.number === localPlayer.number &&

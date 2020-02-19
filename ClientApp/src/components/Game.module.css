@@ -16,7 +16,6 @@
 
 .submit {
   composes: submit from "../styles/utility.module.css";
-  margin: 2px 8px 8px 8px;
 }
 
 .confirm {
