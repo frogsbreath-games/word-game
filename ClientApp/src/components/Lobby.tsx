@@ -61,8 +61,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
       this.props.connection
         .invoke(
           "SendMessage",
-          this.state.input,
-          this.props.game.localPlayer.team
+          this.state.input
         )
         .catch(err => console.error(err));
       this.setState({ input: "" });

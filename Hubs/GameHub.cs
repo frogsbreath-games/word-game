@@ -3,18 +3,31 @@ using WordGame.API.Domain.Models;
 using WordGame.API.Extensions;
 using WordGame.API.Models;
 using WordGame.API.Domain.Enums;
+using WordGame.API.Domain.Repositories;
+using System.Linq;
+using System;
 
 namespace WordGame.API.Hubs
 {
 	public class GameHub : AuthorizedGroupHub<IGameClient>
 	{
+		protected readonly IGameRepository _gameRepository;
+
+		public GameHub(IGameRepository gameRepository)
+		{
+			_gameRepository = gameRepository;
+		}
+
 		protected override string GroupName => Context.User.GetGameCode();
 
-		public Task SendMessage(string message, Team team)
+		public async Task SendMessage(string message)
 		{
-			//Way to get player object in hub context instead of passing team from client?
-			return Clients.Group(GroupName).GameEvent(
-				GameEvent.PlayerMessage(Context.User.Identity.Name!, team, System.DateTime.Now, message));
+			var game = await _gameRepository.GetGameByCode(Context.User.GetGameCode());
+
+			await Clients.Group(GroupName).GameEvent(
+				GameEvent.PlayerMessage(Context.User.GetPlayer(game),
+				DateTime.Now,
+				message));
 		}
 	}
 

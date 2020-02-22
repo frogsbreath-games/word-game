@@ -130,8 +130,8 @@ namespace WordGame.API.Domain.Models
 		public static GameEvent PlayerVotedEndTurn(Player player, DateTime timestamp)
 			=> new GameEvent(player, timestamp, GameEventType.PlayerVotedEndTurn);
 
-		public static GameEvent PlayerMessage(string player, Team team, DateTime timestamp, string message)
-			=> new GameEvent(player, team, timestamp, GameEventType.PlayerMessage,
+		public static GameEvent PlayerMessage(Player player, DateTime timestamp, string message)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerMessage,
 			new Dictionary<string, object>
 			{
 				["message"] = message
