@@ -43,9 +43,11 @@ export interface GameEvent {
   data?: object;
 }
 
+export type GameStatus = "lobby" | "inProgress" | "boardReview" | "postGame" | "archived";
+
 export interface Game {
   code: string;
-  status: string;
+  status: GameStatus;
   localPlayer: Player;
   players: Player[];
   wordTiles: WordTile[];

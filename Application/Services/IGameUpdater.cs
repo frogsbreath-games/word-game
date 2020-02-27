@@ -20,6 +20,8 @@ namespace WordGame.API.Application.Services
 		Task DeleteGame(Game game);
 
 		Task UpdateGame(Game game);
+
+		Task TryRunBackgroundGameTask(Game game);
 	}
 
 	public class GameUpdater : IGameUpdater
@@ -68,12 +70,12 @@ namespace WordGame.API.Application.Services
 			foreach (var @event in game.DispatchCultistEvents())
 				tasks.Add(_gameContext.Clients.Players(game.Cultists).GameEvent(@event));
 
-			Task.Run(() => BotTask(game));
+			Task.Run(() => TryRunBackgroundGameTask(game));
 
 			return Task.WhenAll(tasks);
 		}
 
-		protected async Task BotTask(Game game)
+		public async Task TryRunBackgroundGameTask(Game game)
 		{
 			if (game.Status != GameStatus.InProgress)
 				return;

@@ -128,7 +128,7 @@ class Game extends React.PureComponent<GameProps, State> {
     //game has not been retrieved do not create a connection ever
     if (this.props.game.status) {
       //if we are supposed to be in the lobby and we don't have a connection make one
-      if (this.props.game.status === "lobby" && !this.props.connection) {
+      if ((this.props.game.status === "inProgress" || this.props.game.status === "boardReview") && !this.props.connection) {
         this.ensureConnectionExists();
       }
     }
