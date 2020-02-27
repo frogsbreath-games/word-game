@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WordGame.API.Application.Resources;
 using WordGame.API.Domain.Enums;
 using WordGame.API.Domain.Models;
 
@@ -25,7 +26,7 @@ namespace WordGame.API.Models
 			Players = game.Players.Select(p => new PlayerModel(p)).ToList();
 			WordTiles = game.WordTiles.Select(wt => new WordTileModel(
 				wt.Word,
-				Status == GameStatus.InProgress && (localPlayer.Type == PlayerType.Cultist || wt.IsRevealed)
+				Status == GameStatus.InProgress && (localPlayer.Character?.Type == CharacterType.Cultist || wt.IsRevealed)
 					? wt.Team
 					: Team.Unknown,
 				wt.IsRevealed,
@@ -40,10 +41,10 @@ namespace WordGame.API.Models
 					currentTurn.Team,
 					currentTurn.TurnNumber,
 					currentTurn.Status,
-					localPlayer.Type == PlayerType.Cultist || currentTurn.Status != TurnStatus.PendingApproval
+					localPlayer.Character?.Type == CharacterType.Cultist || currentTurn.Status != TurnStatus.PendingApproval
 						? currentTurn.HintWord
 						: null,
-					localPlayer.Type == PlayerType.Cultist || currentTurn.Status != TurnStatus.PendingApproval
+					localPlayer.Character?.Type == CharacterType.Cultist || currentTurn.Status != TurnStatus.PendingApproval
 						? currentTurn.WordCount
 						: null,
 					currentTurn.EndTurnVotes,
@@ -51,6 +52,7 @@ namespace WordGame.API.Models
 			}
 			Actions = new GameActionsModel(game, localPlayer);
 			Descriptions = new DescriptionModel(game, localPlayer);
+			AvailableCharacters = CharacterList.Characters.Where(c => !game.Players.Any(p => p.Character?.Number == c.Number)).ToList();
 		}
 
 		public string Code { get; }
@@ -66,6 +68,8 @@ namespace WordGame.API.Models
 		public int BlueTilesRemaining { get; }
 
 		public int RedTilesRemaining { get; }
+
+		public List<Character> AvailableCharacters { get; }
 
 		public Team? WinningTeam { get; }
 

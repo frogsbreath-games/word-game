@@ -56,7 +56,6 @@ namespace WordGame.API.Domain.Models
 			string code,
 			string adminName,
 			Team adminTeam,
-			PlayerType adminType,
 			DateTime? createdDate = null,
 			ObjectId? id = null)
 		{
@@ -66,10 +65,9 @@ namespace WordGame.API.Domain.Models
 			Status = GameStatus.Lobby;
 			AddPlayer(new Player(
 				adminName,
-				adminType,
+				adminTeam,
 				UserRole.Organizer,
 				0,
-				adminTeam,
 				createdDate: CreatedDate));
 		}
 
@@ -82,7 +80,6 @@ namespace WordGame.API.Domain.Models
 			string name,
 			UserRole role = UserRole.Player,
 			Team? team = null,
-			PlayerType? type = null,
 			int? number = null)
 		{
 			if (!number.HasValue)
@@ -97,19 +94,11 @@ namespace WordGame.API.Domain.Models
 					: Team.Red;
 			}
 
-			if (!type.HasValue)
-			{
-				type = Players.FilterByTeam(team.Value).FilterByType(PlayerType.Cultist).Any()
-					? PlayerType.Researcher
-					: PlayerType.Cultist;
-			}
-
 			var player = new Player(
 				name,
-				type.Value,
+				team.Value,
 				role,
-				number.Value,
-				team.Value);
+				number.Value);
 
 			AddPlayer(player);
 
@@ -118,23 +107,31 @@ namespace WordGame.API.Domain.Models
 			return player;
 		}
 
-		public void UpdatePlayer(Player player, Team? team, string? name, PlayerType? type)
+		public void UpdatePlayerCharacter(Player player, Character character)
 		{
-			var postUpdateEvents = new List<Action<Player>>();
+			if (Players.Any(p => p.Character?.Number == character.Number))
+				throw new InvalidOperationException();
 
-			if (team.HasValue && player.Team != team)
-				postUpdateEvents.Add(p => AddPublicEvent(GameEvent.PlayerChangedTeam(p, team.Value, DateTime.Now)));
+			player.UpdateCharacter(character);
 
-			if (type.HasValue && player.Type != type)
-				postUpdateEvents.Add(p => AddPublicEvent(GameEvent.PlayerChangedType(p, type.Value, DateTime.Now)));
+			AddPublicEvent(GameEvent.PlayerChangedCharacter(player, character.Name, DateTime.Now));
+		}
 
-			player.UpdatePlayer(
-				team,
-				name,
-				type);
+		public void ClearPlayerCharacter(Player player)
+		{
+			player.ClearCharacter();
 
-			foreach (var @event in postUpdateEvents)
-				@event(player);
+			AddPublicEvent(GameEvent.PlayerClearedCharacter(player, DateTime.Now));
+		}
+
+		public void UpdatePlayerTeam(Player player, Team team)
+		{
+			if (player.Team != team)
+			{
+				player.UpdateTeam(team);
+
+				AddPublicEvent(GameEvent.PlayerChangedTeam(player, team, DateTime.Now));
+			}
 		}
 
 		public void GenerateBoard(Player player, List<WordTile> tiles)
@@ -336,10 +333,10 @@ namespace WordGame.API.Domain.Models
 		public IEnumerable<Player> RedPlayers => Players.FilterByTeam(Team.Red);
 
 		[JsonIgnore]
-		public IEnumerable<Player> Cultists => Players.FilterByType(PlayerType.Cultist);
+		public IEnumerable<Player> Cultists => Players.FilterByType(CharacterType.Cultist);
 
 		[JsonIgnore]
-		public IEnumerable<Player> Researchers => Players.FilterByType(PlayerType.Researcher);
+		public IEnumerable<Player> Researchers => Players.FilterByType(CharacterType.Researcher);
 
 		//This is sort of inefficient but whatever
 		public bool BoardCanBeGenerated()
@@ -347,10 +344,16 @@ namespace WordGame.API.Domain.Models
 			if (Status != GameStatus.Lobby)
 				return false;
 
-			if (RedPlayers.FilterByType(PlayerType.Cultist).Count() != 1)
+			if (RedPlayers.Any(p => p.Character == null))
 				return false;
 
-			if (BluePlayers.FilterByType(PlayerType.Cultist).Count() != 1)
+			if (BluePlayers.Any(p => p.Character == null))
+				return false;
+
+			if (RedPlayers.FilterByType(CharacterType.Cultist).Count() != 1)
+				return false;
+
+			if (BluePlayers.FilterByType(CharacterType.Cultist).Count() != 1)
 				return false;
 
 			if (RedPlayers.Count() < 2)

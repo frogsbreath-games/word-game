@@ -10,8 +10,7 @@ import { ReactComponent as TileInner } from "../assets/TileInner.svg";
 import { ReactComponent as ConfirmIcon } from "../assets/CheckIcon.svg";
 import { ReactComponent as CancelIcon } from "../assets/CancelIcon.svg";
 import { ReactComponent as SkullIcon } from "../assets/SkullIcon.svg";
-import researcher from "../assets/Researcher.png";
-import cultist from "../assets/Cultist.png";
+import CharacterImg from "./CharacterImg";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -45,19 +44,9 @@ type PlayerTrackerProps = {
 const PlayerTracker = ({ player, team }: PlayerTrackerProps) => (
   <div className={styles.tracker}>
     <div className={styles.character}>
-      {player.type === "researcher" ? (
-        <img
-          src={researcher}
-          style={{ height: "100%", maxWidth: "100%", zIndex: 100 }}
-          alt="Researcher"
-        />
-      ) : (
-        <img
-          src={cultist}
-          style={{ height: "100%", maxWidth: "100%", zIndex: 100 }}
-          alt="Cultist"
-        />
-      )}
+      <CharacterImg
+        number={player.characterNumber}
+      />
     </div>
     <h4 className={team === "red" ? styles.redHeader : styles.blueHeader}>
       {player.name}

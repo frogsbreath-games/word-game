@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WordGame.API.Domain.Enums
 {
-	public enum PlayerType
+	public enum CharacterType
 	{
 		Cultist,
 		Researcher

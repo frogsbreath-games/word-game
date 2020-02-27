@@ -48,7 +48,8 @@ namespace WordGame.API.Domain.Models
 
 			GameEventType.PlayerJoinedGame => " Joined The Game",
 			GameEventType.PlayerChangedTeam => $" Switched to Team {Data["team"]}",
-			GameEventType.PlayerChangedType => $" Switched to {Data["type"]}",
+			GameEventType.PlayerChangedCharacter => $" Locked in '{Data["character"]}'",
+			GameEventType.PlayerClearedCharacter => $" Went Back to Picking a Character",
 			GameEventType.PlayerApprovedHint => $" Approved Hint Word \"{Data["word"]}\" ({Data["count"]})",
 			GameEventType.PlayerRefusedHint => $" Refused Hint Word \"{Data["word"]}\" ({Data["count"]})",
 			GameEventType.PlayerGaveHint => $" Gave Hint Word \"{Data["word"]}\" ({Data["count"]})",
@@ -89,12 +90,15 @@ namespace WordGame.API.Domain.Models
 					["team"] = team
 				});
 
-		public static GameEvent PlayerChangedType(Player player, PlayerType type, DateTime timestamp)
-			=> new GameEvent(player, timestamp, GameEventType.PlayerChangedType,
+		public static GameEvent PlayerChangedCharacter(Player player, string character, DateTime timestamp)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerChangedCharacter,
 				new Dictionary<string, object>
 				{
-					["type"] = type
+					["character"] = character
 				});
+
+		public static GameEvent PlayerClearedCharacter(Player player, DateTime timestamp)
+			=> new GameEvent(player, timestamp, GameEventType.PlayerClearedCharacter);
 
 		public static GameEvent PlayerApprovedHint(Player player, DateTime timestamp, string word, int count)
 			=> new GameEvent(player, timestamp, GameEventType.PlayerApprovedHint,
@@ -158,7 +162,8 @@ namespace WordGame.API.Domain.Models
 		//Player Action Events
 		PlayerJoinedGame,
 		PlayerChangedTeam,
-		PlayerChangedType,
+		PlayerChangedCharacter,
+		PlayerClearedCharacter,
 		PlayerApprovedHint,
 		PlayerRefusedHint,
 		PlayerGaveHint,

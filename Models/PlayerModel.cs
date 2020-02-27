@@ -13,16 +13,20 @@ namespace WordGame.API.Models
 			: this(
 				player.Number,
 				player.Name,
-				player.Type,
+				player.Character?.Number,
+				player.Character?.Name,
+				player.Character?.Type,
 				player.Role,
 				player.Team)
 		{
 		}
 
-		public PlayerModel(int number, string name, PlayerType type, UserRole role, Team team)
+		public PlayerModel(int number, string name, int? characterNumber, string? characterName, CharacterType? type, UserRole role, Team team)
 		{
 			Number = number;
 			Name = name ?? throw new ArgumentNullException(nameof(name));
+			CharacterNumber = characterNumber;
+			CharacterName = characterName;
 			Type = type;
 			Role = role;
 			Team = team;
@@ -32,7 +36,11 @@ namespace WordGame.API.Models
 
 		public string Name { get; }
 
-		public PlayerType Type { get; }
+		public int? CharacterNumber { get; }
+
+		public string? CharacterName { get; }
+
+		public CharacterType? Type { get; }
 
 		public UserRole Role { get; }
 

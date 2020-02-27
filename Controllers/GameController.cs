@@ -157,8 +157,7 @@ namespace WordGame.API.Controllers
 			var game = new Game(
 				Guid.NewGuid().ToString().Substring(0, 6).ToUpper(),
 				_nameGenerator.GetRandomName(),
-				Team.Red,
-				PlayerType.Cultist);
+				Team.Red);
 
 			await _repository.AddGame(game);
 
@@ -220,7 +219,7 @@ namespace WordGame.API.Controllers
 		public async Task<ApiResponse<List<PlayerModel>>> GetGamePlayers(
 			[FromRoute] string code,
 			[FromQuery] Team? team = null,
-			[FromQuery] PlayerType? type = null)
+			[FromQuery] CharacterType? type = null)
 		{
 			(var game, _) = await GetGameAndLocalPlayer(code);
 
@@ -240,7 +239,7 @@ namespace WordGame.API.Controllers
 		[Returns(typeof(List<PlayerModel>))]
 		public Task<ApiResponse<List<PlayerModel>>> GetCurrentGamePlayers(
 			[FromQuery] Team? team = null,
-			[FromQuery] PlayerType? type = null)
+			[FromQuery] CharacterType? type = null)
 			=> GetGamePlayers(
 				User.GetGameCode(),
 				team,
@@ -517,12 +516,26 @@ namespace WordGame.API.Controllers
 
 			if (player is null)
 				return NotFound($"Cannot find player with number: [{number}] in game with code: [{code}]");
+			
+			if (playerModel.Team is Team team)
+			{
+				game.UpdatePlayerTeam(player, team);
+			}
 
-			game.UpdatePlayer(
-				player,
-				playerModel.Team,
-				playerModel.Name,
-				playerModel.Type);
+			if (playerModel.CharacterNumber is int characterNumber)
+			{
+				if (characterNumber < 0)
+				{
+					game.ClearPlayerCharacter(player);
+				}
+				else
+				{
+					if (game.Players.Any(p => p.Character?.Number == characterNumber))
+						return BadRequest("Character is not available");
+
+					game.UpdatePlayerCharacter(player, CharacterList.Characters.Single(c => c.Number == characterNumber));
+				}
+			}
 
 			await _gameUpdater.UpdateGame(game);
 

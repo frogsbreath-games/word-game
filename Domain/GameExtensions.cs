@@ -98,7 +98,7 @@ namespace WordGame.API.Domain
 			if (game.CurrentTurn.Status != TurnStatus.Planning)
 				return Try.Failure($"Cannot give hint outside the planning stage of the current turn.");
 
-			if (player.Type != PlayerType.Cultist || player.Team != game.CurrentTurn.Team)
+			if (player.Character?.Type != CharacterType.Cultist || player.Team != game.CurrentTurn.Team)
 				return Try.Failure("This player cannot give a hint!");
 
 			return Try.Success;
@@ -112,7 +112,7 @@ namespace WordGame.API.Domain
 			if (game.CurrentTurn.Status != TurnStatus.PendingApproval)
 				return Try.Failure($"Cannot review hint outside the pending approval stage of the current turn.");
 
-			if (player.Type != PlayerType.Cultist || player.Team == game.CurrentTurn.Team)
+			if (player.Character?.Type != CharacterType.Cultist || player.Team == game.CurrentTurn.Team)
 				return Try.Failure("This player cannot review a hint!");
 
 			return Try.Success;
@@ -126,7 +126,7 @@ namespace WordGame.API.Domain
 			if (game.CurrentTurn.Status != TurnStatus.Guessing)
 				return Try.Failure($"Cannot cast word vote outside the guessing stage of the current turn.");
 
-			if (player.Type != PlayerType.Researcher || player.Team != game.CurrentTurn.Team)
+			if (player.Character?.Type != CharacterType.Researcher || player.Team != game.CurrentTurn.Team)
 				return Try.Failure("This player cannot vote for a word!");
 
 			return Try.Success;
@@ -138,7 +138,7 @@ namespace WordGame.API.Domain
 		public static IEnumerable<Player> FilterByRole(this IEnumerable<Player> players, UserRole role)
 			=> players.Where(p => p.Role == role);
 
-		public static IEnumerable<Player> FilterByType(this IEnumerable<Player> players, PlayerType type)
-			=> players.Where(p => p.Type == type);
+		public static IEnumerable<Player> FilterByType(this IEnumerable<Player> players, CharacterType type)
+			=> players.Where(p => p.Character?.Type == type);
 	}
 }

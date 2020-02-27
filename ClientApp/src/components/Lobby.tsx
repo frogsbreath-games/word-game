@@ -24,7 +24,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
     this.swapTeams = this.swapTeams.bind(this);
     this.deleteBot = this.deleteBot.bind(this);
     this.quitGame = this.quitGame.bind(this);
-    this.handleRoleChange = this.handleRoleChange.bind(this);
+    this.handleCharacterChange = this.handleCharacterChange.bind(this);
   }
 
   public componentDidMount() {
@@ -41,11 +41,11 @@ class Lobby extends React.PureComponent<GameProps, State> {
     this.props.createConnection();
   }
 
-  public handleRoleChange(
+  public handleCharacterChange(
     player: GameStore.Player,
-    type: GameStore.PlayerType
+    number: number
   ) {
-    player.type = type;
+    player.characterNumber = number;
     this.props.updatePlayer(player);
   }
 
@@ -82,6 +82,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
     } else {
       player.team = "blue";
     }
+    player.characterNumber = undefined;
     this.props.updatePlayer(player);
   }
 
@@ -185,12 +186,13 @@ class Lobby extends React.PureComponent<GameProps, State> {
                                 player={player}
                                 localPlayer={this.props.game.localPlayer}
                                 gameActions={this.props.game.actions}
+                                availableCharacters={this.props.game.availableCharacters}
                                 code={this.props.game.code}
                                 key={player.number}
                                 swapTeams={this.swapTeams}
                                 leaveGame={this.quitGame}
                                 deleteBot={this.deleteBot}
-                                changeRole={this.handleRoleChange}
+                                changeCharacter={this.handleCharacterChange}
                               />
                             </CSSTransition>
                           ))}
@@ -215,12 +217,13 @@ class Lobby extends React.PureComponent<GameProps, State> {
                                 player={player}
                                 localPlayer={this.props.game.localPlayer}
                                 gameActions={this.props.game.actions}
+                                availableCharacters={this.props.game.availableCharacters}
                                 code={this.props.game.code}
                                 key={player.number}
                                 swapTeams={this.swapTeams}
                                 leaveGame={this.quitGame}
                                 deleteBot={this.deleteBot}
-                                changeRole={this.handleRoleChange}
+                                changeCharacter={this.handleCharacterChange}
                               />
                             </CSSTransition>
                           ))}

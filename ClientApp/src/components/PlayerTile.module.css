@@ -24,6 +24,7 @@
   opacity: 0.8;
   fill: white;
   width: 20px;
+  z-index: 200;
 }
 
 .button {

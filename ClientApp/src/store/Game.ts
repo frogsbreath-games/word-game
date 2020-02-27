@@ -54,6 +54,7 @@ export interface Game {
   redTilesRemaining: number;
   actions: GameActions;
   descriptions: Descriptions;
+  availableCharacters: Character[];
 }
 
 export interface GameActions {
@@ -87,13 +88,22 @@ export interface Turn {
 
 export interface Player {
   number: number;
+  characterNumber?: number;
+  characterName?: string;
   name: string;
-  type: PlayerType;
+  type?: CharacterType;
   role: UserRole;
   team: Team;
 }
 
-export type PlayerType = "cultist" | "researcher";
+export interface Character {
+  number: number;
+  name: string;
+  type: CharacterType;
+  team: Team;
+}
+
+export type CharacterType = "cultist" | "researcher";
 
 export type UserRole = "organizer" | "player" | "bot";
 

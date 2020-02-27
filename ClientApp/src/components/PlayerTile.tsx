@@ -3,12 +3,7 @@ import { ReactComponent as PlayerIcon } from "../assets/PlayerIcon.svg";
 import { ReactComponent as SwapIcon } from "../assets/SwapIcon.svg";
 import { ReactComponent as TrashIcon } from "../assets/TrashIcon.svg";
 import { ReactComponent as QuitIcon } from "../assets/CancelIcon.svg";
-import researcher from "../assets/researcher.png";
-import researcher2 from "../assets/Researcher2.png";
-import researcher3 from "../assets/Researcher3.png";
-import researcher4 from "../assets/researcher4.png";
-import cultist from "../assets/Cultist.png";
-import sorceress from "../assets/Cultist2.png";
+import CharacterImg from "./CharacterImg";
 import * as GameStore from "../store/Game";
 import styles from "./PlayerTile.module.css";
 
@@ -16,22 +11,24 @@ type PlayerTileProps = {
   player: GameStore.Player;
   localPlayer: GameStore.Player;
   gameActions: GameStore.GameActions;
+  availableCharacters: GameStore.Character[]
   key: number;
   code: string;
   swapTeams: (player: GameStore.Player) => void;
   leaveGame: () => void;
   deleteBot: (playerNumber: number) => void;
-  changeRole: (player: GameStore.Player, type: GameStore.PlayerType) => void;
+  changeCharacter: (player: GameStore.Player, number: number) => void;
 };
 
 const PlayerTile = ({
   player,
   gameActions,
   localPlayer,
+  availableCharacters,
   swapTeams,
   leaveGame,
   deleteBot,
-  changeRole,
+  changeCharacter,
   code
 }: PlayerTileProps) => (
   <div>
@@ -43,33 +40,27 @@ const PlayerTile = ({
       <div className={styles.character}>
         {player.number === localPlayer.number && (
           <PlayerIcon className={styles.icon} />
-        )}
-        {player.type === "researcher" ? (
-          <img
-            src={player.number % 2 === 0 ? researcher4 : researcher3}
-            style={{ maxHeight: "100%", maxWidth: "100%" }}
-            alt="Researcher"
+          )}
+          <CharacterImg
+            number={player.characterNumber}
           />
-        ) : (
-          <img
-            src={player.number % 2 === 0 ? cultist : sorceress}
-            style={{ maxHeight: "100%", maxWidth: "100%" }}
-            alt="Cultist"
-          />
-        )}
       </div>
       <div className={styles.select}>
         <select
-          value={player.type}
-          onChange={event =>
-            changeRole(
-              player,
-              event.target.value === "researcher" ? "researcher" : "cultist"
-            )
-          }
+        value={player.characterNumber !== null ? player.characterNumber : -1}
+        onChange={event =>
+          changeCharacter(
+            player,
+            +event.target.value
+          )}
         >
-          <option value="researcher">Researcher</option>
-          <option value="cultist">Cultist</option>
+        <option value={-1}>--None--</option>
+        {(player.characterNumber !== null) && (
+          <option value={player.characterNumber}>{player.characterName}</option>
+        )}
+        {availableCharacters.filter(c => c.team === player.team).map(c => (
+          <option value={c.number}>{c.name}</option>
+        ))}
         </select>
       </div>
 

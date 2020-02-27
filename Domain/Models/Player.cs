@@ -11,17 +11,33 @@ namespace WordGame.API.Domain.Models
 	{
 		public Player(
 			string name,
-			PlayerType type,
+			Character character,
 			UserRole role,
 			int number,
-			Team team,
 			Guid? id = null,
 			DateTime? createdDate = null)
 		{
 			Id = id ?? Guid.NewGuid();
 			CreatedDate = createdDate ?? DateTime.Now;
 			Name = name ?? throw new ArgumentNullException(nameof(name));
-			Type = type;
+			Character = character;
+			Role = role;
+			Team = character.Team;
+			Number = number;
+		}
+
+		public Player(
+			string name,
+			Team team,
+			UserRole role,
+			int number,
+			Guid? id = null,
+			DateTime? createdDate = null)
+		{
+			Id = id ?? Guid.NewGuid();
+			CreatedDate = createdDate ?? DateTime.Now;
+			Name = name ?? throw new ArgumentNullException(nameof(name));
+			Character = null;
 			Role = role;
 			Team = team;
 			Number = number;
@@ -37,25 +53,27 @@ namespace WordGame.API.Domain.Models
 
 		public string Name { get; protected set; }
 
-		public PlayerType Type { get; protected set; }
+		public Character? Character { get; protected set; }
 
 		public UserRole Role { get; protected set; }
 
 		public Team Team { get; protected set; }
 
-		public void UpdatePlayer(
-			Team? team = null,
-			string? name = null,
-			PlayerType? type = null)
+		public void UpdateCharacter(Character character)
 		{
-			if (team.HasValue)
-				Team = team.Value;
+			Character = character;
+			Team = character.Team;
+		}
 
-			if (name != null)
-				Name = name;
+		public void ClearCharacter()
+		{
+			Character = null;
+		}
 
-			if (type.HasValue)
-				Type = type.Value;
+		public void UpdateTeam(Team team)
+		{
+			Team = team;
+			Character = null;
 		}
 	}
 }

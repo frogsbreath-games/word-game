@@ -40,7 +40,7 @@ namespace WordGame.API.Models
 					StatusDescription = $"{game.CurrentTurn.Team} Team Cultist is formulating a hint.";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
-						if (localPlayer.Type == PlayerType.Cultist)
+						if (localPlayer.Character?.Type == CharacterType.Cultist)
 						{
 							LocalPlayerInstruction = "Create a hint and clue number for your team!";
 						}
@@ -57,7 +57,7 @@ namespace WordGame.API.Models
 					StatusDescription = $"{TeamEx.GetOpposingTeam(game.CurrentTurn.Team)} Team Cultist is approving a hint.";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
-						if (localPlayer.Type == PlayerType.Cultist)
+						if (localPlayer.Character?.Type == CharacterType.Cultist)
 						{
 							LocalPlayerInstruction = "Wait for the opposing Cultist to approve your hint! ⏳";
 						}
@@ -68,7 +68,7 @@ namespace WordGame.API.Models
 					}
 					else
 					{
-						if (localPlayer.Type == PlayerType.Cultist)
+						if (localPlayer.Character?.Type == CharacterType.Cultist)
 						{
 							LocalPlayerInstruction = "Review the hint and approve or deny it!";
 						}
@@ -85,7 +85,7 @@ namespace WordGame.API.Models
 					StatusDescription = $"{game.CurrentTurn.Team} Team Researchers are submitting guesses.";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
-						if (localPlayer.Type == PlayerType.Cultist)
+						if (localPlayer.Character?.Type == CharacterType.Cultist)
 						{
 							LocalPlayerInstruction = "Keep a straight face and wait for your researchers to submit guesses! 😎";
 						}
@@ -106,7 +106,7 @@ namespace WordGame.API.Models
 					StatusDescription = $"{game.CurrentTurn.Team} Team Researchers have submitted guesses. Hold for result! 🥁";
 					if (game.CurrentTurn.Team == localPlayer.Team)
 					{
-						if (localPlayer.Type == PlayerType.Cultist)
+						if (localPlayer.Character?.Type == CharacterType.Cultist)
 						{
 							LocalPlayerInstruction = "Nothing you can do now your team has spoken!";
 						}
