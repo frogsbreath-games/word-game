@@ -45,25 +45,25 @@ function characterSrc(number?: number) {
 function characterName(number?: number) {
   switch (number) {
     case 0:
-      return "Cultist";
+      return "Azami D'aathess";
     case 1:
-      return "Cultist";
+      return "Z'arri Zhaorru Zuibberh";
     case 2:
-      return "Researcher 1";
+      return "Dmitry Koshkin";
     case 3:
-      return "Researcher 1";
+      return "Father Alfred Moore";
     case 4:
-      return "Researcher 2";
+      return "Osip Belinsky";
     case 5:
-      return "Researcher 2";
+      return "Inspector Raymond Bernard";
     case 6:
-      return "Researcher 3";
+      return "Tatyana Ulanov";
     case 7:
-      return "Researcher 3";
+      return "Professor Clayton Womack";
     case 8:
-      return "Researcher 4";
+      return "Komandarm Igor Yeltsin";
     case 9:
-      return "Researcher 4";
+      return "Dr Eloise Winthrop";
     default:
       return "None";
   }
@@ -73,7 +73,7 @@ const CharacterImg = ({ number }: CharacterImgProps) => (
   <img
     src={characterSrc(number)}
     style={{ maxHeight: "100%", maxWidth: "100%", zIndex: 100 }}
-    alt="{characterName(number)}"
+    alt={characterName(number)}
   />
 );
 
