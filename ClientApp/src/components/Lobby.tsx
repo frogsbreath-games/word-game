@@ -146,9 +146,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
           <div style={{ paddingBottom: "16rem" }}>
             <div className={styles.lobbyBody}>
               <div className={styles.main}>
-                <div
-                  style={{ display: "grid", gridTemplateColumns: "50% 50%" }}
-                >
+                <div className={styles.lobbyHeader}>
                   <div>
                     <h1>Lobby: {this.props.game.code}</h1>
                     {organizerButtons}
