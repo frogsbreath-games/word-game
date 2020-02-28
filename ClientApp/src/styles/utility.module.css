@@ -37,6 +37,11 @@
   box-shadow: 0 6px var(--black);
 }
 
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .button:hover {
   filter: brightness(110%);
 }
