@@ -129,14 +129,6 @@ class Lobby extends React.PureComponent<GameProps, State> {
             Add Bot
           </button>
           <button
-            className={styles.button}
-            type="button"
-            onClick={() => this.props.requestCurrentGame()}
-            style={{ margin: "5px" }}
-          >
-            Refresh
-          </button>
-          <button
             className={styles.delete}
             type="button"
             onClick={() => this.props.deleteGame(this.props.game.code)}
