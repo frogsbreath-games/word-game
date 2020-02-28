@@ -11,7 +11,7 @@ type PlayerTileProps = {
   player: GameStore.Player;
   localPlayer: GameStore.Player;
   gameActions: GameStore.GameActions;
-  availableCharacters: GameStore.Character[]
+  availableCharacters: GameStore.Character[];
   key: number;
   code: string;
   swapTeams: (player: GameStore.Player) => void;
@@ -34,33 +34,36 @@ const PlayerTile = ({
   <div>
     <div className={styles[player.team + "Tile"]}>
       <div className={styles.name}>
-        <h5 style={{ color: "white" }}>{player.name}</h5>
+        <h5 style={{ color: "white" }}>
+          {player.name}
+          <h3>{player.type === null ? "Pick a player!" : player.type}</h3>
+        </h5>
       </div>
 
       <div className={styles.character}>
         {player.number === localPlayer.number && (
           <PlayerIcon className={styles.icon} />
-          )}
-          <CharacterImg
-            number={player.characterNumber}
-          />
+        )}
+        <CharacterImg number={player.characterNumber} />
       </div>
       <div className={styles.select}>
         <select
-        value={player.characterNumber !== null ? player.characterNumber : -1}
-        onChange={event =>
-          changeCharacter(
-            player,
-            +event.target.value
-          )}
+          value={player.characterNumber !== null ? player.characterNumber : -1}
+          onChange={event => changeCharacter(player, +event.target.value)}
         >
-        <option value={-1}>--None--</option>
-        {(player.characterNumber !== null) && (
-          <option value={player.characterNumber}>{player.characterName}</option>
-        )}
-        {availableCharacters.filter(c => c.team === player.team).map(c => (
-          <option value={c.number}>{c.name}</option>
-        ))}
+          <option value={-1}>--None--</option>
+          {player.characterNumber !== null && (
+            <option value={player.characterNumber}>
+              {player.characterName}
+            </option>
+          )}
+          {availableCharacters
+            .filter(c => c.team === player.team)
+            .map(c => (
+              <option value={c.number}>
+                {c.name + (c.type === "cultist" ? " (Cultist)" : "")}
+              </option>
+            ))}
         </select>
       </div>
 
