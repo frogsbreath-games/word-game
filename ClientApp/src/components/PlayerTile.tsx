@@ -34,10 +34,10 @@ const PlayerTile = ({
   <div>
     <div className={styles[player.team + "Tile"]}>
       <div className={styles.name}>
-        <h5 style={{ color: "white" }}>
-          {player.name}
-          <h3>{player.type === null ? "Pick a player!" : player.type}</h3>
-        </h5>
+        <h5 style={{ color: "white", marginBottom: 0 }}>{player.name}</h5>
+        <h3 style={{ color: "white" }}>
+          {player.type === null ? "Pick a player!" : player.type}
+        </h3>
       </div>
 
       <div className={styles.character}>
