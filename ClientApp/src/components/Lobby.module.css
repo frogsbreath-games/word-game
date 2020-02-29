@@ -40,6 +40,11 @@
   grid-template-areas: "main chat";
 }
 
+.lobbyHeader {
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+
 .main {
   grid-area: main;
 }
@@ -78,5 +83,15 @@
 
   .eventWindow {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .lobbyHeader {
+    grid-template-columns: 100%;
+  }
+
+  .playerLists {
+    grid-template-columns: 100%;
   }
 }
