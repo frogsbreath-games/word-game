@@ -9,6 +9,7 @@ import LogoFooter from "./LogoFooter";
 import fadeTransition from "../styles/transitions/fade.module.css";
 import styles from "./Lobby.module.css";
 import QRCode from "qrcode.react";
+import CopyToClipboard from "react-copy-to-clipboard";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -153,7 +154,15 @@ class Lobby extends React.PureComponent<GameProps, State> {
               <div className={styles.main}>
                 <div className={styles.lobbyHeader}>
                   <div>
-                    <h1>Lobby: {this.props.game.code}</h1>
+                    <CopyToClipboard
+                      text={this.getJoinUrl()}>
+                      <h1
+                        title="Click To Copy Game URL"
+                        style={{ cursor: "pointer" }}
+                      >
+                        Lobby: {this.props.game.code}
+                      </h1>
+                    </CopyToClipboard>
                     <QRCode value={this.getJoinUrl()} />
                     {organizerButtons}
                   </div>
