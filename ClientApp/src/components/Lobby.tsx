@@ -8,6 +8,8 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import LogoFooter from "./LogoFooter";
 import fadeTransition from "../styles/transitions/fade.module.css";
 import styles from "./Lobby.module.css";
+import QRCode from "qrcode.react";
+import CopyToClipboard from "react-copy-to-clipboard";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -68,6 +70,10 @@ class Lobby extends React.PureComponent<GameProps, State> {
     }
   }
 
+  getJoinUrl(): string {
+    return "https://" + window.location.host + "/join/" + this.props.game.code;
+  }
+
   handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ input: event.target.value });
   }
@@ -120,15 +126,6 @@ class Lobby extends React.PureComponent<GameProps, State> {
             Generate Board
           </button>
           <button
-            disabled={!this.props.game.actions.canAddBot}
-            className={styles.button}
-            type="button"
-            onClick={() => this.props.addBot()}
-            style={{ margin: "5px" }}
-          >
-            Add Bot
-          </button>
-          <button
             className={styles.delete}
             type="button"
             onClick={() => this.props.deleteGame(this.props.game.code)}
@@ -148,11 +145,20 @@ class Lobby extends React.PureComponent<GameProps, State> {
               <div className={styles.main}>
                 <div className={styles.lobbyHeader}>
                   <div>
-                    <h1>Lobby: {this.props.game.code}</h1>
+                    <CopyToClipboard
+                      text={this.getJoinUrl()}>
+                      <h1
+                        title="Click To Copy Game URL"
+                        style={{ cursor: "pointer" }}
+                      >
+                        Lobby: {this.props.game.code}
+                      </h1>
+                    </CopyToClipboard>
+                    <QRCode value={this.getJoinUrl()} />
                     {organizerButtons}
                   </div>
                   <div>
-                    <h3>{this.props.game.descriptions.status}</h3>
+                    <h2>{this.props.game.descriptions.status}</h2>
                     <h6>{this.props.game.descriptions.statusDescription}</h6>
                     <p>{this.props.game.descriptions.localPlayerInstruction}</p>
                   </div>
@@ -187,6 +193,17 @@ class Lobby extends React.PureComponent<GameProps, State> {
                             </CSSTransition>
                           ))}
                       </TransitionGroup>
+                      {this.props.game.actions.canAddBot && (this.props.game.players.filter(player => player.team === "red").length < 5) && (
+                        <button
+                          disabled={!this.props.game.actions.canAddBot}
+                          className={styles.button}
+                          type="button"
+                          onClick={() => this.props.addBot("red")}
+                          style={{ margin: "5px", float: "right" }}
+                        >
+                          Add Red Bot
+                          </button>
+                      )}
                     </div>
                   </div>
                   <div>
@@ -218,6 +235,17 @@ class Lobby extends React.PureComponent<GameProps, State> {
                             </CSSTransition>
                           ))}
                       </TransitionGroup>
+                      {this.props.game.actions.canAddBot && this.props.game.players.filter(player => player.team === "blue").length < 5 && (
+                        <button
+                          disabled={!this.props.game.actions.canAddBot}
+                          className={styles.button}
+                          type="button"
+                          onClick={() => this.props.addBot("blue")}
+                          style={{ margin: "5px", float: "right" }}
+                        >
+                          Add Blue Bot
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
