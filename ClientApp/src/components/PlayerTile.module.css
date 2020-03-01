@@ -41,7 +41,7 @@
   padding: 10px;
   min-height: 150px;
   display: grid;
-  grid-template-columns: 25% 25% minmax(100px, 50%);
+  grid-template-columns: 28% 28% 44%;
   grid-template-rows: repeat(3);
   grid-template-areas:
     "name name character "
@@ -75,6 +75,7 @@
 
 .select {
   grid-area: select;
+  margin-top: 10px;
 }
 
 .select select {
