@@ -12,6 +12,7 @@ export default () => (
     <Route exact path="/" component={GameHome} />
     <Route path="/game" component={Game} />
     <Route path="/game-home" component={GameHome} />
+    <Route path="/join/:gameCode" component={GameHome} />
     <Route path="/lobby" component={Lobby} />
   </Layout>
 );

@@ -39,7 +39,6 @@ const PlayerTile = ({
           {player.type === null ? "Pick a player!" : player.type}
         </h3>
       </div>
-
       <div className={styles.character}>
         {player.number === localPlayer.number && (
           <PlayerIcon className={styles.icon} />
@@ -61,7 +60,7 @@ const PlayerTile = ({
             .filter(c => c.team === player.team)
             .map(c => (
               <option value={c.number}>
-                {c.name + (c.type === "cultist" ? " (Cultist)" : "")}
+                {c.name + (c.type === "cultist" ? " 👿" : "")}
               </option>
             ))}
         </select>

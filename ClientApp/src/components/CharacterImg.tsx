@@ -47,21 +47,21 @@ function characterName(number?: number) {
     case 0:
       return "Azami D'aathess";
     case 1:
-      return "Z'arri Zhaorru Zuibberh";
+      return "Z'arri Zuibberh";
     case 2:
       return "Dmitry Koshkin";
     case 3:
-      return "Father Alfred Moore";
+      return "Father Moore";
     case 4:
       return "Osip Belinsky";
     case 5:
-      return "Inspector Raymond Bernard";
+      return "Inspector Bernard";
     case 6:
       return "Tatyana Ulanov";
     case 7:
-      return "Professor Clayton Womack";
+      return "Professor Womack";
     case 8:
-      return "Komandarm Igor Yeltsin";
+      return "Komandarm Yeltsin";
     case 9:
       return "Dr Eloise Winthrop";
     default:

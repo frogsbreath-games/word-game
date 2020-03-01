@@ -44,9 +44,7 @@ type PlayerTrackerProps = {
 const PlayerTracker = ({ player, team }: PlayerTrackerProps) => (
   <div className={styles.tracker}>
     <div className={styles.character}>
-      <CharacterImg
-        number={player.characterNumber}
-      />
+      <CharacterImg number={player.characterNumber} />
     </div>
     <h4 className={team === "red" ? styles.redHeader : styles.blueHeader}>
       {player.name}
@@ -72,12 +70,8 @@ const GameTile = ({
     onClick={() => handleClickWord(wordTile.word, wordTile.isRevealed)}
   >
     <div className={styles.tileContainer}>
-      <TileOuter
-        className={styles[wordTile.team + "TileOuter"]}
-      />
-      <TileInner
-        className={styles[wordTile.team + "TileInner"]}
-      />
+      <TileOuter className={styles[wordTile.team + "TileOuter"]} />
+      <TileInner className={styles[wordTile.team + "TileInner"]} />
       <div className={styles.absoluteCenter}>
         {!wordTile.isRevealed && (
           <h5 className={styles.wordTileWord}>{wordTile.word}</h5>
@@ -93,7 +87,9 @@ const GameTile = ({
           />
         ))}
         {turnStatus === "boardReview" && localPlayer.role === "organizer" && (
-          <h3 title="Replace Word">&#8635;</h3>
+          <h3 className={styles.replace} title="Replace Word">
+            &#8635;
+          </h3>
         )}
       </div>
       {wordTile.isRevealed && (
@@ -128,7 +124,11 @@ class Game extends React.PureComponent<GameProps, State> {
     //game has not been retrieved do not create a connection ever
     if (this.props.game.status) {
       //if we are supposed to be in the lobby and we don't have a connection make one
-      if ((this.props.game.status === "inProgress" || this.props.game.status === "boardReview") && !this.props.connection) {
+      if (
+        (this.props.game.status === "inProgress" ||
+          this.props.game.status === "boardReview") &&
+        !this.props.connection
+      ) {
         this.ensureConnectionExists();
       }
     }
@@ -149,10 +149,7 @@ class Game extends React.PureComponent<GameProps, State> {
   sendMessage() {
     if (this.props.connection) {
       this.props.connection
-        .invoke(
-          "SendMessage",
-          this.state.input
-        )
+        .invoke("SendMessage", this.state.input)
         .catch(err => console.error(err));
       this.setState({ input: "" });
     }
@@ -196,7 +193,11 @@ class Game extends React.PureComponent<GameProps, State> {
   }
 
   public render() {
-    if (!this.props.game.status || (this.props.game.status !== "inProgress" && this.props.game.status !== "boardReview")) {
+    if (
+      !this.props.game.status ||
+      (this.props.game.status !== "inProgress" &&
+        this.props.game.status !== "boardReview")
+    ) {
       return <Redirect to="/game-home" />;
     }
     let currentTeam;
@@ -231,6 +232,14 @@ class Game extends React.PureComponent<GameProps, State> {
         <div className={styles.gameBody}>
           <div className={styles.leftSection}>
             <div className={styles.banner}>
+              <div className={styles.instructions}>
+                <div style={{ textAlign: "center" }}>
+                  <h3>{this.props.game.descriptions.status}</h3>
+                  <hr />
+                  <h6>{this.props.game.descriptions.statusDescription}</h6>
+                  <p>{this.props.game.descriptions.localPlayerInstruction}</p>
+                </div>
+              </div>
               <TeamTile
                 team={localTeam}
                 tilesRemaining={localTeamsTilesRemaining}
@@ -241,15 +250,7 @@ class Game extends React.PureComponent<GameProps, State> {
                 tilesRemaining={opposingTeamTilesRemaining}
                 isTeamsTurn={currentTeam === opposingTeam}
               />
-              {/* not sure where to put status */}
-              <div className={styles.instructions}>
-                <div style={{ textAlign: "center" }}>
-                  <h3>{this.props.game.descriptions.status}</h3>
-                  <hr />
-                  <h6>{this.props.game.descriptions.statusDescription}</h6>
-                  <p>{this.props.game.descriptions.localPlayerInstruction}</p>
-                </div>
-              </div>
+
               <div className="row">
                 {this.props.game.actions.canDelete && (
                   <button
@@ -304,7 +305,7 @@ class Game extends React.PureComponent<GameProps, State> {
                 {/* this should only be seen by cultist when it is hint phase */}
                 {this.props.game.actions.canGiveHint && (
                   <div className={styles.hintInputs}>
-                    <h3>Create Hint & Clue Count</h3>
+                    <h3>Submit Hint & Clue Count</h3>
                     <div className={styles.inputs}>
                       <input
                         type="text"
@@ -328,12 +329,11 @@ class Game extends React.PureComponent<GameProps, State> {
                         ))}
                       </select>
                       <button
-                        style={{ width: "150px", justifySelf: "center" }}
-                        className={styles.submit}
+                        className={styles.submitHint}
                         type="button"
                         onClick={this.handleSubmitClick}
                       >
-                        Submit hint
+                        Submit
                       </button>
                     </div>
                   </div>
@@ -396,37 +396,39 @@ class Game extends React.PureComponent<GameProps, State> {
               team={localTeam}
               player={this.props.game.localPlayer}
             />
-            <div className={styles.eventWindow}>
-              {this.props.events &&
-                this.props.events.map((event, index) => (
-                  <div key={index}>
-                    <div style={{ margin: "2px" }}>
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          fontFamily: "monospace"
-                        }}
-                      >
-                        {event.timestamp}
-                      </span>
-                      <br />
-                      <span className={styles[event.team]}>
-                        {event.player ? event.player : "Team " + event.team}
-                      </span>
-                      <span>{" " + event.message}</span>
+            <div className={styles.chat}>
+              <div className={styles.eventWindow}>
+                {this.props.events &&
+                  this.props.events.map((event, index) => (
+                    <div key={index}>
+                      <div style={{ margin: "2px" }}>
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            fontFamily: "monospace"
+                          }}
+                        >
+                          {event.timestamp}
+                        </span>
+                        <br />
+                        <span className={styles[event.team]}>
+                          {event.player ? event.player : "Team " + event.team}
+                        </span>
+                        <span>{" " + event.message}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-            </div>
-            <div>
-              <input
-                className={styles.chatInput}
-                type="text"
-                placeholder="Message something..."
-                value={this.state.input}
-                onChange={this.handleChange}
-                onKeyPress={this.handleKeyPress}
-              />
+                  ))}
+              </div>
+              <div className={styles.chatInput}>
+                <input
+                  className={styles.messageInput}
+                  type="text"
+                  placeholder="Message something..."
+                  value={this.state.input}
+                  onChange={this.handleChange}
+                  onKeyPress={this.handleKeyPress}
+                />
+              </div>
             </div>
           </div>
         </div>

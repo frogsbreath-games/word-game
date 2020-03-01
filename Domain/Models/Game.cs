@@ -139,7 +139,7 @@ namespace WordGame.API.Domain.Models
 			if (this.CanGenerateBoard(player).IsFailure(out var message))
 				throw new InvalidOperationException(message);
 
-			if (tiles.Count != 25)
+			if (tiles.Count != 24)
 				throw new InvalidOperationException("Must generate board with 25 words!");
 
 			Status = GameStatus.BoardReview;

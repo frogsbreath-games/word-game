@@ -32,6 +32,7 @@ export interface GameState {
   game: Game;
   connection?: signalR.HubConnection;
   events: GameEvent[];
+  errorMessage?: string;
 }
 
 export interface GameEvent {
@@ -137,6 +138,50 @@ export interface APIResponse {
   errorArray: object[];
 }
 
+interface ApiErrorHandler {
+  badRequest?: () => any;
+  notFound?: () => any;
+  default?: () => any;
+}
+
+class ApiError extends Error {
+  constructor(status: number, message?: string) {
+    super(message);
+    this.statusCode = status
+  }
+
+  statusCode: number;
+}
+
+function handleApiResponse<T extends object>(response: Response): Promise<T> {
+  if (response.ok)
+    return (response.json() as Promise<APIResponse>).then(r => r.data as T);
+  else
+    throw new ApiError(response.status);
+}
+
+function handleApiError(handler: ApiErrorHandler): (error: Error) => any {
+  return (error: Error) => {
+    if (error instanceof ApiError) {
+      switch (error.statusCode) {
+        case 400:
+          if (handler.badRequest) {
+            handler.badRequest();
+            return;
+          }
+        case 404:
+          if (handler.notFound) {
+            handler.notFound();
+            return;
+          }
+      }
+    }
+    if (handler.default) {
+      handler.default();
+    }
+  };
+}
+
 // -----------------
 // ACTIONS - These are serializable (hence replayable) descriptions of state transitions.
 // They do not themselves have any side-effects; they just describe something that is going to happen.
@@ -178,6 +223,11 @@ interface ReceiveGameEvent {
   event: GameEvent;
 }
 
+interface ReceiveErrors {
+  type: "RECEIVE_ERRORS";
+  errorMessage: string
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
 type KnownAction =
@@ -188,7 +238,8 @@ type KnownAction =
   | ReceiveLeaveDeleteAction
   | ReceiveCurrentGameAction
   | ReceiveUpdateGameAction
-  | ReceiveGameEvent;
+  | ReceiveGameEvent
+  | ReceiveErrors
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -446,17 +497,33 @@ export const actionCreators = {
       fetch(`api/games/${code}/join`, {
         method: "POST"
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
-          console.log(data);
+        .then<Game>(handleApiResponse)
+        .then(game => {
           dispatch({
             type: "RECEIVE_JOIN_GAME",
-            game: data.data as Game
+            game: game
           });
         })
-        .catch(error => {
-          alert(error);
-        });
+        .catch(handleApiError({
+          badRequest: () => {
+            dispatch({
+              type: "RECEIVE_ERRORS",
+              errorMessage: "Cannot join game with code: \"" + code + "\""
+            });
+          },
+          notFound: () => {
+            dispatch({
+              type: "RECEIVE_ERRORS",
+              errorMessage: "No game found with code: \"" + code + "\""
+            });
+          },
+          default: () => {
+            dispatch({
+              type: "RECEIVE_ERRORS",
+              errorMessage: "An unknown error occurred. Please try again."
+            });
+          }
+        }));
 
       dispatch({
         type: "REQUEST_SERVER_ACTION"
@@ -705,6 +772,14 @@ export const reducer: Reducer<GameState> = (
         game: state.game,
         connection: state.connection,
         events: [action.event, ...state.events]
+      };
+    case "RECEIVE_ERRORS":
+      return {
+        isLoading: false,
+        game: state.game,
+        connection: state.connection,
+        errorMessage: action.errorMessage,
+        events: state.events
       };
     default:
       return state;

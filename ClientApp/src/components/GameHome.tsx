@@ -7,17 +7,26 @@ import styles from "./GameHome.module.css";
 import { ReactComponent as Cthulhu } from "../assets/Cthulhu.svg";
 import { Container } from "reactstrap";
 import LogoFooter from "./LogoFooter";
+import { RouteComponentProps } from "react-router-dom";
 
 // At runtime, Redux will merge together...
-type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
+type GameProps = RouteComponentProps<{ gameCode?: string }> &
+  GameStore.GameState &
   typeof GameStore.actionCreators;
 
-type State = { value: string };
+type State = {
+  gameCode: string,
+  showError: boolean
+};
 
-class GameHome extends React.PureComponent<GameProps, State> {
+class GameHome extends React.Component<GameProps, State> {
   constructor(props: GameProps) {
     super(props);
-    this.state = { value: "" };
+    
+    this.state = {
+      gameCode: "",
+      showError: false
+    };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -25,6 +34,13 @@ class GameHome extends React.PureComponent<GameProps, State> {
 
   public componentDidMount() {
     this.ensureDataFetched();
+
+    const gameCode = this.props.match.params.gameCode;
+
+    if (gameCode) {
+      this.setState({ gameCode, showError: true });
+      this.props.joinGame(gameCode);
+    }
     //When game is retrieved redirect to lobby component
   }
 
@@ -33,12 +49,13 @@ class GameHome extends React.PureComponent<GameProps, State> {
   }
 
   handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({ value: event.target.value });
+    this.setState({ gameCode: event.target.value, showError: false });
   }
 
   handleSubmit(event: React.MouseEvent) {
-    if (this.state.value !== undefined && this.state.value !== "") {
-      this.props.joinGame(this.state.value);
+    if (this.state.gameCode !== undefined && this.state.gameCode !== "") {
+      this.props.joinGame(this.state.gameCode);
+      this.setState({ ...this.state, showError: true });
     }
     event.preventDefault();
   }
@@ -80,9 +97,9 @@ class GameHome extends React.PureComponent<GameProps, State> {
                 >
                   <input
                     type="text"
-                    value={this.state.value}
+                    value={this.state.gameCode}
                     onChange={this.handleChange}
-                    className={styles.input}
+                    className={(this.state.showError && this.props.errorMessage ? styles.inputError : styles.input)}
                     placeholder="XXX69..."
                   />
                   <div className="input-group-append">
@@ -95,6 +112,9 @@ class GameHome extends React.PureComponent<GameProps, State> {
                     </button>
                   </div>
                 </div>
+                {this.props.errorMessage && this.state.showError && (
+                  <p className={styles.errorMessage}>{this.props.errorMessage}</p>
+                )}
               </div>
               <div style={{ textAlign: "center" }}>
                 <h1>Don't have a code?</h1>

@@ -58,7 +58,7 @@
 }
 
 .eventWindow {
-  composes: eventWindow from "./Game.module.css";
+  composes: eventWindow from "../styles/utility.module.css";
   grid-area: messages;
 }
 

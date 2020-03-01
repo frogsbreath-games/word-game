@@ -32,12 +32,12 @@
 
 .inputs {
   display: grid;
-  grid-template-columns: 40% 40% 20%;
+  grid-template-columns: 2fr 1fr 1fr;
 }
 
 .banner {
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: auto 1fr 1fr;
   justify-content: stretch;
 }
 
@@ -231,12 +231,10 @@
 
 .board {
   display: grid;
-  grid-template-columns: repeat(5, minmax(20%, 1fr));
-  grid-template-rows: repeat(5, minmax(10%, 1fr));
+  grid-template-columns: repeat(4, minmax(25%, 1fr));
+  grid-template-rows: repeat(6, minmax(10%, 1fr));
   grid-column-gap: 10px;
   grid-row-gap: 10px;
-  padding: 10px;
-  padding-right: 50px;
   background-image: url("../assets/BookCover.svg");
   background-repeat: no-repeat;
   background-clip: padding-box;
@@ -257,25 +255,6 @@
 
 .wordTile:hover {
   filter: brightness(110%);
-}
-
-.eventWindow {
-  background: #e4e4e4;
-  margin: 10px;
-  padding: 15px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 12px;
-  min-height: calc(100vh - 215px);
-  max-height: calc(100vh - 215px);
-  overflow-y: auto;
-  flex-direction: column-reverse;
-  display: flex;
-  box-shadow: 0 6px;
-}
-
-.eventWindow > h6 {
-  text-transform: uppercase;
 }
 
 /* Eye icon styles */
@@ -406,7 +385,7 @@
 .gameBody {
   border-top: solid 3px var(--black);
   display: grid;
-  grid-template-columns: 4fr 9fr 4fr;
+  grid-template-columns: 4fr 6fr 4fr;
   grid-template-areas: "left main right";
 }
 
@@ -430,9 +409,27 @@
   background: radial-gradient(var(--grey), var(--dark-grey));
 }
 
+.chat {
+  grid-area: chat;
+  display: grid;
+  grid-template-areas:
+    "messages"
+    "chatInput";
+}
+
+.eventWindow {
+  composes: eventWindow from "../styles/utility.module.css";
+  grid-area: messages;
+}
+
 .chatInput {
-  composes: input;
+  grid-area: chatInput;
   width: 95%;
+}
+
+.messageInput {
+  composes: input;
+  width: 100%;
 }
 
 .red {
@@ -441,6 +438,13 @@
 
 .blue {
   composes: blueColor from "../styles/utility.module.css";
+}
+
+.submitHint {
+  composes: submit;
+  justify-self: center;
+  margin: 10px;
+  width: 80%;
 }
 
 @media (max-width: 700px) {
@@ -452,5 +456,33 @@
       "main"
       "left"
       "right";
+  }
+  .board {
+    padding: 4% 10% 10% 6%;
+    grid-column-gap: 5px;
+    grid-row-gap: 5px;
+  }
+
+  .wordTileWord {
+    font-size: 0.8rem;
+  }
+
+  .vote {
+    height: 10px;
+    width: 10px;
+  }
+
+  .chat {
+    grid-template-areas:
+      "chatInput"
+      "messages";
+  }
+
+  .eventWindow {
+    flex-direction: column;
+  }
+
+  .replace {
+    font-size: 0.9rem;
   }
 }

@@ -33,7 +33,7 @@ namespace WordGame.API.Application.Services
 
 			teams.AddRange(Enumerable.Repeat(Team.Red, 8));
 			teams.AddRange(Enumerable.Repeat(Team.Blue, 8));
-			teams.AddRange(Enumerable.Repeat(Team.Neutral, 7));
+			teams.AddRange(Enumerable.Repeat(Team.Neutral, 6));
 			teams.Add(Team.Black);
 
 			teams.Shuffle(_rand.Random);
