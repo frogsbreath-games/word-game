@@ -8,6 +8,7 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import LogoFooter from "./LogoFooter";
 import fadeTransition from "../styles/transitions/fade.module.css";
 import styles from "./Lobby.module.css";
+import QRCode from "qrcode.react";
 
 // At runtime, Redux will merge together...
 type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
@@ -66,6 +67,10 @@ class Lobby extends React.PureComponent<GameProps, State> {
         .catch(err => console.error(err));
       this.setState({ input: "" });
     }
+  }
+
+  getJoinUrl(): string {
+    return "https://" + window.location.host + "/join/" + this.props.game.code;
   }
 
   handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -149,6 +154,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
                 <div className={styles.lobbyHeader}>
                   <div>
                     <h1>Lobby: {this.props.game.code}</h1>
+                    <QRCode value={this.getJoinUrl()} />
                     {organizerButtons}
                   </div>
                   <div>
