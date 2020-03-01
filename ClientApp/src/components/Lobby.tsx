@@ -167,7 +167,7 @@ class Lobby extends React.PureComponent<GameProps, State> {
                     {organizerButtons}
                   </div>
                   <div>
-                    <h3>{this.props.game.descriptions.status}</h3>
+                    <h2>{this.props.game.descriptions.status}</h2>
                     <h6>{this.props.game.descriptions.statusDescription}</h6>
                     <p>{this.props.game.descriptions.localPlayerInstruction}</p>
                   </div>
