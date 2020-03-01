@@ -126,15 +126,6 @@ class Lobby extends React.PureComponent<GameProps, State> {
             Generate Board
           </button>
           <button
-            disabled={!this.props.game.actions.canAddBot}
-            className={styles.button}
-            type="button"
-            onClick={() => this.props.addBot()}
-            style={{ margin: "5px" }}
-          >
-            Add Bot
-          </button>
-          <button
             className={styles.delete}
             type="button"
             onClick={() => this.props.deleteGame(this.props.game.code)}
@@ -202,6 +193,17 @@ class Lobby extends React.PureComponent<GameProps, State> {
                             </CSSTransition>
                           ))}
                       </TransitionGroup>
+                      {this.props.game.actions.canAddBot && (this.props.game.players.filter(player => player.team === "red").length < 5) && (
+                        <button
+                          disabled={!this.props.game.actions.canAddBot}
+                          className={styles.button}
+                          type="button"
+                          onClick={() => this.props.addBot("red")}
+                          style={{ margin: "5px", float: "right" }}
+                        >
+                          Add Red Bot
+                          </button>
+                      )}
                     </div>
                   </div>
                   <div>
@@ -233,6 +235,17 @@ class Lobby extends React.PureComponent<GameProps, State> {
                             </CSSTransition>
                           ))}
                       </TransitionGroup>
+                      {this.props.game.actions.canAddBot && this.props.game.players.filter(player => player.team === "blue").length < 5 && (
+                        <button
+                          disabled={!this.props.game.actions.canAddBot}
+                          className={styles.button}
+                          type="button"
+                          onClick={() => this.props.addBot("blue")}
+                          style={{ margin: "5px", float: "right" }}
+                        >
+                          Add Blue Bot
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

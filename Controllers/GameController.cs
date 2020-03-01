@@ -427,14 +427,15 @@ namespace WordGame.API.Controllers
 		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ReturnsStatus(HttpStatusCode.Accepted)]
 		public async Task<ApiResponse> AddGameBot(
-			[FromRoute] string code)
+			[FromRoute] string code,
+			[FromBody] Team team)
 		{
 			(var game, var localPlayer) = await GetGameAndLocalPlayer(code);
 
 			if (game.CanAddBot(localPlayer).IsFailure(out string message))
 				return BadRequest(message);
 
-			game.AddNewPlayer(_nameGenerator.GetRandomName(), UserRole.Bot);
+			game.AddNewPlayer(_nameGenerator.GetRandomName(), UserRole.Bot, team);
 
 			await _gameUpdater.UpdateGame(game);
 
@@ -444,8 +445,8 @@ namespace WordGame.API.Controllers
 		[HttpPost("current/players"), UserAuthorize(UserRole.Organizer)]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
 		[ReturnsStatus(HttpStatusCode.Accepted)]
-		public Task<ApiResponse> AddCurrentGameBot()
-			=> AddGameBot(User.GetGameCode());
+		public Task<ApiResponse> AddCurrentGameBot([FromBody] Team team)
+			=> AddGameBot(User.GetGameCode(), team);
 
 		[HttpGet("{code}/players/{number}"), UserAuthorize]
 		[ReturnsStatus(HttpStatusCode.NotFound)]
