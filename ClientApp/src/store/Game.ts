@@ -1,6 +1,6 @@
 import { Action, Reducer } from "redux";
 import { AppThunkAction } from "./";
-import * as signalr from "@aspnet/signalr";
+import * as signalr from "@microsoft/signalr";
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
@@ -252,6 +252,7 @@ export const actionCreators = {
     if (appState && appState.game && !appState.game.connection) {
       const connection = new signalr.HubConnectionBuilder()
         .withUrl(`hubs/game`)
+        .withAutomaticReconnect()
         .build();
 
       connection.on("GameUpdated", data => {
@@ -658,7 +659,7 @@ export const actionCreators = {
       });
     }
   },
-  addBot: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+  addBot: (team: Team): AppThunkAction<KnownAction> => (dispatch, getState) => {
     // Only load data if it's something we don't already have (and are not already loading)
     const appState = getState();
     if (appState && appState.game) {
@@ -666,7 +667,8 @@ export const actionCreators = {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
-        }
+        },
+        body: JSON.stringify(team)
       })
         .then(response => response.json() as Promise<APIResponse>)
         .then(data => {

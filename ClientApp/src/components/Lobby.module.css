@@ -35,14 +35,14 @@
 .lobbyBody {
   display: grid;
   grid-template-columns: 60% 40%;
-  margin-left: 10%;
-  margin-right: 10%;
+  margin: 10px 10%;
   grid-template-areas: "main chat";
 }
 
 .lobbyHeader {
   display: grid;
   grid-template-columns: 50% 50%;
+  margin-bottom: 10px;
 }
 
 .main {
@@ -66,13 +66,15 @@
   grid-area: chatInput;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1199.98px) {
   .lobbyBody {
     display: grid;
     grid-template-columns: 100%;
     grid-template-areas:
       "main"
       "chat";
+    grid-row-gap: 10px;
+    margin: 10px 8%;
   }
 
   .chat {
@@ -86,12 +88,30 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 991.98px) {
+  .lobbyBody {
+    margin: 10px 6%;
+  }
+}
+
+@media (max-width: 767.98px) {
   .lobbyHeader {
     grid-template-columns: 100%;
+    grid-row-gap: 10px;
+  }
+
+  .lobbyBody {
+    margin: 10px 4%;
   }
 
   .playerLists {
     grid-template-columns: 100%;
+    grid-row-gap: 10px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .lobbyBody {
+    margin: 10px 15px;
   }
 }

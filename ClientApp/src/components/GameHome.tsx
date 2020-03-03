@@ -7,9 +7,11 @@ import styles from "./GameHome.module.css";
 import { ReactComponent as Cthulhu } from "../assets/Cthulhu.svg";
 import { Container } from "reactstrap";
 import LogoFooter from "./LogoFooter";
+import { RouteComponentProps } from "react-router-dom";
 
 // At runtime, Redux will merge together...
-type GameProps = GameStore.GameState & // ... state we've requested from the Redux store
+type GameProps = RouteComponentProps<{ gameCode?: string }> &
+  GameStore.GameState &
   typeof GameStore.actionCreators;
 
 type State = {
@@ -17,9 +19,10 @@ type State = {
   showError: boolean
 };
 
-class GameHome extends React.PureComponent<GameProps, State> {
+class GameHome extends React.Component<GameProps, State> {
   constructor(props: GameProps) {
     super(props);
+    
     this.state = {
       gameCode: "",
       showError: false
@@ -31,6 +34,13 @@ class GameHome extends React.PureComponent<GameProps, State> {
 
   public componentDidMount() {
     this.ensureDataFetched();
+
+    const gameCode = this.props.match.params.gameCode;
+
+    if (gameCode) {
+      this.setState({ gameCode, showError: true });
+      this.props.joinGame(gameCode);
+    }
     //When game is retrieved redirect to lobby component
   }
 
