@@ -53,12 +53,16 @@
   composes: container;
   background-color: var(--blue);
   box-shadow: 0 6px var(--dark-blue);
+  background-image: url("../assets/BlueTeamPattern.svg");
+  background-size: 120%;
 }
 
 .redTile {
   composes: container;
   background-color: var(--red);
   box-shadow: 0 6px var(--dark-red);
+  background-image: url("../assets/RedTeamPattern.svg");
+  background-size: 120%;
 }
 
 .character {
