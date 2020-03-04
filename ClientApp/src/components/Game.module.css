@@ -419,6 +419,8 @@
 
 .eventWindow {
   composes: eventWindow from "../styles/utility.module.css";
+  min-height: calc(100vh - 215px);
+  max-height: calc(100vh - 215px);
   grid-area: messages;
 }
 
