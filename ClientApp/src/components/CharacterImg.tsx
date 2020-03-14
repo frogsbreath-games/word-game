@@ -8,7 +8,7 @@ import soldier from "../assets/Soldier1.png";
 import soldier2 from "../assets/Soldier2.png";
 import soldier3 from "../assets/Soldier3.png";
 import soldier4 from "../assets/Soldier4.png";
-import cultist from "../assets/Cultist.png";
+import cultist from "../assets/Cultist1.png";
 import sorceress from "../assets/Cultist2.png";
 
 type CharacterImgProps = {

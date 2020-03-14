@@ -15,14 +15,14 @@ type GameProps = RouteComponentProps<{ gameCode?: string }> &
   typeof GameStore.actionCreators;
 
 type State = {
-  gameCode: string,
-  showError: boolean
+  gameCode: string;
+  showError: boolean;
 };
 
 class GameHome extends React.Component<GameProps, State> {
   constructor(props: GameProps) {
     super(props);
-    
+
     this.state = {
       gameCode: "",
       showError: false
@@ -99,8 +99,12 @@ class GameHome extends React.Component<GameProps, State> {
                     type="text"
                     value={this.state.gameCode}
                     onChange={this.handleChange}
-                    className={(this.state.showError && this.props.errorMessage ? styles.inputError : styles.input)}
-                    placeholder="XXX69..."
+                    className={
+                      this.state.showError && this.props.errorMessage
+                        ? styles.inputError
+                        : styles.input
+                    }
+                    placeholder="Enter Existing Code Here..."
                   />
                   <div className="input-group-append">
                     <button
@@ -113,7 +117,9 @@ class GameHome extends React.Component<GameProps, State> {
                   </div>
                 </div>
                 {this.props.errorMessage && this.state.showError && (
-                  <p className={styles.errorMessage}>{this.props.errorMessage}</p>
+                  <p className={styles.errorMessage}>
+                    {this.props.errorMessage}
+                  </p>
                 )}
               </div>
               <div style={{ textAlign: "center" }}>

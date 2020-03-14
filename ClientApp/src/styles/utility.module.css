@@ -97,8 +97,6 @@
   border-radius: 4px;
   font-family: monospace;
   font-size: 12px;
-  min-height: calc(100vh - 215px);
-  max-height: calc(100vh - 215px);
   overflow-y: auto;
   flex-direction: column-reverse;
   display: flex;
