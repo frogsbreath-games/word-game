@@ -11,8 +11,8 @@ const LogoFooter = () => {
         width: "100%"
       }}
     >
-      <img src={Logo} width="150px" alt="FrogsBreath Logo" />
-      <p>© 2019 FrogsBreath Games</p>
+      <img src={Logo} width="150px" alt="Frogsbreath Logo" />
+      <p>© 2020 Frogsbreath Games</p>
     </div>
   );
 };

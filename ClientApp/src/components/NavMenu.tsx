@@ -21,7 +21,7 @@ export default class NavMenu extends React.PureComponent<
         >
           <CthulhuLogo style={{ width: "40px", marginRight: "10px" }} />
           <NavbarBrand tag={Link} to="/">
-            <h3>Necronomicodex</h3>
+            <h3>Spellbook</h3>
           </NavbarBrand>
           <NavbarToggler onClick={this.toggle} className="mr-2" />
           <Collapse
