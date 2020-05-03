@@ -29,7 +29,7 @@ const PlayerTile = ({
   leaveGame,
   deleteBot,
   changeCharacter,
-  code
+  code,
 }: PlayerTileProps) => (
   <div>
     <div className={styles[player.team + "Tile"]}>
@@ -48,7 +48,11 @@ const PlayerTile = ({
       <div className={styles.select}>
         <select
           value={player.characterNumber !== null ? player.characterNumber : -1}
-          onChange={event => changeCharacter(player, +event.target.value)}
+          onChange={(event) => changeCharacter(player, +event.target.value)}
+          disabled={
+            player.number !== localPlayer.number &&
+            localPlayer.role !== "organizer"
+          }
         >
           <option value={-1}>--None--</option>
           {player.characterNumber !== null && (
@@ -57,8 +61,8 @@ const PlayerTile = ({
             </option>
           )}
           {availableCharacters
-            .filter(c => c.team === player.team)
-            .map(c => (
+            .filter((c) => c.team === player.team)
+            .map((c) => (
               <option value={c.number}>
                 {c.name + (c.type === "cultist" ? " 👿" : "")}
               </option>
