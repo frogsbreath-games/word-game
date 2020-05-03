@@ -1,7 +1,6 @@
 import { Action, Reducer } from "redux";
 import { AppThunkAction } from "./";
 import * as signalr from "@microsoft/signalr";
-
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
 
@@ -44,7 +43,12 @@ export interface GameEvent {
   data?: object;
 }
 
-export type GameStatus = "lobby" | "inProgress" | "boardReview" | "postGame" | "archived";
+export type GameStatus =
+  | "lobby"
+  | "inProgress"
+  | "boardReview"
+  | "postGame"
+  | "archived";
 
 export interface Game {
   code: string;
@@ -147,7 +151,7 @@ interface ApiErrorHandler {
 class ApiError extends Error {
   constructor(status: number, message?: string) {
     super(message);
-    this.statusCode = status
+    this.statusCode = status;
   }
 
   statusCode: number;
@@ -156,8 +160,7 @@ class ApiError extends Error {
 function handleApiResponse<T extends object>(response: Response): Promise<T> {
   if (response.ok)
     return (response.json() as Promise<APIResponse>).then(r => r.data as T);
-  else
-    throw new ApiError(response.status);
+  else throw new ApiError(response.status);
 }
 
 function handleApiError(handler: ApiErrorHandler): (error: Error) => any {
@@ -225,7 +228,7 @@ interface ReceiveGameEvent {
 
 interface ReceiveErrors {
   type: "RECEIVE_ERRORS";
-  errorMessage: string
+  errorMessage: string;
 }
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
@@ -239,7 +242,7 @@ type KnownAction =
   | ReceiveCurrentGameAction
   | ReceiveUpdateGameAction
   | ReceiveGameEvent
-  | ReceiveErrors
+  | ReceiveErrors;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -505,36 +508,35 @@ export const actionCreators = {
             game: game
           });
         })
-        .catch(handleApiError({
-          badRequest: () => {
-            dispatch({
-              type: "RECEIVE_ERRORS",
-              errorMessage: "Cannot join game with code: \"" + code + "\""
-            });
-          },
-          notFound: () => {
-            dispatch({
-              type: "RECEIVE_ERRORS",
-              errorMessage: "No game found with code: \"" + code + "\""
-            });
-          },
-          default: () => {
-            dispatch({
-              type: "RECEIVE_ERRORS",
-              errorMessage: "An unknown error occurred. Please try again."
-            });
-          }
-        }));
+        .catch(
+          handleApiError({
+            badRequest: () => {
+              dispatch({
+                type: "RECEIVE_ERRORS",
+                errorMessage: 'Cannot join game with code: "' + code + '"'
+              });
+            },
+            notFound: () => {
+              dispatch({
+                type: "RECEIVE_ERRORS",
+                errorMessage: 'No game found with code: "' + code + '"'
+              });
+            },
+            default: () => {
+              dispatch({
+                type: "RECEIVE_ERRORS",
+                errorMessage: "An unknown error occurred. Please try again."
+              });
+            }
+          })
+        );
 
       dispatch({
         type: "REQUEST_SERVER_ACTION"
       });
     }
   },
-  generateBoard: (): AppThunkAction<KnownAction> => (
-    dispatch,
-    getState
-  ) => {
+  generateBoard: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
     // Only load data if it's something we don't already have (and are not already loading)
     const appState = getState();
     if (appState && appState.game) {

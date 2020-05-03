@@ -92,3 +92,7 @@
 .buttons {
   grid-area: buttons;
 }
+
+.upperCase {
+  text-transform: uppercase;
+}
