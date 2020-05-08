@@ -63,7 +63,7 @@ const GameTile = ({
   wordTile,
   localPlayer,
   turnStatus,
-  handleClickWord
+  handleClickWord,
 }: GameTileProps) => (
   <div
     className={styles.wordTile}
@@ -76,7 +76,7 @@ const GameTile = ({
         {!wordTile.isRevealed && (
           <h5 className={styles.wordTileWord}>{wordTile.word}</h5>
         )}
-        {wordTile.votes.map(playerVote => (
+        {wordTile.votes.map((playerVote) => (
           <div
             key={playerVote.number}
             className={
@@ -150,7 +150,7 @@ class Game extends React.PureComponent<GameProps, State> {
     if (this.props.connection) {
       this.props.connection
         .invoke("SendMessage", this.state.input)
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
       this.setState({ input: "" });
     }
   }
@@ -170,11 +170,11 @@ class Game extends React.PureComponent<GameProps, State> {
   handleSubmitClick() {
     this.props.giveHint({
       hintWord: this.state.hintWord,
-      wordCount: this.state.wordCount
+      wordCount: this.state.wordCount,
     } as GameStore.Hint);
     this.setState({
       hintWord: "",
-      wordCount: 0
+      wordCount: 0,
     });
   }
 
@@ -282,20 +282,6 @@ class Game extends React.PureComponent<GameProps, State> {
                     Start Game
                   </button>
                 )}
-                {this.props.game.actions.canVote && (
-                  <button
-                    className={styles.submit}
-                    type="button"
-                    onClick={() => this.props.voteEndTurn()}
-                    style={{ marginTop: "10px", marginLeft: "20px" }}
-                  >
-                    End Turn (
-                    {this.props.game.currentTurn
-                      ? this.props.game.currentTurn.endTurnVotes.length
-                      : 0}
-                    )
-                  </button>
-                )}
               </div>
             </div>
           </div>
@@ -322,7 +308,7 @@ class Game extends React.PureComponent<GameProps, State> {
                         {Array.from(
                           { length: localTeamsTilesRemaining + 1 },
                           (v, i) => i
-                        ).map(number => (
+                        ).map((number) => (
                           <option key={number} value={number}>
                             {number}
                           </option>
@@ -379,7 +365,7 @@ class Game extends React.PureComponent<GameProps, State> {
               </div>
               <div className={styles.board}>
                 {this.props.game.wordTiles &&
-                  this.props.game.wordTiles.map(tile => (
+                  this.props.game.wordTiles.map((tile) => (
                     <GameTile
                       wordTile={tile}
                       key={tile.word}
@@ -388,6 +374,22 @@ class Game extends React.PureComponent<GameProps, State> {
                       turnStatus={currentStatus}
                     />
                   ))}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                {this.props.game.actions.canVote && (
+                  <button
+                    className={styles.submit}
+                    type="button"
+                    onClick={() => this.props.voteEndTurn()}
+                    style={{ marginTop: "10px" }}
+                  >
+                    End Turn (
+                    {this.props.game.currentTurn
+                      ? this.props.game.currentTurn.endTurnVotes.length
+                      : 0}
+                    )
+                  </button>
+                )}
               </div>
             </div>
           </main>
@@ -405,7 +407,7 @@ class Game extends React.PureComponent<GameProps, State> {
                         <span
                           style={{
                             fontSize: "10px",
-                            fontFamily: "monospace"
+                            fontFamily: "monospace",
                           }}
                         >
                           {event.timestamp}
