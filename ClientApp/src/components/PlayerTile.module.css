@@ -42,7 +42,7 @@
   min-height: 150px;
   display: grid;
   grid-template-columns: 28% 28% 44%;
-  grid-template-rows: repeat(3);
+  grid-template-rows: 1.5rem 1fr 1fr;
   grid-template-areas:
     "name name character "
     "select select character"
