@@ -61,7 +61,7 @@ namespace WordGame.API.Domain.Models
 		{
 			Id = id ?? ObjectId.GenerateNewId();
 			CreatedDate = createdDate ?? DateTime.Now;
-			Code = code ?? throw new ArgumentNullException(nameof(code));
+			Code = code?.ToUpper() ?? throw new ArgumentNullException(nameof(code));
 			Status = GameStatus.Lobby;
 			AddPlayer(new Player(
 				adminName,

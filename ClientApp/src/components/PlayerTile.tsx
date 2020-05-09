@@ -29,15 +29,15 @@ const PlayerTile = ({
   leaveGame,
   deleteBot,
   changeCharacter,
-  code
+  code,
 }: PlayerTileProps) => (
   <div>
     <div className={styles[player.team + "Tile"]}>
       <div className={styles.name}>
         <h5 style={{ color: "white", marginBottom: 0 }}>{player.name}</h5>
-        <h3 style={{ color: "white" }}>
+        {/* <h3 style={{ color: "white" }}>
           {player.type === null ? "Pick a player!" : player.type}
-        </h3>
+        </h3> */}
       </div>
       <div className={styles.character}>
         {player.number === localPlayer.number && (
@@ -48,19 +48,32 @@ const PlayerTile = ({
       <div className={styles.select}>
         <select
           value={player.characterNumber !== null ? player.characterNumber : -1}
-          onChange={event => changeCharacter(player, +event.target.value)}
+          onChange={(event) => changeCharacter(player, +event.target.value)}
+          disabled={
+            player.number !== localPlayer.number &&
+            localPlayer.role !== "organizer"
+          }
+          className={styles.upperCase}
         >
           <option value={-1}>--None--</option>
           {player.characterNumber !== null && (
             <option value={player.characterNumber}>
-              {player.characterName}
+              {player.type +
+                " " +
+                player.characterName +
+                " " +
+                (player.type === "cultist" ? " 👿" : " 🤠")}
             </option>
           )}
           {availableCharacters
-            .filter(c => c.team === player.team)
-            .map(c => (
+            .filter((c) => c.team === player.team)
+            .map((c) => (
               <option value={c.number}>
-                {c.name + (c.type === "cultist" ? " 👿" : "")}
+                {c.type +
+                  " " +
+                  c.name +
+                  " " +
+                  (c.type === "cultist" ? " 👿" : " 🤠")}
               </option>
             ))}
         </select>

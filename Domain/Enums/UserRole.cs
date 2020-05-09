@@ -9,6 +9,7 @@ namespace WordGame.API.Domain.Enums
 	{
 		Organizer,
 		Player,
+		Spectator,
 		Bot
 	}
 }

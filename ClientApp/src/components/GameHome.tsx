@@ -25,7 +25,7 @@ class GameHome extends React.Component<GameProps, State> {
 
     this.state = {
       gameCode: "",
-      showError: false
+      showError: false,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -88,13 +88,10 @@ class GameHome extends React.Component<GameProps, State> {
         <div style={{ position: "relative", minHeight: "100vh" }}>
           <div style={{ paddingBottom: "16rem" }}>
             <Container>
-              <div style={{ textAlign: "center" }}>
+              <div style={{ textAlign: "center" }} className={styles.content}>
                 <Cthulhu style={{ width: "400px" }} />
                 <h1>Have a code?</h1>
-                <div
-                  className="input-group mx-auto"
-                  style={{ width: 300, marginBottom: 10 }}
-                >
+                <div className={styles.joinGame}>
                   <input
                     type="text"
                     value={this.state.gameCode}
