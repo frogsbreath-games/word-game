@@ -43,20 +43,20 @@ namespace WordGame.API.Data.Repositories
 
 		public async Task<Game> GetGameByCode(string code)
 		{
-			return await Games.Find(x => x.Code == code
+			return await Games.Find(x => x.Code == code.ToUpper()
 					&& x.Status != GameStatus.Archived)
 				.SingleOrDefaultAsync();
 		}
 
 		public async Task<DeleteResult> DeleteGame(string code)
 		{
-			return await Games.DeleteOneAsync(x => x.Code == code);
+			return await Games.DeleteOneAsync(x => x.Code == code.ToUpper());
 		}
 
 		public async Task<ReplaceOneResult> UpdateGame(string code, Game game)
 		{
 			return await Games.ReplaceOneAsync(
-				x => x.Code == code,
+				x => x.Code == code.ToUpper(),
 				game);
 		}
 	}
