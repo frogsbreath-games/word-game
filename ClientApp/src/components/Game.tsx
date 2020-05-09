@@ -22,9 +22,15 @@ type TeamTileProps = {
   team: GameStore.Team;
   tilesRemaining: number;
   isTeamsTurn: boolean;
+  players: GameStore.Player[];
 };
 
-const TeamTile = ({ team, tilesRemaining, isTeamsTurn }: TeamTileProps) => (
+const TeamTile = ({
+  team,
+  tilesRemaining,
+  isTeamsTurn,
+  players,
+}: TeamTileProps) => (
   <div className={team === "red" ? styles.redTile : styles.blueTile}>
     <h3 className={team === "red" ? styles.redTeamLabel : styles.blueTeamLabel}>
       {team + " Team"}
@@ -33,6 +39,17 @@ const TeamTile = ({ team, tilesRemaining, isTeamsTurn }: TeamTileProps) => (
       <h3>Remaining Tiles: {tilesRemaining}</h3>
       {isTeamsTurn && <h6 className={styles.lightLabel}>Current Turn</h6>}
     </div>
+    {players.map((player) => (
+      <div
+        className={team === "red" ? styles.redTeamLabel : styles.blueTeamLabel}
+      >
+        {player.type +
+          " " +
+          player.name +
+          " " +
+          (player.type === "cultist" ? " 👿" : " 🤠")}
+      </div>
+    ))}
   </div>
 );
 
@@ -244,11 +261,17 @@ class Game extends React.PureComponent<GameProps, State> {
                 team={localTeam}
                 tilesRemaining={localTeamsTilesRemaining}
                 isTeamsTurn={currentTeam === localTeam}
+                players={this.props.game.players.filter(
+                  (player) => player.team === localTeam
+                )}
               />
               <TeamTile
                 team={opposingTeam}
                 tilesRemaining={opposingTeamTilesRemaining}
                 isTeamsTurn={currentTeam === opposingTeam}
+                players={this.props.game.players.filter(
+                  (player) => player.team === opposingTeam
+                )}
               />
 
               <div className="row">
