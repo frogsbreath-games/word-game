@@ -112,7 +112,7 @@ export interface Character {
 
 export type CharacterType = "cultist" | "researcher";
 
-export type UserRole = "organizer" | "player" | "bot";
+export type UserRole = "organizer" | "player" | "spectator" | "bot";
 
 export interface WordTile {
   word: string;

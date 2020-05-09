@@ -10,11 +10,11 @@ namespace WordGame.API.Application.Authorization
 {
 	public class UserAuthorizeAttribute : AuthorizeAttribute
 	{
-		public UserAuthorizeAttribute(UserRole role)
+		public UserAuthorizeAttribute(params UserRole[] roles)
 			: base()
 		{
 			AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme;
-			Roles = role.ToString();
+			Roles = string.Join(',', roles);
 		}
 
 		public UserAuthorizeAttribute()
