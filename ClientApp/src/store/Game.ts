@@ -159,7 +159,7 @@ class ApiError extends Error {
 
 function handleApiResponse<T extends object>(response: Response): Promise<T> {
   if (response.ok)
-    return (response.json() as Promise<APIResponse>).then(r => r.data as T);
+    return (response.json() as Promise<APIResponse>).then((r) => r.data as T);
   else throw new ApiError(response.status);
 }
 
@@ -172,11 +172,13 @@ function handleApiError(handler: ApiErrorHandler): (error: Error) => any {
             handler.badRequest();
             return;
           }
+        /* falls through */
         case 404:
           if (handler.notFound) {
             handler.notFound();
             return;
           }
+        /* falls through */
       }
     }
     if (handler.default) {
@@ -258,29 +260,29 @@ export const actionCreators = {
         .withAutomaticReconnect()
         .build();
 
-      connection.on("GameUpdated", data => {
+      connection.on("GameUpdated", (data) => {
         console.log("Game Updated!");
         console.log(data);
         dispatch({
           type: "RECEIVE_UPDATE_GAME",
-          game: data as Game
+          game: data as Game,
         });
       });
 
-      connection.on("GameEvent", data => {
+      connection.on("GameEvent", (data) => {
         console.log("Game Event Received!");
         console.log(data);
         dispatch({
           type: "RECEIVE_GAME_EVENT",
-          event: data as GameEvent
+          event: data as GameEvent,
         });
       });
 
-      connection.on("GameDeleted", data => {
+      connection.on("GameDeleted", (data) => {
         console.log("Game Deleted!");
         console.log(data);
         dispatch({
-          type: "RECEIVE_DELETE_GAME"
+          type: "RECEIVE_DELETE_GAME",
         });
       });
 
@@ -289,11 +291,11 @@ export const actionCreators = {
         .then(() =>
           dispatch({
             type: "CREATE_HUB_CONNECTION",
-            connection: connection
+            connection: connection,
           })
         )
         .then(() => console.log("Connection started!"))
-        .catch(err => console.log("Error while establishing connection :("));
+        .catch((err) => console.log("Error while establishing connection :("));
     }
   },
   requestNewGame: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
@@ -301,17 +303,17 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games`, { method: "POST" })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
           dispatch({
             type: "RECEIVE_NEW_GAME",
-            game: data.data as Game
+            game: data.data as Game,
           });
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -326,11 +328,11 @@ export const actionCreators = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json"
-        }
+          Accept: "application/json",
+        },
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
           //This message property is being capitalized
           if (
@@ -338,33 +340,33 @@ export const actionCreators = {
             data.message.includes("Cannot find game with code:")
           ) {
             fetch(`api/games/forceSignOut`, {
-              method: "POST"
+              method: "POST",
             })
-              .then(response => response.json() as Promise<APIResponse>)
-              .then(data => {
+              .then((response) => response.json() as Promise<APIResponse>)
+              .then((data) => {
                 console.log(data);
                 dispatch({
                   type: "RECEIVE_CURRENT_GAME",
-                  game: {} as Game
+                  game: {} as Game,
                 });
               });
           } else {
             dispatch({
               type: "RECEIVE_CURRENT_GAME",
-              game: data.data as Game
+              game: data.data as Game,
             });
           }
         })
-        .catch(error => {
+        .catch((error) => {
           //added this because if user isn't authenticated get 404 response
           dispatch({
             type: "RECEIVE_CURRENT_GAME",
-            game: {} as Game
+            game: {} as Game,
           });
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -378,17 +380,17 @@ export const actionCreators = {
       fetch(`api/games/${appState.game.game.code}/players/${player.number}`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(player)
+        body: JSON.stringify(player),
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -402,17 +404,17 @@ export const actionCreators = {
       fetch(`api/games/${appState.game.game.code}/voteWord`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(guess)
+        body: JSON.stringify(guess),
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -421,15 +423,15 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/${appState.game.game.code}/voteEndTurn`, {
-        method: "POST"
+        method: "POST",
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -443,17 +445,17 @@ export const actionCreators = {
       fetch(`api/games/current/giveHint`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(hint)
+        body: JSON.stringify(hint),
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -462,15 +464,15 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/current/approveHint`, {
-        method: "POST"
+        method: "POST",
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -479,15 +481,15 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/current/refuseHint`, {
-        method: "POST"
+        method: "POST",
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -499,13 +501,13 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/${code}/join`, {
-        method: "POST"
+        method: "POST",
       })
         .then<Game>(handleApiResponse)
-        .then(game => {
+        .then((game) => {
           dispatch({
             type: "RECEIVE_JOIN_GAME",
-            game: game
+            game: game,
           });
         })
         .catch(
@@ -513,26 +515,26 @@ export const actionCreators = {
             badRequest: () => {
               dispatch({
                 type: "RECEIVE_ERRORS",
-                errorMessage: 'Cannot join game with code: "' + code + '"'
+                errorMessage: 'Cannot join game with code: "' + code + '"',
               });
             },
             notFound: () => {
               dispatch({
                 type: "RECEIVE_ERRORS",
-                errorMessage: 'No game found with code: "' + code + '"'
+                errorMessage: 'No game found with code: "' + code + '"',
               });
             },
             default: () => {
               dispatch({
                 type: "RECEIVE_ERRORS",
-                errorMessage: "An unknown error occurred. Please try again."
+                errorMessage: "An unknown error occurred. Please try again.",
               });
-            }
+            },
           })
         );
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -541,15 +543,15 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/current/generateBoard`, {
-        method: "POST"
+        method: "POST",
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -563,17 +565,17 @@ export const actionCreators = {
       fetch(`api/games/${appState.game.game.code}/replaceWord`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(word)
+        body: JSON.stringify(word),
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -585,15 +587,15 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/${code}/start`, {
-        method: "POST"
+        method: "POST",
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -605,15 +607,15 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/${code}/backToLobby`, {
-        method: "POST"
+        method: "POST",
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -625,18 +627,18 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/${code}`, {
-        method: "DELETE"
+        method: "DELETE",
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
           dispatch({
-            type: "RECEIVE_DELETE_GAME"
+            type: "RECEIVE_DELETE_GAME",
           });
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -645,19 +647,19 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/current/quit`, {
-        method: "POST"
+        method: "POST",
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           //Should have same action behavior as delete game
           console.log(data);
           dispatch({
-            type: "RECEIVE_DELETE_GAME"
+            type: "RECEIVE_DELETE_GAME",
           });
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -668,17 +670,17 @@ export const actionCreators = {
       fetch(`api/games/current/players`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(team)
+        body: JSON.stringify(team),
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
   },
@@ -690,18 +692,18 @@ export const actionCreators = {
     const appState = getState();
     if (appState && appState.game) {
       fetch(`api/games/${appState.game.game.code}/players/${playerNumber}`, {
-        method: "DELETE"
+        method: "DELETE",
       })
-        .then(response => response.json() as Promise<APIResponse>)
-        .then(data => {
+        .then((response) => response.json() as Promise<APIResponse>)
+        .then((data) => {
           console.log(data);
         });
 
       dispatch({
-        type: "REQUEST_SERVER_ACTION"
+        type: "REQUEST_SERVER_ACTION",
       });
     }
-  }
+  },
 };
 
 // ----------------
@@ -710,7 +712,7 @@ export const actionCreators = {
 const unloadedState: GameState = {
   isLoading: false,
   game: {} as Game,
-  events: [] as GameEvent[]
+  events: [] as GameEvent[],
 };
 
 export const reducer: Reducer<GameState> = (
@@ -727,55 +729,55 @@ export const reducer: Reducer<GameState> = (
         isLoading: true,
         game: state.game,
         connection: state.connection,
-        events: state.events
+        events: state.events,
       };
     case "CREATE_HUB_CONNECTION":
       return {
         isLoading: false,
         game: state.game,
         connection: action.connection,
-        events: state.events
+        events: state.events,
       };
     case "RECEIVE_CURRENT_GAME":
       return {
         isLoading: false,
         game: action.game,
         connection: state.connection,
-        events: state.events
+        events: state.events,
       };
     case "RECEIVE_NEW_GAME":
       return {
         isLoading: false,
         game: action.game,
         connection: state.connection,
-        events: state.events
+        events: state.events,
       };
     case "RECEIVE_JOIN_GAME":
       return {
         isLoading: false,
         game: action.game,
         connection: state.connection,
-        events: state.events
+        events: state.events,
       };
     case "RECEIVE_DELETE_GAME":
       return {
         isLoading: false,
         game: {} as Game,
-        events: [] as GameEvent[]
+        events: [] as GameEvent[],
       };
     case "RECEIVE_UPDATE_GAME":
       return {
         isLoading: false,
         game: action.game,
         connection: state.connection,
-        events: state.events
+        events: state.events,
       };
     case "RECEIVE_GAME_EVENT":
       return {
         isLoading: state.isLoading,
         game: state.game,
         connection: state.connection,
-        events: [action.event, ...state.events]
+        events: [action.event, ...state.events],
       };
     case "RECEIVE_ERRORS":
       return {
@@ -783,7 +785,7 @@ export const reducer: Reducer<GameState> = (
         game: state.game,
         connection: state.connection,
         errorMessage: action.errorMessage,
-        events: state.events
+        events: state.events,
       };
     default:
       return state;
