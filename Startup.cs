@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNet.SignalR;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -75,8 +74,6 @@ namespace WordGame.API
 			services.AddScoped<INameGenerator, NameGenerator>();
 			services.AddScoped<IGameBoardGenerator, GameBoardGenerator>();
 			services.AddScoped<IGameUpdater, GameUpdater>();
-
-			GlobalHost.DependencyResolver.Register(typeof(IUserIdProvider), () => new PlayerIdProvider());
 
 			services.AddSignalR()
 				.AddNewtonsoftJsonProtocol(options =>
